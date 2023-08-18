@@ -1,4 +1,4 @@
-# New Administration aseqbase website
+# Administration panel for the aseqbase website
 A default content management system is special for an aseqbase website...
 ## Dependencies
 * <a href="http://github.com//aseqbase/aseqbase">aseqbase/aseqbase</a>
