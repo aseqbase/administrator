@@ -15,8 +15,6 @@ class Information extends InformationBase{
 	public $DownloadPath = "https://github.com/aseqbase/aseqbase";
 	public $Location = null;
 
-	public $KeyWords = array("MiMFa aseqbase Framework", "MiMFa", "aseqbase", "Web Development", "Development", "Web Framework", "Website", "Framework");
-
 	public $MainMenus = array(
 		array("Name"=>"HOME","Link"=>"/home","Image"=>"/file/symbol/home.png","Attributes"=> "class='menu-link'"),
 		array("Name"=>"GIT","Link"=>"http://github.com/mimfa/aseqbase","Image"=>"/file/symbol/market.png","Attributes"=> "class='menu-link'"),

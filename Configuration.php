@@ -23,7 +23,8 @@ class Configuration extends ConfigurationBase {
     //public $AccessMode = 0;
     //public $AccessPatterns = array();
     //public $RestrictionContent = "Unfortunately you have no access to the site now!<br>Please try a few minute later...";
-
+    public $VisitAccess = 5;
+    public $AllowSigning = true;
 
     //public $DataBaseEncoding = "utf-8";
     //public $DataBaseType = 'mysql';
