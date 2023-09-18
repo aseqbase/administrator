@@ -16,11 +16,14 @@ class Information extends InformationBase{
 	public $Location = null;
 
 	public $MainMenus = array(
-		array("Name"=>"HOME","Link"=>"/home","Image"=>"/file/symbol/home.png","Attributes"=> "class='menu-link'"),
-		array("Name"=>"GIT","Link"=>"http://github.com/mimfa/aseqbase","Image"=>"/file/symbol/market.png","Attributes"=> "class='menu-link'"),
-		array("Name"=>"FORUM","Link"=>"https://github.com/aseqbase/aseqbase/issues","Image"=>"/file/symbol/chat.png","Attributes"=> "class='menu-link'"),
-		array("Name"=>"PRODUCTS","Link"=>"http://github.com/mimfa","Image"=>"/file/symbol/product.png", "Attributes"=>"class='menu-link'"),
-		array("Name"=>"ABOUT","Link"=>"/about","Image"=>"","Attributes"=> "class='menu-link'")
+		array("Name"=>"HOME","Link"=>"/home","Image"=>"/file/symbol/home.png"),
+		array("Name"=>"GIT","Link"=>"http://github.com/mimfa/aseqbase","Image"=>"/file/symbol/market.png"),
+		array("Name"=>"FORUM","Link"=>"https://github.com/aseqbase/aseqbase/issues","Image"=>"/file/symbol/chat.png"),
+		array("Name"=>"USERS","Link"=>"/user/users","Image"=>"/file/symbol/user.png", "Items"=> array(
+		    	array("Name"=>"USERS","Link"=>"/user/users","Image"=>"/file/symbol/user.png"),
+		    	array("Name"=>"GROUPS","Link"=>"/user/groups","Image"=>"/file/symbol/group.png")
+		    )),
+		array("Name"=>"ABOUT","Link"=>"/about","Image"=>"")
 		);
 
 	public $Shortcuts = array(
