@@ -11,6 +11,7 @@ class Information extends InformationBase{
 	public $Description = "A default content management system is special for an aseqbase website...";
 	public $FullDescription = "A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.";
 
+	public $GitPath = "https://github.com/aseqbase";
 	public $Path = "https://aseqbase.ir";
 	public $DownloadPath = "https://github.com/aseqbase/aseqbase";
 	public $Location = null;
@@ -30,19 +31,30 @@ class Information extends InformationBase{
 		    	array("Name"=>"PLUGINS","Link"=>"/plugin/plugins","Image"=>"/file/symbol/plugin.png"),
 		    	array("Name"=>"MARKET","Link"=>"http://github.com/aseqbase","Image"=>"/file/symbol/market.png")
 		    )),
-		array("Name"=>"GIT","Link"=>"http://github.com/mimfa/aseqbase","Image"=>"/file/symbol/git.png"),
-		array("Name"=>"FORUM","Link"=>"https://github.com/aseqbase/aseqbase/issues","Image"=>"/file/symbol/chat.png"),
+		array("Name"=>"APPEARANCES","Link"=>"/system/template","Image"=>"/file/symbol/dashboard.png", "Items"=> array(
+		    	array("Name"=>"TEMPLATES","Link"=>"/system/templates","Image"=>"/file/symbol/package.png"),
+		    	array("Name"=>"EDITS","Link"=>"/system/template","Image"=>"/file/symbol/info.png")
+		    )),
+		array("Name"=>"SYSTEMS","Link"=>"/system/information","Image"=>"/file/symbol/operation.png", "Items"=> array(
+		    	array("Name"=>"INFORMATIONS","Link"=>"/system/information","Image"=>"/file/symbol/info.png"),
+		    	array("Name"=>"CONFIGURATIONS","Link"=>"/system/configuration","Image"=>"/file/symbol/operation.png")
+		    )),
 		array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/file/symbol/about.png")
 		);
 
 	public $Shortcuts = array(
 		array("Name"=>"Menu","Link"=>"","Image"=>"/file/symbol/menu.png", "Attributes"=>"onclick='viewSideMenu()'"),
-		array("Name"=>"Market","Link"=>"#embed","Image"=>"/file/symbol/market.png","Attributes"=> "class='embed-link' onclick='viewEmbed(\"https://github.com/aseqbase/aseqbase\",\"fade\"); viewSideMenu(false);'"),
-		array("Name"=>"Home","Link"=>"#internal","Image"=>"/file/symbol/home.png","Attributes"=> "class='internal-link' onclick='viewInternal(\"home\",\"fade\"); viewSideMenu(false);'"),
-		array("Name"=>"Products","Link"=>"#internal","Image"=>"/file/symbol/product.png", "Attributes"=>"class='internal-link' onclick='viewInternal(\"https://github.com/mimfa\",\"fade\"); viewSideMenu(false);'"),
-		array("Name"=>"Chat","Link"=>"#internal","Image"=>"/file/symbol/chat.png","Attributes"=> "class='internal-link' onclick='viewInternal(\"https://github.com/aseqbase/aseqbase/issues\",\"fade\"); viewSideMenu(false);'")
+		array("Name"=>"POSTS","Access"=>10,"Link"=>"/content/posts","Image"=>"/file/symbol/document.png"),
+		array("Name"=>"HOME","Access"=>10,"Link"=>"/home","Image"=>"/file/symbol/home.png"),
+		array("Name"=>"USERS","Access"=>10,"Link"=>"/user/users","Image"=>"/file/symbol/user.png"),
+		array("Name"=>"SYSTEMS","Access"=>10,"Link"=>"/system/information","Image"=>"/file/symbol/operation.png"),
 		);
-
+	
+	public $Services = array(
+		array("Name"=>"POSTS","Access"=>10,"Link"=>"/content/posts","Image"=>"/file/symbol/document.png"),
+		array("Name"=>"USERS","Access"=>10,"Link"=>"/user/users","Image"=>"/file/symbol/user.png"),
+		array("Name"=>"SYSTEMS","Access"=>10,"Link"=>"/system/information","Image"=>"/file/symbol/operation.png")
+	);
 	public $Contacts = array(
 		array("Name"=>"Instagram","Link"=>"/?page=https://www.instagram.com/aseqbase","Icon"=> "fa fa-instagram"),
 		array("Name"=>"Telegram","Link"=>"https://t.me/aseqbase","Icon"=> "fa fa-telegram"),

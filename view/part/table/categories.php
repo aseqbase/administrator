@@ -2,7 +2,7 @@
 ACCESS(\_::$CONFIG->AdminAccess);
 use MiMFa\Module\Table;
 MODULE("Table");
-$mod = new Table(\_::$CONFIG->DataBasePrefix."Content");
+$mod = new Table(\_::$CONFIG->DataBasePrefix."Category");
 $mod->RowLabelsKeys = ["Name", "Title"];
 $mod->ExcludeColumnKeys = ["ID", "Access", "MetaData"];
 $mod->Updatable = true;
@@ -15,7 +15,6 @@ $mod->CellTypes = [
     "Status"=>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
     "Image"=>"image",
     "Description"=>"strings",
-    "Content"=>"strings",
     "MetaData"=>"json",
     "CreateTime"=>"datetime",
     "UpdateTime"=>$stdut
