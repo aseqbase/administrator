@@ -16,14 +16,23 @@ class Information extends InformationBase{
 	public $Location = null;
 
 	public $MainMenus = array(
-		array("Name"=>"HOME","Link"=>"/home","Image"=>"/file/symbol/home.png"),
-		array("Name"=>"GIT","Link"=>"http://github.com/mimfa/aseqbase","Image"=>"/file/symbol/market.png"),
-		array("Name"=>"FORUM","Link"=>"https://github.com/aseqbase/aseqbase/issues","Image"=>"/file/symbol/chat.png"),
+		array("Name"=>"DASHBOARD","Link"=>"/home","Image"=>"/file/symbol/home.png"),
+		array("Name"=>"CONTENTS","Link"=>"/content/posts","Image"=>"/file/symbol/document.png", "Items"=> array(
+		    	array("Name"=>"POSTS","Link"=>"/content/posts","Image"=>"/file/symbol/document.png"),
+		    	array("Name"=>"GROUPS","Link"=>"/content/groups","Image"=>"/file/symbol/directory.png"),
+		    	array("Name"=>"CATEGORIES","Link"=>"/content/categories","Image"=>"/file/symbol/category.png")
+		    )),
 		array("Name"=>"USERS","Link"=>"/user/users","Image"=>"/file/symbol/user.png", "Items"=> array(
 		    	array("Name"=>"USERS","Link"=>"/user/users","Image"=>"/file/symbol/user.png"),
-		    	array("Name"=>"GROUPS","Link"=>"/user/groups","Image"=>"/file/symbol/group.png")
+		    	array("Name"=>"GROUPS","Link"=>"/user/groups","Image"=>"/file/symbol/team.png")
 		    )),
-		array("Name"=>"ABOUT","Link"=>"/about","Image"=>"")
+		array("Name"=>"PLUGINS","Link"=>"/plugin/plugins","Image"=>"/file/symbol/plugin.png", "Items"=> array(
+		    	array("Name"=>"PLUGINS","Link"=>"/plugin/plugins","Image"=>"/file/symbol/plugin.png"),
+		    	array("Name"=>"MARKET","Link"=>"http://github.com/aseqbase","Image"=>"/file/symbol/market.png")
+		    )),
+		array("Name"=>"GIT","Link"=>"http://github.com/mimfa/aseqbase","Image"=>"/file/symbol/git.png"),
+		array("Name"=>"FORUM","Link"=>"https://github.com/aseqbase/aseqbase/issues","Image"=>"/file/symbol/chat.png"),
+		array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/file/symbol/about.png")
 		);
 
 	public $Shortcuts = array(
@@ -32,12 +41,6 @@ class Information extends InformationBase{
 		array("Name"=>"Home","Link"=>"#internal","Image"=>"/file/symbol/home.png","Attributes"=> "class='internal-link' onclick='viewInternal(\"home\",\"fade\"); viewSideMenu(false);'"),
 		array("Name"=>"Products","Link"=>"#internal","Image"=>"/file/symbol/product.png", "Attributes"=>"class='internal-link' onclick='viewInternal(\"https://github.com/mimfa\",\"fade\"); viewSideMenu(false);'"),
 		array("Name"=>"Chat","Link"=>"#internal","Image"=>"/file/symbol/chat.png","Attributes"=> "class='internal-link' onclick='viewInternal(\"https://github.com/aseqbase/aseqbase/issues\",\"fade\"); viewSideMenu(false);'")
-		);
-
-	public $Services = array(
-		array("Name"=>"MiMFa Collection","Description"=>"<p class='md-hide'>A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.</p>","Image"=>"/file/icon/amplifier.png", "More"=>"<a class='btn' href='/about'>MORE</a>"),
-		array("Name"=>"OUR TARGET","Description"=>"<p class='md-hide'>Develop websites by <u>a seq</u>uence-<u>base</u>d framework</p><p class='md-hide'>The privilege of using each of these graphic documents can be provided as NFT.</p>","Image"=>"/file/icon/target.png", "More"=>"<a class='btn' href='/about'>MORE</a>"),
-		array("Name"=>"WHAT IS WEB FRAMEWORK","Description"=>"<p class='md-hide'>A web development framework is a set of resources and tools for software developers to build and manage web applications, web services and websites.</p>","Image"=>"/file/icon/coach.png", "More"=>"<a class=\"btn\" onclick=\"viewExternal('https://www.techtarget.com/searchcontentmanagement/definition/web-development-framework-WDF#:~:text=A%20web%20development%20framework%20is,applications%2C%20web%20services%20and%20websites.','fade');\" data-target=\".page\" href=\"#external\">READ ABOUT NFT</a>")
 		);
 
 	public $Contacts = array(
