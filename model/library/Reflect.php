@@ -8,56 +8,14 @@ namespace MiMFa\Library;
  *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#reflect See the Library Documentation
 */
 class Reflect{
-    /**
-     * To get each Features of a Class
-     * @param mixed $object
-     */
-    public static function WriteClass($path, ReflectedThing $source){
-        $content = file_get_contents($path);
-        foreach ($source as $name => $prop) {
-            $start = preg_find("/(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{[\w\W]+\s+)(?=\$$name\W)/", $content);
-            if($start) $content = $start.preg_replace("/^\$${$name}[^;]*(?:(?:(\"|')[\W\w]*\1[^;]*)|(?:[^;\"']*))*;/U",
-                    "\$$name = ".Convert::ToValue($prop->Value,$prop->Vars),
-                    substr($content, strlen($start)));
-            else {
-                $start = preg_find("/(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{\s*/", $content);
-                if($start) $content = $start.preg_replace("/^\$${$name}[^;]*(?:(?:(\"|')[\W\w]*\1[^;]*)|(?:[^;\"']*))*;/U",
-                 "\$$name = ".Convert::ToValue($prop->Value,$prop->Vars),
-                 substr($content, strlen($start)));
-                else throw new \Exception("There is not any class named '$name'!");
-            }
-        }
-        return file_put_contents($path, $content);
-    }
-    /**
-     * To get each Features of a property
-     * @param mixed $object
-     */
-    public static function SetProperty($objectOrPath, ReflectedThing $source){
-        $ref = new ReflectedThing();
-        $ref->Type = "[\w\<\>\|]+";
-        $name = "\w+";
-        $type = "[\w\<\>\|]+";
-        $body = "(?<=\=)[\w\W]+\;\s*\r\n";
-        if(is_object($objectOrPath)) return new ReflectedThing($objectOrPath);
-        elseif(file_exists($objectOrPath)) $objectOrPath = file_get_contents($objectOrPath);
-        else return new ReflectedThing(new \ReflectionObject($objectOrPath));
-        foreach (preg_find_all("/(?<=\s)*({$type})(\s|\b)+({$name})(\s|\b)*[\w\W]*({$body})/i", $objectOrPath) as $part)
-        {
-            $ref->Name = preg_find("/{$name}/", $part);
-            $thing = new ReflectedThing();
-            $ref = $thing;
-        }
-        return $ref;
-    }
 
     public static function CommentParameters(string|null $comment){
         if(is_null($comment)) return [];
-        $matches = preg_find_all("#(@[a-zA-Z]+\s*.*)#", $comment);
+        $matches = preg_find_all("/@\w+\s*.*/", $comment);
         $res = [];
-        $res["abstract"] = Convert::ToString(preg_find_all("/(?<=\*\s+)[a-zA-Z].*/", $comment));
+        $res["abstract"] = ltrim(Convert::ToString(preg_find_all("/^\s*\*?(?<=\s)\s*[^@][\s\w].*/mi", $comment)), "* \t\r\n\f\v");
         foreach ($matches as $value)
-            $res[preg_find("/(?<=\@)[a-zA-Z]+/", $value)] = preg_find("/(?<=\@[a-zA-Z]+\s+).*/", $value);
+            $res[preg_find("/(?<=\@)\w+/", $value)] = preg_find("/\@\w+(?<=\s).*/", $value);
         return $res;
     }
 
@@ -65,27 +23,115 @@ class Reflect{
      * To get each Features of a Class
      * @param mixed $object
      */
-    public static function Class($object){
-        return new ReflectedThing(new \ReflectionClass($object));
+    public static function Get($objectOrReflection){
+        if($objectOrReflection === null) return new Reflected();
+        if($objectOrReflection instanceof Reflected) return $objectOrReflection;
+        if($objectOrReflection instanceof \ReflectionClass) return new Reflected($objectOrReflection);
+        return new Reflected(new \ReflectionClass($objectOrReflection), $objectOrReflection);
     }
     /**
-     * To get each Features of an Object
+     * To set each Features of a Class
      * @param mixed $object
      */
-    public static function Object($object){
-        return new ReflectedThing(new \ReflectionObject($object));
+    public static function Set($objectOrReflection, array $newData = []){
+        if($objectOrReflection === null) return null;
+        if($objectOrReflection instanceof Reflected || $objectOrReflection instanceof \ReflectionClass){
+            $reflection = self::Get($objectOrReflection);
+            foreach ($newData as $key=>$value)
+                if(isset($reflection[$key])) $reflection[$key]->Value = $value;
+            return $reflection;
+        }
+        foreach ($newData as $key=>$value)
+            if(isset($objectOrReflection->$key)) $objectOrReflection->$key = $value;
+        return $objectOrReflection;
     }
-    ///**
-    // * To get each Features of an Enum
-    // * @param mixed $object
-    // */
-    //public static function Enum($object){
-    //    $ref = new \ReflectionEnum($object);
-    //    return $ref;
-    //}
+    /**
+     * To get fill Features by an array
+     * @param mixed $object
+     */
+    public static function Fill($objectOrReflection, array $newValues = []){
+        $objectOrReflection = self::Get($objectOrReflection);
+        foreach ($newValues as $key=>$value)
+            if(isset($objectOrReflection[$key])) $objectOrReflection[$key]->Value = $value??$objectOrReflection[$key]->DefaultValue;
+        return $objectOrReflection;
+    }
+    /**
+     * To get each Features of a Class
+     * @param mixed $object
+     */
+    public static function Write($objectOrReflection, $path = null){
+        $objectOrReflection = self::Get($objectOrReflection);
+        $path = $path??$objectOrReflection->Path;
+        $content = file_get_contents($path);
+        foreach ($objectOrReflection as $name => $prop) {
+            $start = preg_find("/(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{[\w\W]+\s+)(?=\$$name\W)/", $content);
+            if($start) $content = $start.preg_replace("/^\$${$name}[^;]*(?:(?:(\"|')[\W\w]*\1[^;]*)|(?:[^;\"']*))*;/U",
+                    "\$$name = ".Convert::ToValue($prop->Value,$prop->Vars),
+                    substr($content, strlen($start)));
+            else {
+                $start = preg_find("/(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{\s*/", $content);
+                if($start){
+                    $indention = preg_find("/\s*$/",$start);
+                    $content = $start.(
+                        (is_null($prop->Comment)?null:preg_replace("/\r?\n\r?/", PHP_EOL.$indention, $prop->Comment).PHP_EOL.$indention).
+                        (count($prop->Modifires)<1?null:implode(" ", $prop->Modifires)." ").
+                        (is_null($prop->Name)?null:"\$$prop->Name").
+                        (is_null($prop->Value)?";":" = ".Convert::ToValue($prop->Value).";").PHP_EOL.$indention
+                    ).substr($content, strlen($start));
+                }else throw new \Exception("There is not any class named '$name'!");
+            }
+        }
+        return file_put_contents($path, $content);
+    }
+    /**
+     * To get the Path of a Class
+     * @param mixed $object
+     */
+    public static function GetPath($objectOrReflection){
+        if($objectOrReflection === null) return null;
+        if($objectOrReflection instanceof Reflected) return $objectOrReflection->Path;
+        if($objectOrReflection instanceof \ReflectionClass) return (new Reflected($objectOrReflection))->Path;
+        return (new Reflected(new \ReflectionClass($objectOrReflection)))->Path;
+    }
+
+    /**
+     * To get all Features of a Class as a HTML Form
+     * @param mixed $object
+     */
+    public static function GetForm($objectOrReflection):\MiMFa\Module\Form{
+        MODULE("Form");
+        $form = new \MiMFa\Module\Form();
+        $form->Title = "Edit";
+        $form->Id = "MainEditForm";
+        $form->Image = "edit";
+        $form->Template = "both";
+        $form->Method = "POST";
+        $form->Timeout = 60000;
+        $form->SubmitLabel = "Update";
+        $form->ResetLabel = "Reset";
+        $form->Children = self::GetFields($objectOrReflection);
+        return $form;
+    }
+    /**
+     * To get each of Features of a Class as a form HTML Field
+     * @param mixed $object
+     */
+    public static function GetFields($objectOrReflection){
+        MODULE("Field");
+        foreach (self::Get($objectOrReflection) as $key=>$value)
+            yield new \MiMFa\Module\Field(key:$key, value:$value->Value, title:$value->Title, description:$value->Description, type:$value->Var[0]);
+    }
+    /**
+     * To handle all Features received of a Class HTML Form
+     * @param mixed $object
+     */
+    public static function HandleForm($objectOrReflection, array $newValues = []){
+        $objectOrReflection = self::Fill($objectOrReflection, $newValues);
+        return self::Write($objectOrReflection);
+    }
 }
 
-class ReflectedThing extends \ArrayObject{
+class Reflected extends \ArrayObject{
     public string|null $Type = null;
     /**
      * The default name of object
@@ -185,80 +231,91 @@ class ReflectedThing extends \ArrayObject{
     public mixed $DefaultValue = null;
     public mixed $Value = null;
     public string|null $Comment = null;
+    public mixed $Path = null;
 
 
-    public function __construct($reflected=null){
-        $this->Set($reflected);
+    public function __construct($reflection=null, $object = null){
+        $this->Set($reflection);
     }
 
-    public function Set($reflected){
-        if(!is_null($reflected))
-            if($reflected instanceof \ReflectionClass)
-                $this->SetClass($reflected);
-            elseif($reflected instanceof \ReflectionObject)
-                $this->SetObject($reflected);
-            elseif($reflected instanceof \ReflectionMethod)
-                $this->SetMethod($reflected);
-            elseif($reflected instanceof \ReflectionFunction)
-                $this->SetFunction($reflected);
-            elseif($reflected instanceof \ReflectionProperty)
-                $this->SetProperty($reflected);
-            elseif($reflected instanceof \ReflectionAttribute)
-                $this->SetAttribute($reflected);
-            elseif($reflected instanceof \ReflectionGenerator)
-                $this->SetGenerator($reflected);
-            else $this->SetObject(new ReflectionObject($reflected));
+    public function Set($reflection, $object = null){
+        if(!is_null($object) && is_null($reflection))
+            if(is_subclass_of($object, "\Base")) $reflection = new \ReflectionClass($object);
+            elseif(is_object($object)) $reflection = new \ReflectionObject($object);
+        if(!is_null($reflection))
+            if($reflection instanceof \ReflectionClass)
+                $this->SetClass($reflection, $object);
+            elseif($reflection instanceof \ReflectionObject)
+                $this->SetObject($reflection, $object);
+            elseif($reflection instanceof \ReflectionMethod)
+                $this->SetMethod($reflection, $object);
+            elseif($reflection instanceof \ReflectionFunction)
+                $this->SetFunction($reflection, $object);
+            elseif($reflection instanceof \ReflectionProperty)
+                $this->SetProperty($reflection, $object);
+            elseif($reflection instanceof \ReflectionAttribute)
+                $this->SetAttribute($reflection, $object);
+            elseif($reflection instanceof \ReflectionGenerator)
+                $this->SetGenerator($reflection, $object);
+            else $this->SetObject(new ReflectionObject($reflection, $object));
     }
-    public function SetClass(\ReflectionClass $reflected){
+    public function SetClass(\ReflectionClass $reflection, $object = null){
         $this->Type = "class";
-        $this->Name = $reflected->getName();
-        $this->Load($reflected->getDocComment());
-        foreach ($reflected->getProperties() as $value) $this[$value->getName()] = new ReflectedThing($value);
+        $this->Name = $reflection->getName();
+        $this->Path = $reflection->getFileName();
+        $this->Load($reflection->getDocComment());
+        if(is_null($object)) foreach ($reflection->getProperties() as $value) $this[$value->getName()] = new Reflected($value);
+        else foreach ($reflection->getProperties() as $value) $this[$value->getName()] = new Reflected($value, $value->getValue($object));
     }
-    public function SetObject(\ReflectionObject $reflected){
+    public function SetObject(\ReflectionObject $reflection, $object = null){
         $this->Type = "object";
-        $this->Name = $reflected->getName();
-        $this->Load($reflected->getDocComment());
-        foreach ($reflected->getProperties() as $value) $this[$value->getName()] = new ReflectedThing($value);
+        $this->Name = $reflection->getName();
+        $this->Path = $reflection->getFileName();
+        $this->Load($reflection->getDocComment());
+        if(is_null($object)) foreach ($reflection->getProperties() as $value) $this[$value->getName()] = new Reflected($value);
+        else foreach ($reflection->getProperties() as $value) $this[$value->getName()] = new Reflected($value, $value->getValue($object));
     }
-    public function SetProperty(\ReflectionProperty $reflected){
+    public function SetProperty(\ReflectionProperty $reflection, $object = null){
         $this->Type = "property";
-        $this->Name = $reflected->getName();
-        $this->DefaultValue = $reflected->getDefaultValue();
-        $this->Value = $reflected->getValue();
-        $this->Var = $reflected->getType();
+        $this->Name = $reflection->getName();
+        $this->DefaultValue = $reflection->getDefaultValue();
         $this->Modifires = [];
-        if($reflected->isPublic) $this->Modifires[] = "public";
-        if($reflected->isPrivate) $this->Modifires[] = "private";
-        if($reflected->isProtected) $this->Modifires[] = "protected";
-        if($reflected->isReadOnly) $this->Modifires[] = "readonly";
-        if($reflected->isStatic) $this->Modifires[] = "static";
-        $this->Load($reflected->getDocComment());
+        if(!is_null($object)) {
+            $this->Value = $reflection->getValue($object);
+            $this->Var = $reflection->getType();
+            $this->Var = $this->Var === null?null:$this->Var."";
+            if($reflection->isPublic) $this->Modifires[] = "public";
+            if($reflection->isPrivate) $this->Modifires[] = "private";
+            if($reflection->isProtected) $this->Modifires[] = "protected";
+            if($reflection->isReadOnly) $this->Modifires[] = "readonly";
+            if($reflection->isStatic) $this->Modifires[] = "static";
+        }
+        $this->Load($reflection->getDocComment());
     }
-    public function SetMethod(\ReflectionMethod $reflected){
+    public function SetMethod(\ReflectionMethod $reflection, $object = null){
         $this->Type = "method";
-        $this->Name = $reflected->getName();
+        $this->Name = $reflection->getName();
         $this->Modifires = [];
-        if($reflected->isPublic) $this->Modifires[] = "public";
-        if($reflected->isPrivate) $this->Modifires[] = "private";
-        if($reflected->isProtected) $this->Modifires[] = "protected";
-        if($reflected->isStatic) $this->Modifires[] = "static";
-        $this->Load($reflected->getDocComment());
+        if($reflection->isPublic) $this->Modifires[] = "public";
+        if($reflection->isPrivate) $this->Modifires[] = "private";
+        if($reflection->isProtected) $this->Modifires[] = "protected";
+        if($reflection->isStatic) $this->Modifires[] = "static";
+        $this->Load($reflection->getDocComment());
     }
-    public function SetFunction(\ReflectionFunction $reflected){
+    public function SetFunction(\ReflectionFunction $reflection, $object = null){
         $this->Type = "function";
-        $this->Name = $reflected->getName();
-        $this->Load($reflected->getDocComment());
+        $this->Name = $reflection->getName();
+        $this->Load($reflection->getDocComment());
     }
-    public function SetGenerator(\ReflectionGenerator $reflected){
+    public function SetGenerator(\ReflectionGenerator $reflection, $object = null){
         $this->Type = "generator";
-        $this->Name = $reflected->getName();
-        $this->Load($reflected->getDocComment());
+        $this->Name = $reflection->getName();
+        $this->Load($reflection->getDocComment());
     }
-    public function SetAttribute(\ReflectionAttribute $reflected){
+    public function SetAttribute(\ReflectionAttribute $reflection, $object = null){
         $this->Type = "attribute";
-        $this->Name = $reflected->getName();
-        $this->Load($reflected->getDocComment());
+        $this->Name = $reflection->getName();
+        $this->Load($reflection->getDocComment());
     }
 
     public function Load($comment){
