@@ -8,14 +8,15 @@ namespace MiMFa\Library;
  *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#reflect See the Library Documentation
 */
 class Reflect{
+    public static $DefaultSign = "[[default]]";
 
-    public static function CommentParameters(string|null $comment){
+    public static function GetCommentParameters(string|null $comment){
         if(is_null($comment)) return [];
-        $matches = preg_find_all("/@\w+\s*.*/", $comment);
+        $matches = preg_find_all("/\@\w+\s*.*/", $comment);
         $res = [];
         $res["abstract"] = ltrim(Convert::ToString(preg_find_all("/^\s*\*?(?<=\s)\s*[^@][\s\w].*/mi", $comment)), "* \t\r\n\f\v");
         foreach ($matches as $value)
-            $res[preg_find("/(?<=\@)\w+/", $value)] = preg_find("/\@\w+(?<=\s).*/", $value);
+            $res[preg_find("/(?<=\@)\w+/", $value)] = trim(preg_replace("/^\@\w+\s*/", "", $value));
         return $res;
     }
 
@@ -56,33 +57,66 @@ class Reflect{
         return $objectOrReflection;
     }
     /**
+     * To get fill Features by an array
+     * @param mixed $object
+     */
+    public static function Update($objectOrReflection, array $newValues = []){
+        $objectOrReflection = self::Get($objectOrReflection);
+        foreach ($newValues as $key=>$value)
+            if(isset($objectOrReflection[$key]))
+                if($objectOrReflection[$key]->DefaultValue == $value || $value === null || $value === self::$DefaultSign) $objectOrReflection[$key] = null;
+                elseif($objectOrReflection[$key]->Value == $value) unset($objectOrReflection[$key]);
+                else $objectOrReflection[$key]->Value = $value??$objectOrReflection[$key]->DefaultValue;
+        return $objectOrReflection;
+    }
+    /**
      * To get each Features of a Class
      * @param mixed $object
      */
-    public static function Write($objectOrReflection, $path = null){
+    public static function Write($objectOrReflection){
         $objectOrReflection = self::Get($objectOrReflection);
-        $path = $path??$objectOrReflection->Path;
+        $path = $objectOrReflection->Path;
         $content = file_get_contents($path);
-        foreach ($objectOrReflection as $name => $prop) {
-            $start = preg_find("/(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{[\w\W]+\s+)(?=\$$name\W)/", $content);
-            if($start) $content = $start.preg_replace("/^\$${$name}[^;]*(?:(?:(\"|')[\W\w]*\1[^;]*)|(?:[^;\"']*))*;/U",
-                    "\$$name = ".Convert::ToValue($prop->Value,$prop->Vars),
-                    substr($content, strlen($start)));
-            else {
-                $start = preg_find("/(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{\s*/", $content);
-                if($start){
-                    $indention = preg_find("/\s*$/",$start);
-                    $content = $start.(
-                        (is_null($prop->Comment)?null:preg_replace("/\r?\n\r?/", PHP_EOL.$indention, $prop->Comment).PHP_EOL.$indention).
-                        (count($prop->Modifires)<1?null:implode(" ", $prop->Modifires)." ").
-                        (is_null($prop->Name)?null:"\$$prop->Name").
-                        (is_null($prop->Value)?";":" = ".Convert::ToValue($prop->Value).";").PHP_EOL.$indention
-                    ).substr($content, strlen($start));
-                }else throw new \Exception("There is not any class named '$name'!");
+        $uc = 0;
+        foreach (array_reverse($objectOrReflection->getArrayCopy()) as $name => $prop)
+            if($prop === null || $prop->Value === $prop->DefaultValue || $prop->Value === self::$DefaultSign ){
+                $start = preg_find('/^[\w\W]+(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{[\w\W]*\s+?)(?=\$'.$name.'[^;]*(?:(?:("|\')[\W\w]*\1[^;]*)|(?:[^;"\']*))*;)/', $content);
+                if(!is_null($start) && strlen($start) > 8)
+                    $content = strrev(preg_replace('/^;(?:(?:("|\')[\W\w]*\1)|[^;"\'])+(?=;)/', "", strrev($start))).
+                        substr($content, strlen($start));
+                $uc++;
             }
-        }
-        return file_put_contents($path, $content);
+            else {
+                $start = preg_find('/^[\w\W]+(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{[\w\W]*\s+?)(?=\$'.$name.'\W)/', $content);
+                if(!is_null($start) && strlen($start) > 8) {
+                    $content = $start.preg_replace('/^\$'.$name.'[^;]*(?:(?:("|\')[\W\w]*\1[^;]*)|(?:[^;"\']*))*;/',
+                        "$".$name." = ".Convert::ToValue($prop->Value, $prop->Type??$prop->Field??getValid($prop->Vars, 0)??$prop->Var).";",
+                        substr($content, strlen($start)));
+                    $uc++;
+                }
+                else {
+                    $start = preg_find('/^[\w\W]+(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{\s*)/m', $content);
+                    if(!is_null($start) && strlen($start) > 8){
+                        $indention = preg_find('/\s*$/',$start);
+                        $content = $start.
+                            (isEmpty($prop->Comment)?null:($prop->Comment.$indention)).
+                            //"//$prop->Type;$prop->Var:".implode("|", $prop->Vars).$indention.
+                            (count($prop->Modifires)<1?null:(implode(" ", $prop->Modifires)." ")).
+                            //(count($prop->Vars)<1?null:(implode("|", $prop->Vars)." ")).
+                            (is_null($prop->Name)?null:("$".$prop->Name)).
+                            (is_null($prop->Value)?null:(" = ".Convert::ToValue($prop->Value, $prop->Type??$prop->Field??getValid($prop->Vars, 0)??$prop->Var))).
+                            ";".PHP_EOL.$indention.substr($content, strlen($start));
+                        $uc++;
+                    } else {
+                        var_dump($content);
+                        throw new \Exception("Here could not find a destination to set the '$name'!");
+                    }
+                }
+            }
+        file_put_contents($path, $content);
+        return $uc;
     }
+
     /**
      * To get the Path of a Class
      * @param mixed $object
@@ -100,15 +134,19 @@ class Reflect{
      */
     public static function GetForm($objectOrReflection):\MiMFa\Module\Form{
         MODULE("Form");
+        $reflection = self::Get($objectOrReflection);
         $form = new \MiMFa\Module\Form();
-        $form->Title = "Edit";
-        $form->Id = "MainEditForm";
+        $form->ResponseView = "value";
+        $form->Title = "Edit {$reflection->Title}";
+        $form->Description = $reflection->Description;
+        $form->Id = "{$reflection->Name}EditForm";
         $form->Image = "edit";
         $form->Template = "both";
         $form->Method = "POST";
         $form->Timeout = 60000;
         $form->SubmitLabel = "Update";
         $form->ResetLabel = "Reset";
+        $form->AllowHeader = false;
         $form->Children = self::GetFields($objectOrReflection);
         return $form;
     }
@@ -119,20 +157,62 @@ class Reflect{
     public static function GetFields($objectOrReflection){
         MODULE("Field");
         foreach (self::Get($objectOrReflection) as $key=>$value)
-            yield new \MiMFa\Module\Field(key:$key, value:$value->Value, title:$value->Title, description:$value->Description, type:$value->Var[0]);
+            yield new \MiMFa\Module\Field(
+                key:$key,
+                value:($value->Value===null?null:Convert::ToValue($value->Value, false)),
+                title:$value->Title,
+                //description:"$value->Field;$value->Type;$value->Var:".implode("|", $value->Vars),
+                description:$value->Description,
+                type:($value->Field??$value->Type??getValid($value->Vars, 0)??$value->Var)
+            );
     }
     /**
      * To handle all Features received of a Class HTML Form
      * @param mixed $object
      */
-    public static function HandleForm($objectOrReflection, array $newValues = []){
-        $objectOrReflection = self::Fill($objectOrReflection, $newValues);
-        return self::Write($objectOrReflection);
+    public static function HandleForm($objectOrReflection, array $newValues = null){
+        try {
+            if(is_null($newValues)) $newValues = RECEIVE(null,"POST");
+            $objectOrReflection = self::Update($objectOrReflection, $newValues);
+            $c = count($objectOrReflection);
+            if($c < 1) return HTML::Warning("Here is no unsaved change!");
+            else $c = self::Write($objectOrReflection);
+            if($c < 1) return HTML::Warning("Here is not anythings to update!");
+            else return HTML::Success("'$c' field(s) of data updated successfully!");
+        } catch(\Exception $ex) { return HTML::Error($ex); }
     }
 }
 
 class Reflected extends \ArrayObject{
     public string|null $Type = null;
+    /**
+     * The programmistic type
+     * @var string|null
+     */
+    public string|null $Structure = null;
+    /**
+     * If used @field: the main input type
+     * @var string|null
+     */
+    public string|null $Field = null;
+    /**
+     * {bool, int, float, string, array<datatype>, etc.}: to indicate the variable or constant type. other useful type can be:
+	enum-string: to indicate the legal string name for a variable
+	class-string: to indicate the exist class name
+	interface-string: to indicate the exist interface name
+	lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
+     * @var string
+     */
+    public string|null $Var = null;
+    /**
+     * {bool, int, float, string, array<datatype>, etc.}: to indicate the variable or constant type. other useful type can be:
+	enum-string: to indicate the legal string name for a variable
+	class-string: to indicate the exist class name
+	interface-string: to indicate the exist interface name
+	lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
+     * @var array
+     */
+    public array $Vars = [];
     /**
      * The default name of object
      * @var string|null
@@ -149,28 +229,10 @@ class Reflected extends \ArrayObject{
      */
     public string|null $Description = null;
     /**
-     * {bool, int, float, string, array<datatype>, etc.}: to indicate the variable or constant type. other useful type can be:
-	enum-string: to indicate the legal string name for a variable
-	class-string: to indicate the exist class name
-	interface-string: to indicate the exist interface name
-	lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
-     * @var string
-     */
-    public string $Var = "mixed";
-    /**
-     * {bool, int, float, string, array<datatype>, etc.}: to indicate the variable or constant type. other useful type can be:
-	enum-string: to indicate the legal string name for a variable
-	class-string: to indicate the exist class name
-	interface-string: to indicate the exist interface name
-	lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
-     * @var string
-     */
-    public array $Vars = ["mixed"];
-    /**
      * If used @small, @medium, @large: to indicate the size of input box
      * @var float
      */
-    public float $Size = 0.1;
+    public float $Size = 0;
     /**
      * If used @category categoryname: to specify a category to organize the documented element's package into
      * @var string|null
@@ -233,12 +295,14 @@ class Reflected extends \ArrayObject{
     public string|null $Comment = null;
     public mixed $Path = null;
 
+    public object|null $Object = null;
 
     public function __construct($reflection=null, $object = null){
-        $this->Set($reflection);
+        $this->Set($reflection, $object);
     }
 
     public function Set($reflection, $object = null){
+        $this->Object = $object;
         if(!is_null($object) && is_null($reflection))
             if(is_subclass_of($object, "\Base")) $reflection = new \ReflectionClass($object);
             elseif(is_object($object)) $reflection = new \ReflectionObject($object);
@@ -258,42 +322,88 @@ class Reflected extends \ArrayObject{
             elseif($reflection instanceof \ReflectionGenerator)
                 $this->SetGenerator($reflection, $object);
             else $this->SetObject(new ReflectionObject($reflection, $object));
+        return $this;
     }
     public function SetClass(\ReflectionClass $reflection, $object = null){
-        $this->Type = "class";
+        $this->Field = $this->Structure = "class";
         $this->Name = $reflection->getName();
         $this->Path = $reflection->getFileName();
+        $parent = $reflection->getParentClass();
+        $this->Type = $this->Var = $parent?($parent instanceof \ReflectionClass? $parent->getName():$parent.""):null;
         $this->Load($reflection->getDocComment());
-        if(is_null($object)) foreach ($reflection->getProperties() as $value) $this[$value->getName()] = new Reflected($value);
-        else foreach ($reflection->getProperties() as $value) $this[$value->getName()] = new Reflected($value, $value->getValue($object));
+        foreach ($reflection->getProperties() as $value){
+            $prop = new Reflected($value, $object);
+            if(
+                $prop->Visible &&
+                !in_array("readonly", $prop->Modifires) &&
+                !in_array("private", $prop->Modifires) &&
+                !in_array("protected", $prop->Modifires)
+                ) $this[$value->getName()] = $prop;
+        }
+        if($parent) return $this->UpdateByClass($parent);
+        else return $this;
+    }
+    public function UpdateByClass(\ReflectionClass $reflection, $object = null){
+        $this->Load($reflection->getDocComment());
+        foreach ($reflection->getProperties() as $value){
+            if(isset($this[$value->getName()])){
+                $prop = $this[$value->getName()];
+                if(
+                    $prop->Visible &&
+                    !in_array("readonly", $prop->Modifires) &&
+                    !in_array("private", $prop->Modifires) &&
+                    !in_array("protected", $prop->Modifires)
+                    ) $this[$value->getName()]->Load($value->getDocComment());
+            }
+        }
+        $parent = $reflection->getParentClass();
+        if($parent) return $this->UpdateByClass($parent);
+        else return $this;
     }
     public function SetObject(\ReflectionObject $reflection, $object = null){
-        $this->Type = "object";
+        $this->Field = $this->Structure = "object";
         $this->Name = $reflection->getName();
         $this->Path = $reflection->getFileName();
+        $parent = $reflection->getParentClass();
+        $this->Type = $this->Var = $parent?($parent instanceof \ReflectionClass? $parent->getName():$parent.""):null;
         $this->Load($reflection->getDocComment());
-        if(is_null($object)) foreach ($reflection->getProperties() as $value) $this[$value->getName()] = new Reflected($value);
-        else foreach ($reflection->getProperties() as $value) $this[$value->getName()] = new Reflected($value, $value->getValue($object));
+        foreach ($reflection->getProperties() as $value){
+            $prop = new Reflected($value, $object);
+            if(
+                $prop->Visible &&
+                !in_array("readonly", $prop->Modifires) &&
+                !in_array("private", $prop->Modifires) &&
+                !in_array("protected", $prop->Modifires)
+                ) $this[$value->getName()] = $prop;
+        }
+        if($parent) return $this->UpdateByClass($parent);
+        else return $this;
     }
     public function SetProperty(\ReflectionProperty $reflection, $object = null){
-        $this->Type = "property";
+        $this->Structure = "property";
         $this->Name = $reflection->getName();
         $this->DefaultValue = $reflection->getDefaultValue();
         $this->Modifires = [];
+        if($reflection->isPublic()) $this->Modifires[] = "public";
+        if($reflection->isPrivate()) $this->Modifires[] = "private";
+        if($reflection->isProtected()) $this->Modifires[] = "protected";
+        if($reflection->isReadOnly()) $this->Modifires[] = "readonly";
+        if($reflection->isStatic()) $this->Modifires[] = "static";
         if(!is_null($object)) {
-            $this->Value = $reflection->getValue($object);
-            $this->Var = $reflection->getType();
-            $this->Var = $this->Var === null?null:$this->Var."";
-            if($reflection->isPublic) $this->Modifires[] = "public";
-            if($reflection->isPrivate) $this->Modifires[] = "private";
-            if($reflection->isProtected) $this->Modifires[] = "protected";
-            if($reflection->isReadOnly) $this->Modifires[] = "readonly";
-            if($reflection->isStatic) $this->Modifires[] = "static";
+            if(is_object($object)) $this->Value = $reflection->getValue($object);
+            else $this->Value = $object;
+            $this->Vars[] = $this->Type = $reflection->getType()."";
+            if(!is_null($this->Value??$this->DefaultValue)){
+                $t = gettype($this->Value??$this->DefaultValue);
+                if(isEmpty($this->Type) || $this->Type === "mixed") $this->Type = $t;
+                $this->Vars[] = $t;
+            }
         }
         $this->Load($reflection->getDocComment());
+        return $this;
     }
     public function SetMethod(\ReflectionMethod $reflection, $object = null){
-        $this->Type = "method";
+        $this->Type = $this->Field = $this->Structure = "method";
         $this->Name = $reflection->getName();
         $this->Modifires = [];
         if($reflection->isPublic) $this->Modifires[] = "public";
@@ -301,60 +411,83 @@ class Reflected extends \ArrayObject{
         if($reflection->isProtected) $this->Modifires[] = "protected";
         if($reflection->isStatic) $this->Modifires[] = "static";
         $this->Load($reflection->getDocComment());
+        return $this;
     }
     public function SetFunction(\ReflectionFunction $reflection, $object = null){
-        $this->Type = "function";
+        $this->Type = $this->Field = $this->Structure = "function";
         $this->Name = $reflection->getName();
         $this->Load($reflection->getDocComment());
+        return $this;
     }
     public function SetGenerator(\ReflectionGenerator $reflection, $object = null){
-        $this->Type = "generator";
+        $this->Type = $this->Field = $this->Structure = "generator";
         $this->Name = $reflection->getName();
         $this->Load($reflection->getDocComment());
+        return $this;
     }
     public function SetAttribute(\ReflectionAttribute $reflection, $object = null){
-        $this->Type = "attribute";
+        $this->Type = $this->Field = $this->Structure = "attribute";
         $this->Name = $reflection->getName();
         $this->Load($reflection->getDocComment());
+        return $this;
     }
 
     public function Load($comment){
         $this->Comment = $comment;
-        $comments = Reflect::CommentParameters($comment);
+        $comments = Reflect::GetCommentParameters($comment);
         $splt = "\t \r\n\f\v";
-        $this->Title = getValid($comments, "title")??Convert::ToTitle($this->Name);
-        $this->Description = getValid($comments, "description")??getValid($comments, "abstract");
-        $this->Var = is_null($this->Var)||$this->Var=="mixed"?getValid($comments, "var", $this->Var??"mixed"):$this->Var;
-        $this->Vars = preg_split("/\s*\|\s*/", $this->Var);
-        $size = getValid($comments, "size");
-        switch ($size) {
-        	case "sm":
-        	case "small":
-                $this->Size = 0.1;
-                break;
-        	case "md":
-        	case "medium":
-                $this->Size = 0.5;
-                break;
-        	case "lg":
-        	case "large":
-                $this->Size = 1;
-                break;
-        	default:
-                $this->Size = (float)$size;
-                break;
+        if(isEmpty($this->Title)) $this->Title = getValid($comments, "title")??Convert::ToTitle($this->Name);
+        $val = getValid($comments, "description")??getValid($comments, "abstract");
+        if(!isEmpty($val)) $this->Description = $val.(isEmpty($this->Description) || $val == $this->Description?null:(PHP_EOL.$this->Description));
+        if(isEmpty($this->Var)){
+            $this->Var = getValid($comments, "var");
+            if($this->Var==="mixed") $this->Var = null;
+            $arr = preg_split("/\s*\|\s*/", $this->Var??"");
+            if($arr) array_push($this->Vars, ...$arr);
         }
-        $this->Category = doValid(function($v)use($splt){ return explode($splt, $v)[0];}, $comments, "category");
+        $this->Vars = array_unique(array_filter($this->Vars, function($var){ return $var !== "mixed" && !isEmpty($var);}));
+        if(isEmpty($this->Field)) $this->Field = getValid($comments, "field", null);
+        if(isEmpty($this->Size)) {
+            $size = getValid($comments, "size");
+            switch ($size) {
+                case "n":
+                case "none":
+                    $this->Size = 0;
+                case "sm":
+                case "small":
+                    $this->Size = 0.1;
+                    break;
+                case "md":
+                case "medium":
+                    $this->Size = 0.5;
+                    break;
+                case "lg":
+                case "large":
+                    $this->Size = 1;
+                    break;
+                default:
+                    $this->Size = (float)$size;
+                    break;
+            }
+        }
+        if(isEmpty($this->Category)) $this->Category = doValid(function($v)use($splt){ return explode($splt, $v)[0]; }, $comments, "category");
         $this->Visible = !isset($comments["internal"]);
-        $this->Access = doValid(function($v)use($splt){ return explode($splt, $v)[0];},$comments, "access");
-        $this->Version = doValid(function($v)use($splt){ return explode($splt, $v)[0];},$comments, "version");
+        if(isEmpty($this->Access)) $this->Access = doValid(function($v)use($splt){ return explode($splt, $v)[0]; }, $comments, "access");
+        if(isEmpty($this->Version)) $this->Version = doValid(function($v)use($splt){ return explode($splt, $v)[0]; }, $comments, "version");
         $this->Example = getValid($comments, "example");
-        $this->Link = getValid($comments, "link");
-        $this->See = getValid($comments, "see");
-        $this->Author = getValid($comments, "author");
-        if(!is_null($this->Author)) $this->Authors = preg_split("/\s+\;\s+/", $this->Author);
-        $this->Copyright = getValid($comments, "copyright");
-        $this->License = getValid($comments, "license");
+        $val = getValid($comments, "example");
+        if(!isEmpty($val)) $this->Example = $val.(isEmpty($this->Example) || $val == $this->Example?null:(PHP_EOL.$this->Example));
+        if(isEmpty($this->Link)) $this->Link = getValid($comments, "link");
+        if(isEmpty($this->See)) $this->See = getValid($comments, "see");
+        if(isEmpty($this->Author)) $this->Author = getValid($comments, "author");
+        if(isValid($comments, "author")){
+            array_push($this->Authors, ...preg_split("/\s*\;\s*/", getValid($comments, "author")));
+            $this->Authors = array_unique(array_filter($this->Authors, function($var){ return !isEmpty($var);}));
+        }
+        if(isEmpty($this->Copyright)) $this->Copyright = getValid($comments, "copyright");
+        if(isEmpty($this->License)) $this->License = getValid($comments, "license");
+        if(!isEmpty($this->Vars) && (isEmpty($this->Type) || $this->Type === "mixed")) $this->Type = getValid($this->Vars,0);
+        return $this;
     }
 }
 ?>

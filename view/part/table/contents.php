@@ -15,7 +15,7 @@ $mod->CellTypes = [
     "Status"=>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
     "Image"=>"image",
     "Description"=>"strings",
-    "Content"=>"strings",
+    "Content"=>"content",
     "MetaData"=>"json",
     "CreateTime"=>"datetime",
     "UpdateTime"=>$stdut
