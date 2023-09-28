@@ -1,5 +1,5 @@
 <?php
-ACCESS(\_::$CONFIG->AdminAccess);
+ACCESS(\_::$CONFIG->SuperAccess);
 LIBRARY("Reflect");
 if(RECEIVE(null,"POST")) echo \MiMFa\Library\Reflect::HandleForm(\_::$CONFIG);
 else {

@@ -7,12 +7,14 @@ $mod->RowLabelsKeys = ["Name"];
 $mod->ExcludeColumnKeys = ["ID", "CreateTime", "UpdateTime", "MetaData"];
 $mod->Updatable = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
-$std = new stdClass();
-$std->Type="number";
-$std->Attributes=["min"=>\_::$CONFIG->BanAccess,"max"=>\_::$CONFIG->UserAccess];
 $mod->CellTypes = [
     "ID"=>"number",
-    "Access"=>$std,
+    "Access"=>function(){
+        $std = new stdClass();
+        $std->Type="number";
+        $std->Attributes=["min"=>\_::$CONFIG->BanAccess,"max"=>\_::$CONFIG->UserAccess];
+        return $std;
+    },
     "Status"=>[-1=>"Blocked",0=>"Undifined",1=>"Activated"],
     "MetaData"=>"json"
     ];
