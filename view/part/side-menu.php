@@ -23,6 +23,7 @@ $module->Items = array(
 		    )),
 		array("Name"=>"SYSTEMS","Link"=>"/system/information", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/operation.png", "Items"=> array(
 		    	array("Name"=>"INFORMATIONS","Link"=>"/system/information", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/info.png"),
+		    	array("Name"=>"TRANSLATIONS","Link"=>"/system/translation", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/web.png"),
 		    	array("Name"=>"CONFIGURATIONS","Link"=>"/system/configuration", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/operation.png")
 		    )),
 		array("Name"=>"ABOUT","Link"=>"/about", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/about.png")
