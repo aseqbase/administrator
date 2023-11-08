@@ -63,7 +63,7 @@ echo HTML::Center(
                 postData(
                     '/".\_::$DIRECTION."?import&".\_::$CONFIG->ViewHandlerKey."=value',
                     'data='+encodeURIComponent(event.target.result),
-                    '#'+this.id,
+                    'content',
                     function(data, selector){
 						$(selector + ' .result').remove();
 						if(isEmpty(data)) load();
@@ -85,7 +85,8 @@ echo HTML::Center(
         if(confirm('Are you sure to clear all lexicon records?'))
             postData(
                 '/".\_::$DIRECTION."?truncate&".\_::$CONFIG->ViewHandlerKey."=value',
-                { 
+                {
+                    selector:'content',
                     successHandler: function(data, selector){
 						$(selector + ' .result').remove();
 						if(isEmpty(data)) load();
