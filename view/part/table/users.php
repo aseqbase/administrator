@@ -37,7 +37,7 @@ $mod->CellTypes = [
     "UpdateTime"=>function($t, $v){
         $std = new stdClass();
         $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"datetime":"hidden";
-        $std->Value = (new DateTime())->format('Y-m-d H:i:s');
+        $std->Value = \_::$CONFIG->GetFormattedDateTime();
         return $std;
     }
     ];
