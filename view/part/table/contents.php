@@ -71,11 +71,11 @@ $mod->CellTypes = [
     "Content"=>"content",
     "MetaData"=>"json",
     "CreateTime"=>function($t, $v){
-        return getAccess(\_::$CONFIG->SuperAccess)?"datetime":(isValid($v)?"disabled":"hidden");
+        return getAccess(\_::$CONFIG->SuperAccess)?"calendar":(isValid($v)?"disabled":"hidden");
     },
     "UpdateTime"=>function($t, $v){
         $std = new stdClass();
-        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"datetime":"hidden";
+        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"calendar":"hidden";
         $std->Value = \_::$CONFIG->GetFormattedDateTime();
         return $std;
     }
