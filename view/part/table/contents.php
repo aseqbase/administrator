@@ -5,16 +5,15 @@ use MiMFa\Library\DataBase;
 MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."Content");
 $table1 = \_::$CONFIG->DataBasePrefix."User";
-$table2 = \_::$CONFIG->DataBasePrefix."Category";
 $mod->SelectQuery = "
-    SELECT A.{$mod->ColumnKey}, D.Title AS 'Category', A.Type, A.Image, A.Title, A.Description, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.UpdateTime
+    SELECT A.{$mod->ColumnKey}, A.Type, A.Image, A.Title, A.Description, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.UpdateTime
     FROM {$mod->Table} AS A
     LEFT OUTER JOIN $table1 AS B ON A.AuthorID=B.ID
     LEFT OUTER JOIN $table1 AS C ON A.EditorID=C.ID
-    LEFT OUTER JOIN $table2 AS D ON A.CategoryID=D.ID
 ";
 $mod->RowLabelsKeys = ["Image", "Title"];
-$mod->IncludeColumnKeys = ['Category', 'Type', 'Image', 'Title', 'Description', 'Status', 'Access', 'Author', 'Editor', 'UpdateTime'];
+$mod->IncludeColumnKeys = ['Type', 'Image', 'Title', 'Description', 'Status', 'Access', 'Author', 'Editor', 'UpdateTime'];
+$mod->AllowServerSide = true;
 $mod->Updatable = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
 $mod->CellTypes = [
@@ -31,20 +30,14 @@ $mod->CellTypes = [
         return $std;
     },
     "ID"=>getAccess(\_::$CONFIG->SuperAccess)?"disabled":false,
-    "CategoryID"=> function(){
+    "CategoryIDs"=> function(){
         $std = new stdClass();
-        $std->Title = "Category";
-        $std->Type = "select";
-        $std->Options = DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Category", "ID", "Title");
-        return $std;
-    },
-    "GroupIDs"=>function(){
-        $std = new stdClass();
-        $std->Title = "Groups";
+        $std->Title = "Categories";
         $std->Type = "array";
         $std->Options = [
             "type"=>"select",
-            "options"=>DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Group", "ID", "Title")
+            "key"=>"CategoryIDs",
+            "options"=>DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Category", "`ID`", "`Name`")
         ];
         return $std;
     },
@@ -54,11 +47,12 @@ $mod->CellTypes = [
         $std->Type = "array";
         $std->Options = [
             "type"=>"select",
-            "options"=>DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Tag", "ID", "Title")
+            "key"=>"TagIDs",
+            "options"=>DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Tag", "`ID`", "`Name`")
         ];
         return $std;
     },
-    "Type"=>['Post','Text','Image','Animation','Video','Audio','File','Service','Product','News','Article','Book','Collection','Course','Query','Form','Advertisement'],
+    "Type"=>"enum",
     "Status"=>[-1=>"Unpublished",0=>"Drafted",1=>"Published"],
     "Image"=>"image",
     "Access"=>function(){
@@ -69,16 +63,16 @@ $mod->CellTypes = [
     },
     "Description"=>"strings",
     "Content"=>"content",
-    "MetaData"=>"json",
-    "CreateTime"=>function($t, $v){
-        return getAccess(\_::$CONFIG->SuperAccess)?"calendar":(isValid($v)?"disabled":"hidden");
-    },
     "UpdateTime"=>function($t, $v){
         $std = new stdClass();
         $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"calendar":"hidden";
         $std->Value = \_::$CONFIG->GetFormattedDateTime();
         return $std;
-    }
+    },
+    "CreateTime"=> function($t, $v){
+        return getAccess(\_::$CONFIG->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
+    },
+    "MetaData"=>"json"
     ];
 $mod->Draw();
 ?>

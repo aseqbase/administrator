@@ -49,9 +49,11 @@ MODULE("PrePage");
 $module = new MiMFa\Module\PrePage();
 $module->Title = "Translation";
 $module->Draw();
-echo HTML::Center(
-    HTML::Button("Export Lexicon","/".\_::$DIRECTION."?export&".\_::$CONFIG->ViewHandlerKey."=value").
-    HTML::Button("Import Lexicon","
+if(!RECEIVE(null,"post")){
+    echo HTML::Center(
+        (RECEIVE("update")?HTML::Button("View Lexicon","/".\_::$DIRECTION):HTML::Button("Edit Lexicon","/".\_::$DIRECTION."?update=true")).
+        HTML::Button("Export Lexicon","/".\_::$DIRECTION."?export&".\_::$CONFIG->ViewHandlerKey."=value").
+        HTML::Button("Import Lexicon","
     var input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.onchange = evt => {
@@ -81,7 +83,7 @@ echo HTML::Center(
     $(input).trigger('click');
     return false;
 ").
-    HTML::Button("Clear Lexicon","
+        HTML::Button("Clear Lexicon","
         if(confirm('Are you sure to clear all lexicon records?'))
             postData(
                 '/".\_::$DIRECTION."?truncate&".\_::$CONFIG->ViewHandlerKey."=value',
@@ -99,6 +101,7 @@ echo HTML::Center(
                 }
             );
     ", ["class"=>"Error"])
-);
+    );
+}
 echo HTML::Page(PART("table/lexicon", print:false));
 ?>

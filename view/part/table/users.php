@@ -11,8 +11,9 @@ $mod->SelectQuery = "
     LEFT OUTER JOIN $table1 AS B ON A.GroupID=B.ID;
 ";
 $mod->RowLabelsKeys = ["Name", "Signature"];
-$mod->ExcludeColumnKeys = ["MetaData"];
+$mod->ExcludeColumnKeys = ["Signature", "MetaData"];
 $mod->Updatable = true;
+$mod->AllowServerSide = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
 $mod->CellTypes = [
     "ID"=>"number",
@@ -30,16 +31,16 @@ $mod->CellTypes = [
     "Contact"=>"tel",
     "Email"=>"email",
     "Password"=>"password",
-    "MetaData"=>"json",
-    "CreateTime"=>function($t, $v){
-        return getAccess(\_::$CONFIG->SuperAccess)?"calendar":(isValid($v)?"disabled":"hidden");
-    },
     "UpdateTime"=>function($t, $v){
         $std = new stdClass();
         $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"calendar":"hidden";
         $std->Value = \_::$CONFIG->GetFormattedDateTime();
         return $std;
-    }
+    },
+    "CreateTime"=> function($t, $v){
+        return getAccess(\_::$CONFIG->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
+    },
+    "MetaData"=>"json"
     ];
 $mod->Draw();
 ?>

@@ -6,7 +6,7 @@ $module->Items = array(
 		array("Name"=>"DASHBOARD","Link"=>"/home", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/home.png"),
 		array("Name"=>"CONTENTS","Link"=>"/content/posts", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/document.png", "Items"=> array(
 		    	array("Name"=>"POSTS","Link"=>"/content/posts", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/document.png"),
-		    	array("Name"=>"GROUPS","Link"=>"/content/groups", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/directory.png"),
+		    	array("Name"=>"TAGS","Link"=>"/content/tags", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/directory.png"),
 		    	array("Name"=>"CATEGORIES","Link"=>"/content/categories", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/category.png")
 		    )),
 		array("Name"=>"USERS","Link"=>"/user/users", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/file/symbol/user.png", "Items"=> array(

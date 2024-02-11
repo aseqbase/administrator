@@ -6,6 +6,7 @@ else {
     $form = \MiMFa\Library\Reflect::GetForm(\_::$CONFIG);
     $form->Title = "Edit Configuration";
     $form->Id = "EditConfiguration";
+    $form->SubmitLabel = null;//Remove to set the form editable
     $form->Draw();
 }
 ?>
