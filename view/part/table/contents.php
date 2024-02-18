@@ -6,30 +6,25 @@ MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."Content");
 $table1 = \_::$CONFIG->DataBasePrefix."User";
 $mod->SelectQuery = "
-    SELECT A.{$mod->ColumnKey}, A.Type, A.Image, A.Title, A.Description, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.UpdateTime
+    SELECT A.{$mod->KeyColumn}, A.Type, A.Image, A.Title, A.Description, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.UpdateTime
     FROM {$mod->Table} AS A
     LEFT OUTER JOIN $table1 AS B ON A.AuthorID=B.ID
     LEFT OUTER JOIN $table1 AS C ON A.EditorID=C.ID
 ";
-$mod->RowLabelsKeys = ["Image", "Title"];
-$mod->IncludeColumnKeys = ['Type', 'Image', 'Title', 'Description', 'Status', 'Access', 'Author', 'Editor', 'UpdateTime'];
+$mod->KeyColumns = ["Image", "Title"];
+$mod->IncludeColumns = ['Type', 'Image', 'Title', 'Description', 'Status', 'Access', 'Author', 'Editor', 'UpdateTime'];
 $mod->AllowServerSide = true;
 $mod->Updatable = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
-$mod->CellTypes = [
-    "AuthorID"=>function($t, $v){
-        $std = new stdClass();
-        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"number":"hidden";
-        if(!isValid($v)) $std->Value = \_::$INFO->User->ID;
-        return $std;
-    },
-    "EditorID"=>function($t, $v){
-        $std = new stdClass();
-        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"number":"hidden";
-        $std->Value = \_::$INFO->User->ID;
-        return $std;
-    },
+$users = DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."User", "ID", "Name");
+$mod->CellsTypes = [
     "ID"=>getAccess(\_::$CONFIG->SuperAccess)?"disabled":false,
+    "Name"=>"string",
+    "Type"=>"enum",
+    "Title"=>"string",
+    "Image"=>"image",
+    "Description"=>"strings",
+    "Content"=>"content",
     "CategoryIDs"=> function(){
         $std = new stdClass();
         $std->Title = "Categories";
@@ -52,17 +47,31 @@ $mod->CellTypes = [
         ];
         return $std;
     },
-    "Type"=>"enum",
     "Status"=>[-1=>"Unpublished",0=>"Drafted",1=>"Published"],
-    "Image"=>"image",
     "Access"=>function(){
         $std = new stdClass();
         $std->Type="number";
         $std->Attributes=["min"=>\_::$CONFIG->BanAccess,"max"=>\_::$CONFIG->UserAccess];
         return $std;
     },
-    "Description"=>"strings",
-    "Content"=>"content",
+    "Class"=>"string",
+    "Path"=>"string",
+    "AuthorID"=>function($t, $v) use($users){
+        $std = new stdClass();
+        $std->Title = "Author";
+        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"select":"hidden";
+        $std->Options = $users;
+        if(!isValid($v)) $std->Value = \_::$INFO->User->ID;
+        return $std;
+    },
+    "EditorID"=>function($t, $v) use($users){
+        $std = new stdClass();
+        $std->Title = "Editor";
+        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"select":"hidden";
+        $std->Options = $users;
+        if(!isValid($v)) $std->Value = \_::$INFO->User->ID;
+        return $std;
+    },
     "UpdateTime"=>function($t, $v){
         $std = new stdClass();
         $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"calendar":"hidden";

@@ -3,13 +3,17 @@ ACCESS(\_::$CONFIG->AdminAccess);
 use MiMFa\Module\Table;
 MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."UserGroup");
-$mod->RowLabelsKeys = ["Title"];
-$mod->ExcludeColumnKeys = ["ID", "Name", "MetaData"];
+$mod->KeyColumns = ["Title"];
+$mod->ExcludeColumns = ["ID", "Name", "MetaData"];
 $mod->Updatable = true;
 $mod->AllowServerSide = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
-$mod->CellTypes = [
+$mod->CellsTypes = [
     "ID"=>"number",
+    "Name"=>"string",
+    "Title"=>"string",
+    "Image"=>"image",
+    "Description"=>"strings",
     "Access"=>function(){
         $std = new stdClass();
         $std->Type="number";

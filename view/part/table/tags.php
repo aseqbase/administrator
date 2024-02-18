@@ -3,12 +3,12 @@ ACCESS(\_::$CONFIG->AdminAccess);
 use MiMFa\Module\Table;
 MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."Tag");
-$mod->RowLabelsKeys = ["Name", "Title"];
-$mod->ExcludeColumnKeys = ["ID", "MetaData"];
+$mod->KeyColumns = ["Name", "Title"];
+$mod->ExcludeColumns = ["ID", "MetaData"];
 $mod->AllowServerSide = true;
 $mod->Updatable = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
-$mod->CellTypes = [
+$mod->CellsTypes = [
     "Name"=>"string",
     "Title"=>"string",
     "Description"=>"strings",

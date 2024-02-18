@@ -6,16 +6,16 @@ MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."User");
 $table1 = \_::$CONFIG->DataBasePrefix."UserGroup";
 $mod->SelectQuery = "
-    SELECT A.{$mod->ColumnKey}, B.Title AS 'Group', A.Image, A.Name, A.Bio, A.Signature, A.Email, A.Status, A.CreateTime
+    SELECT A.{$mod->KeyColumn}, B.Title AS 'Group', A.Image, A.Name, A.Bio, A.Signature, A.Email, A.Status, A.CreateTime
     FROM {$mod->Table} AS A
     LEFT OUTER JOIN $table1 AS B ON A.GroupID=B.ID;
 ";
-$mod->RowLabelsKeys = ["Name", "Signature"];
-$mod->ExcludeColumnKeys = ["Signature", "MetaData"];
+$mod->KeyColumns = ["Name", "Signature"];
+$mod->ExcludeColumns = ["Signature", "MetaData"];
 $mod->Updatable = true;
 $mod->AllowServerSide = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
-$mod->CellTypes = [
+$mod->CellsTypes = [
     "ID"=>"number",
     "GroupID"=> function(){
         $std = new stdClass();
@@ -24,13 +24,21 @@ $mod->CellTypes = [
         $std->Options = DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."UserGroup", "ID", "Title");
         return $std;
     },
-    "Gender"=>["Male"=>"Male","Female"=>"Female","X"=>"X"],
-    "Status"=>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
+    "Name"=>"string",
     "Image"=>"image",
     "Bio"=>"strings",
-    "Contact"=>"tel",
     "Email"=>"email",
+    "Signature"=>"string",
     "Password"=>"password",
+    "FirstName"=>"string",
+    "MiddleName"=>"string",
+    "LastName"=>"string",
+    "Gender"=>"enum",
+    "Contact"=>"tel",
+    "Organization"=>"string",
+    "Address"=>"string",
+    "Path"=>"string",
+    "Status"=>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
     "UpdateTime"=>function($t, $v){
         $std = new stdClass();
         $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"calendar":"hidden";

@@ -5,16 +5,16 @@ use MiMFa\Module\Table;
 MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."Category");
 $mod->SelectQuery = "
-    SELECT A.{$mod->ColumnKey}, A.Name, B.Name AS 'Parent', A.Image, A.Title, A.Description, A.Status, A.Access, A.UpdateTime
+    SELECT A.{$mod->KeyColumn}, A.Name, B.Name AS 'Parent', A.Image, A.Title, A.Description, A.Status, A.Access, A.UpdateTime
     FROM {$mod->Table} AS A
     LEFT OUTER JOIN {$mod->Table} AS B ON A.ParentID=B.ID
 ";
-$mod->RowLabelsKeys = ["Image", "Name", "Title"];
-$mod->ExcludeColumnKeys = ["Content", "Access", "MetaData", "CreateTime"];
+$mod->KeyColumns = ["Image", "Name", "Title"];
+$mod->ExcludeColumns = ["Content", "Access", "MetaData", "CreateTime"];
 $mod->Updatable = true;
 $mod->AllowServerSide = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
-$mod->CellTypes = [
+$mod->CellsTypes = [
     "ID"=>"number",
     "ParentID" => function(){
         $std = new stdClass();
@@ -25,9 +25,9 @@ $mod->CellTypes = [
         return $std;
     },
     "Name"=>"string",
+    "Image"=>"image",
     "Title"=>"string",
     "Description"=>"strings",
-    "Image"=>"image",
     "Access"=>function(){
         $std = new stdClass();
         $std->Type="number";
