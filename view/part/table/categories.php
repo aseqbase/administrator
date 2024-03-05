@@ -1,6 +1,7 @@
 <?php
 ACCESS(\_::$CONFIG->AdminAccess);
 use MiMFa\Library\DataBase;
+use MiMFa\Library\User;
 use MiMFa\Module\Table;
 MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."Category");
@@ -8,6 +9,7 @@ $mod->SelectQuery = "
     SELECT A.{$mod->KeyColumn}, A.Name, B.Name AS 'Parent', A.Image, A.Title, A.Description, A.Status, A.Access, A.UpdateTime
     FROM {$mod->Table} AS A
     LEFT OUTER JOIN {$mod->Table} AS B ON A.ParentID=B.ID
+    ORDER BY A.ParentID ASC
 ";
 $mod->KeyColumns = ["Image", "Name", "Title"];
 $mod->ExcludeColumns = ["Content", "Access", "MetaData", "CreateTime"];
@@ -21,7 +23,7 @@ $mod->CellsTypes = [
         $std->Title = "Parent";
         $std->Description = "The parent category which is related";
         $std->Type = "select";
-        $std->Options = DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Category", "`ID`", "`Name`");
+        $std->Options = DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Category", "`ID`", "`Name`", "TRUE ORDER BY `ParentID` ASC");
         return $std;
     },
     "Name"=>"string",

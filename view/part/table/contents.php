@@ -32,7 +32,7 @@ $mod->CellsTypes = [
         $std->Options = [
             "type"=>"select",
             "key"=>"CategoryIDs",
-            "options"=>DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Category", "`ID`", "`Name`")
+            "options"=>DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Category", "`ID`", "`Name`", "TRUE ORDER BY `ParentID` ASC");
         ];
         return $std;
     },
@@ -56,6 +56,7 @@ $mod->CellsTypes = [
     },
     "Class"=>"string",
     "Path"=>"string",
+    "Priority"=>"number",
     "AuthorID"=>function($t, $v) use($users){
         $std = new stdClass();
         $std->Title = "Author";
