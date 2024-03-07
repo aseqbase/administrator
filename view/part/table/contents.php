@@ -32,7 +32,7 @@ $mod->CellsTypes = [
         $std->Options = [
             "type"=>"select",
             "key"=>"CategoryIDs",
-            "options"=>DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Category", "`ID`", "`Name`", "TRUE ORDER BY `ParentID` ASC");
+            "options"=>DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Category", "`ID`", "`Name`", "TRUE ORDER BY `ParentID` ASC")
         ];
         return $std;
     },
