@@ -4,11 +4,12 @@ use MiMFa\Module\Table;
 MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."Tag");
 $mod->KeyColumns = ["Name", "Title"];
-$mod->ExcludeColumns = ["ID", "MetaData"];
+$mod->ExcludeColumns = ["MetaData"];
 $mod->AllowServerSide = true;
 $mod->Updatable = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
 $mod->CellsTypes = [
+    "ID"=>"number",
     "Name"=>"string",
     "Title"=>"string",
     "Description"=>"strings",
@@ -22,6 +23,6 @@ $mod->CellsTypes = [
         return getAccess(\_::$CONFIG->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
     "MetaData"=>"json"
-    ];
+];
 $mod->Draw();
 ?>

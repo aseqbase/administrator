@@ -1,22 +1,31 @@
 <?php
 ACCESS(\_::$CONFIG->AdminAccess);
-use MiMFa\Module\Table;
 use MiMFa\Library\DataBase;
+use MiMFa\Module\Table;
+LIBRARY("Query");
 MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."Content");
 $table1 = \_::$CONFIG->DataBasePrefix."User";
 $mod->SelectQuery = "
-    SELECT A.{$mod->KeyColumn}, A.Type, A.Image, A.Title, A.Description, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.UpdateTime
+    SELECT A.{$mod->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIDs AS 'Category', A.Priority, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.UpdateTime
     FROM {$mod->Table} AS A
     LEFT OUTER JOIN $table1 AS B ON A.AuthorID=B.ID
     LEFT OUTER JOIN $table1 AS C ON A.EditorID=C.ID
+    ORDER BY A.`Priority` DESC, A.`CreateTime` DESC
 ";
 $mod->KeyColumns = ["Image", "Title"];
-$mod->IncludeColumns = ['Type', 'Image', 'Title', 'Description', 'Status', 'Access', 'Author', 'Editor', 'UpdateTime'];
+$mod->IncludeColumns = ['Type', 'Image', 'Title', 'Category', 'Priority', 'Status', 'Access', 'Author', 'Editor', 'UpdateTime'];
 $mod->AllowServerSide = true;
 $mod->Updatable = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
 $users = DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."User", "ID", "Name");
+$mod->CellsValues = [
+    "Category"=>function($v, $k, $r){
+        $val = \MiMFa\Library\Query::GetCategoryDirection(first(json_decode($v??"{}", JSON_OBJECT_AS_ARRAY)));
+        if(isValid($val)) return \MiMFa\Library\HTML::Link($val,"/cat".$val);
+        return $v;
+    }
+];
 $mod->CellsTypes = [
     "ID"=>getAccess(\_::$CONFIG->SuperAccess)?"disabled":false,
     "Name"=>"string",

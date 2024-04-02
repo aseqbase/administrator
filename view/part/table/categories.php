@@ -1,7 +1,6 @@
 <?php
 ACCESS(\_::$CONFIG->AdminAccess);
 use MiMFa\Library\DataBase;
-use MiMFa\Library\User;
 use MiMFa\Module\Table;
 MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."Category");
@@ -13,8 +12,8 @@ $mod->SelectQuery = "
 ";
 $mod->KeyColumns = ["Image", "Name", "Title"];
 $mod->ExcludeColumns = ["Content", "Access", "MetaData", "CreateTime"];
-$mod->Updatable = true;
 $mod->AllowServerSide = true;
+$mod->Updatable = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
 $mod->CellsTypes = [
     "ID"=>"number",
@@ -47,6 +46,6 @@ $mod->CellsTypes = [
         return getAccess(\_::$CONFIG->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
     "MetaData"=>"json"
-    ];
+];
 $mod->Draw();
 ?>
