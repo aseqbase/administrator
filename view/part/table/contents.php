@@ -7,21 +7,21 @@ MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."Content");
 $table1 = \_::$CONFIG->DataBasePrefix."User";
 $mod->SelectQuery = "
-    SELECT A.{$mod->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIDs AS 'Category', A.Priority, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.UpdateTime
+    SELECT A.{$mod->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIDs AS 'Category', A.Priority, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
     FROM {$mod->Table} AS A
     LEFT OUTER JOIN $table1 AS B ON A.AuthorID=B.ID
     LEFT OUTER JOIN $table1 AS C ON A.EditorID=C.ID
     ORDER BY A.`Priority` DESC, A.`CreateTime` DESC
 ";
 $mod->KeyColumns = ["Image", "Title"];
-$mod->IncludeColumns = ['Type', 'Image', 'Title', 'Category', 'Priority', 'Status', 'Access', 'Author', 'Editor', 'UpdateTime'];
+$mod->IncludeColumns = ['Type', 'Image', 'Title', 'Category', 'Priority', 'Status', 'Access', 'Author', 'Editor', 'CreateTime', 'UpdateTime'];
 $mod->AllowServerSide = true;
 $mod->Updatable = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
 $users = DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."User", "ID", "Name");
 $mod->CellsValues = [
     "Category"=>function($v, $k, $r){
-        $val = \MiMFa\Library\Query::GetCategoryDirection(first(json_decode($v??"{}", JSON_OBJECT_AS_ARRAY)));
+        $val = \MiMFa\Library\Query::GetCategoryDirection(first(Convert::FromJSON($v)));
         if(isValid($val)) return \MiMFa\Library\HTML::Link($val,"/cat".$val);
         return $v;
     }
