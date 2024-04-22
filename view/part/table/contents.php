@@ -21,7 +21,7 @@ $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
 $users = DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."User", "ID", "Name");
 $mod->CellsValues = [
     "Category"=>function($v, $k, $r){
-        $val = \MiMFa\Library\Query::GetCategoryDirection(first(Convert::FromJSON($v)));
+        $val = \MiMFa\Library\Query::GetCategoryDirection(first(\MiMFa\Library\Convert::FromJSON($v)));
         if(isValid($val)) return \MiMFa\Library\HTML::Link($val,"/cat".$val);
         return $v;
     }
@@ -63,7 +63,7 @@ $mod->CellsTypes = [
         $std->Attributes=["min"=>\_::$CONFIG->BanAccess,"max"=>\_::$CONFIG->UserAccess];
         return $std;
     },
-    "Class"=>"string",
+    "Attach"=>"json",
     "Path"=>"string",
     "Priority"=>"number",
     "AuthorID"=>function($t, $v) use($users){
