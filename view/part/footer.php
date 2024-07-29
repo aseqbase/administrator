@@ -9,7 +9,7 @@
 		array("Name"=>"Telegram","Link"=>"https://t.me/aseqbase","Icon"=> "fa fa-telegram"),
 		array("Name"=>"Email","Link"=>"mailto:aseqbase@mimfa.net","Icon"=> "fa fa-envelope"),
 		array("Name"=>"Github","Link"=>"http://github.com/aseqbase","Icon"=> "fa fa-github"),
-		array("Name"=>"Forum","Link"=>"/chat","Image"=>"/file/symbol/chat.png","Icon"=> "fa fa-comments")
+		array("Name"=>"Forum","Link"=>"/chat","Image"=>"/asset/symbol/chat.png","Icon"=> "fa fa-comments")
 	);
     $module->Draw();
     MODULE("TemplateButton");
