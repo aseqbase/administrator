@@ -1,11 +1,11 @@
 <?php
      // Active Maintenace Mode
-     $page  = "../aseq/static/maintenance.php";
+     $page  = __DIR__.DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR.".aseq".DIRECTORY_SEPARATOR."static".DIRECTORY_SEPARATOR."maintenance.php";
      $value = new DateTime("tomorrow");//DateTime::createFromFormat('Y-m-d H:i', '2020-01-01 00:00');
      $title = "Under Maintenance";
      $description = "<p>Our website is currently undergoing scheduled maintenance.
                          We Should be back shortly. Thank you for your patience.</p>";
-     $email = "info@mimfa.net";
+     $email = "info@aseqbase.ir";
      $contacts = array("<a href='mailto:$email'>$email</a>");
 
 
