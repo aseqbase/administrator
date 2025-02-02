@@ -8,7 +8,8 @@ $module->Items = array(
 		array("Name"=>"CONTENTS","Link"=>"/content/posts", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/asset/symbol/document.png", "Items"=> array(
 		    	array("Name"=>"POSTS","Link"=>"/content/posts", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/asset/symbol/document.png"),
 		    	array("Name"=>"TAGS","Link"=>"/content/tags", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/asset/symbol/directory.png"),
-		    	array("Name"=>"CATEGORIES","Link"=>"/content/categories", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/asset/symbol/category.png")
+		    	array("Name"=>"CATEGORIES","Link"=>"/content/categories", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/asset/symbol/category.png"),
+		    	array("Name"=>"COMMENTS","Link"=>"/content/comments", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/asset/symbol/chat.png")
 		    )),
 		array("Name"=>"USERS","Link"=>"/user/users", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/asset/symbol/user.png", "Items"=> array(
 		    	array("Name"=>"USERS","Link"=>"/user/users", "Access"=>\_::$CONFIG->AdminAccess, "Image"=>"/asset/symbol/user.png"),
