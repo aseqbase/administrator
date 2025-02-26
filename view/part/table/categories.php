@@ -1,51 +1,51 @@
 <?php
-ACCESS(\_::$CONFIG->AdminAccess);
-use MiMFa\Library\DataBase;
+inspect(\_::$Config->AdminAccess);
+use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
-MODULE("Table");
-$mod = new Table(\_::$CONFIG->DataBasePrefix."Category");
+module("Table");
+$mod = new Table(table("Category"));
 $mod->SelectQuery = "
     SELECT A.{$mod->KeyColumn}, A.Name, B.Name AS 'Parent', A.Image, A.Title, A.Description, A.Status, A.Access, A.UpdateTime
-    FROM {$mod->Table} AS A
-    LEFT OUTER JOIN {$mod->Table} AS B ON A.ParentID=B.ID
-    ORDER BY A.ParentID ASC
+    FROM {$mod->DataTable->Name} AS A
+    LEFT OUTER JOIN {$mod->DataTable->Name} AS B ON A.ParentId=B.Id
+    ORDER BY A.ParentId ASC
 ";
-$mod->KeyColumns = ["Image", "Name", "Title"];
-$mod->ExcludeColumns = ["Content", "Access", "MetaData", "CreateTime"];
+$mod->KeyColumns = ["Image" , "Name" , "Title" ];
+$mod->ExcludeColumns = ["Content" , "Access" , "MetaData" , "CreateTime" ];
 $mod->AllowServerSide = true;
 $mod->Updatable = true;
-$mod->UpdateAccess = \_::$CONFIG->AdminAccess;
+$mod->UpdateAccess = \_::$Config->AdminAccess;
 $mod->CellsTypes = [
-    "ID"=>"number",
-    "ParentID" => function(){
+    "Id" =>"number",
+     "ParentId" => function(){
         $std = new stdClass();
         $std->Title = "Parent";
         $std->Description = "The parent category which is related";
         $std->Type = "select";
-        $std->Options = DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Category", "`ID`", "`Name`", "TRUE ORDER BY `ParentID` ASC");
+        $std->Options = table("Category")->DoSelectPairs("`Id`", "`Name`", "TRUE ORDER BY  `ParentId` ASC");
         return $std;
     },
-    "Name"=>"string",
-    "Image"=>"image",
-    "Title"=>"string",
-    "Description"=>"strings",
-    "Access"=>function(){
+    "Name" =>"string",
+    "Image" =>"Image" ,
+    "Title" =>"string",
+    "Description" =>"strings",
+    "Access" =>function(){
         $std = new stdClass();
         $std->Type="number";
-        $std->Attributes=["min"=>\_::$CONFIG->BanAccess,"max"=>\_::$CONFIG->UserAccess];
+        $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->UserAccess];
         return $std;
     },
-    "Status"=>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
-    "UpdateTime"=>function($t, $v){
+    "Status" =>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
+    "UpdateTime" =>function($t, $v){
         $std = new stdClass();
-        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"calendar":"hidden";
-        $std->Value = \_::$CONFIG->GetFormattedDateTime();
+        $std->Type = auth(\_::$Config->SuperAccess)?"calendar":"hidden";
+        $std->Value = Convert::ToDateTimeString();
         return $std;
     },
-    "CreateTime"=> function($t, $v){
-        return getAccess(\_::$CONFIG->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
+    "CreateTime" => function($t, $v){
+        return auth(\_::$Config->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
-    "MetaData"=>"json"
+    "MetaData" =>"json"
 ];
-$mod->Draw();
+$mod->Render();
 ?>

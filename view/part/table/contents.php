@@ -1,97 +1,96 @@
 <?php
-ACCESS(\_::$CONFIG->AdminAccess);
-use MiMFa\Library\DataBase;
+inspect(\_::$Config->AdminAccess);
+use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
-LIBRARY("Query");
-MODULE("Table");
-$mod = new Table(\_::$CONFIG->DataBasePrefix."Content");
-$table1 = \_::$CONFIG->DataBasePrefix."User";
+module("Table");
+$mod = new Table(table("Content" ));
+$table1 = \_::$Back->User->DataTable->Name;
 $mod->SelectQuery = "
-    SELECT A.{$mod->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIDs AS 'Category', A.Priority, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
-    FROM {$mod->Table} AS A
-    LEFT OUTER JOIN $table1 AS B ON A.AuthorID=B.ID
-    LEFT OUTER JOIN $table1 AS C ON A.EditorID=C.ID
+    SELECT A.{$mod->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIds AS 'Category', A.Priority, A.Status, A.Access, B.Name AS 'author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
+    FROM {$mod->DataTable->Name} AS A
+    LEFT OUTER JOIN $table1 AS B ON A.AuthorId=B.Id
+    LEFT OUTER JOIN $table1 AS C ON A.EditorId=C.Id
     ORDER BY A.`Priority` DESC, A.`CreateTime` DESC
 ";
-$mod->KeyColumns = ["Image", "Title"];
-$mod->IncludeColumns = ['Type', 'Image', 'Title', 'Category', 'Priority', 'Status', 'Access', 'Author', 'Editor', 'CreateTime', 'UpdateTime'];
+$mod->KeyColumns = ["Image" , "Title" ];
+$mod->IncludeColumns = ['Type' , 'Image' , 'Title' , 'Category', 'Priority' , 'Status' , 'Access' , 'author', 'Editor', 'CreateTime' , 'UpdateTime' ];
 $mod->AllowServerSide = true;
 $mod->Updatable = true;
-$mod->UpdateAccess = \_::$CONFIG->AdminAccess;
-$users = DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."User", "ID", "Name");
+$mod->UpdateAccess = \_::$Config->AdminAccess;
+$users = table("User")->DoSelectPairs("Id" , "Name" );
 $mod->CellsValues = [
     "Category"=>function($v, $k, $r){
-        $val = \MiMFa\Library\Query::GetCategoryDirection(first(\MiMFa\Library\Convert::FromJSON($v)));
-        if(isValid($val)) return \MiMFa\Library\HTML::Link($val,"/cat".$val);
+        $val = \_::$Back->Query->GetCategoryDirection(first(Convert::FromJson($v)));
+        if(isValid($val)) return \MiMFa\Library\Html::Link($val,"/cat".$val);
         return $v;
     }
 ];
 $mod->CellsTypes = [
-    "ID"=>getAccess(\_::$CONFIG->SuperAccess)?"disabled":false,
-    "Name"=>"string",
-    "Type"=>"enum",
-    "Title"=>"string",
-    "Image"=>"image",
-    "Description"=>"strings",
-    "Content"=>"content",
-    "CategoryIDs"=> function(){
+    "Id" =>auth(\_::$Config->SuperAccess)?"disabled":false,
+    "Name" =>"string",
+    "Type" =>"enum",
+    "Title" =>"string",
+    "Image" =>"image" ,
+    "Description" =>"strings",
+    "Content" =>"content" ,
+    "CategoryIds" => function(){
         $std = new stdClass();
         $std->Title = "Categories";
         $std->Type = "array";
         $std->Options = [
-            "type"=>"select",
-            "key"=>"CategoryIDs",
-            "options"=>DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Category", "`ID`", "`Name`", "TRUE ORDER BY `ParentID` ASC")
+            "Type" =>"select",
+            "Key" =>"CategoryIds" ,
+            "Options"=>table("Category")->DoSelectPairs("`Id`", "`Name`", "TRUE ORDER BY  `ParentId` ASC")
         ];
         return $std;
     },
-    "TagIDs"=>function(){
+    "TagIds" =>function(){
         $std = new stdClass();
         $std->Title = "Tags";
         $std->Type = "array";
         $std->Options = [
-            "type"=>"select",
-            "key"=>"TagIDs",
-            "options"=>DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Tag", "`ID`", "`Name`")
+            "Type" =>"select",
+            "Key" =>"TagIds" ,
+            "Options"=>table("Tag")->DoSelectPairs("`Id`", "`Name`")
         ];
         return $std;
     },
-    "Status"=>[-1=>"Unpublished",0=>"Drafted",1=>"Published"],
-    "Access"=>function(){
+    "Status" =>[-1=>"Unpublished",0=>"Drafted",1=>"Published"],
+    "Access" =>function(){
         $std = new stdClass();
         $std->Type="number";
-        $std->Attributes=["min"=>\_::$CONFIG->BanAccess,"max"=>\_::$CONFIG->UserAccess];
+        $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->UserAccess];
         return $std;
     },
-    "Attach"=>"json",
-    "Path"=>"string",
-    "Priority"=>"number",
-    "AuthorID"=>function($t, $v) use($users){
+    "Attach" =>"json",
+    "Path" =>"string",
+    "Priority" =>"number",
+    "AuthorId" =>function($t, $v) use($users){
         $std = new stdClass();
         $std->Title = "Author";
-        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"select":"hidden";
+        $std->Type = auth(\_::$Config->SuperAccess)?"select":"hidden";
         $std->Options = $users;
-        if(!isValid($v)) $std->Value = \_::$INFO->User->ID;
+        if(!isValid($v)) $std->Value = \_::$Back->User->Id;
         return $std;
     },
-    "EditorID"=>function($t, $v) use($users){
+    "EditorId" =>function($t, $v) use($users){
         $std = new stdClass();
         $std->Title = "Editor";
-        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"select":"hidden";
+        $std->Type = auth(\_::$Config->SuperAccess)?"select":"hidden";
         $std->Options = $users;
-        if(!isValid($v)) $std->Value = \_::$INFO->User->ID;
+        if(!isValid($v)) $std->Value = \_::$Back->User->Id;
         return $std;
     },
-    "UpdateTime"=>function($t, $v){
+    "UpdateTime" =>function($t, $v){
         $std = new stdClass();
-        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"calendar":"hidden";
-        $std->Value = \_::$CONFIG->GetFormattedDateTime();
+        $std->Type = auth(\_::$Config->SuperAccess)?"calendar":"hidden";
+        $std->Value = Convert::ToDateTimeString();
         return $std;
     },
-    "CreateTime"=> function($t, $v){
-        return getAccess(\_::$CONFIG->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
+    "CreateTime" => function($t, $v){
+        return auth(\_::$Config->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
-    "MetaData"=>"json"
+    "MetaData" =>"json"
     ];
-$mod->Draw();
+$mod->Render();
 ?>

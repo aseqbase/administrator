@@ -1,28 +1,29 @@
 <?php
-ACCESS(\_::$CONFIG->AdminAccess);
+inspect(\_::$Config->AdminAccess);
+use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
-MODULE("Table");
-$mod = new Table(\_::$CONFIG->DataBasePrefix."Tag");
-$mod->KeyColumns = ["Name", "Title"];
-$mod->ExcludeColumns = ["MetaData"];
+module("Table");
+$mod = new Table(table("Tag"));
+$mod->KeyColumns = ["Name" , "Title" ];
+$mod->ExcludeColumns = ["MetaData" ];
 $mod->AllowServerSide = true;
 $mod->Updatable = true;
-$mod->UpdateAccess = \_::$CONFIG->AdminAccess;
+$mod->UpdateAccess = \_::$Config->AdminAccess;
 $mod->CellsTypes = [
-    "ID"=>"number",
-    "Name"=>"string",
-    "Title"=>"string",
-    "Description"=>"strings",
-    "UpdateTime"=>function($t, $v){
+    "Id" =>"number",
+    "Name" =>"string",
+    "Title" =>"string",
+    "Description" =>"strings",
+    "UpdateTime" =>function($t, $v){
         $std = new stdClass();
-        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"calendar":"hidden";
-        $std->Value = \_::$CONFIG->GetFormattedDateTime();
+        $std->Type = auth(\_::$Config->SuperAccess)?"calendar":"hidden";
+        $std->Value = Convert::ToDateTimeString();
         return $std;
     },
-    "CreateTime"=> function($t, $v){
-        return getAccess(\_::$CONFIG->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
+    "CreateTime" => function($t, $v){
+        return auth(\_::$Config->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
-    "MetaData"=>"json"
+    "MetaData" =>"json"
 ];
-$mod->Draw();
+$mod->Render();
 ?>

@@ -20,10 +20,10 @@ $GLOBALS["ASEQ"] = end($dirs);//join(".", $dirs);/* Change it to null if the fil
 $GLOBALS["BASE"] = (isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null) ?? ".aseq";/* Change it to the base directory if deferents */
 
 /*
-    Change \_::$SEQUENCES
-    newdirectory, newaseq;// Add new directory to the \_::$SEQUENCES
-    directory, newaseq;// Update directory in the \_::$SEQUENCES
-    directory, null;// Remove thw directory from the \_::$SEQUENCES
+    Change \_::$Sequences
+    newdirectory, newaseq;// Add new directory to the \_::$Sequences
+    directory, newaseq;// Update directory in the \_::$Sequences
+    directory, null;// Remove thw directory from the \_::$Sequences
 */
 $GLOBALS["SEQUENCES_PATCH"] = array();
 

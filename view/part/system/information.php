@@ -1,17 +1,16 @@
 <?php
-ACCESS(\_::$CONFIG->SuperAccess);
-if(RECEIVE("restore","GET")) echo \MiMFa\Library\Revise::Restore(\_::$INFO)
-    ?\MiMFa\Library\HTML::Success("Data Restored Successfully!")
-    :\MiMFa\Library\HTML::Warning("Data is restored!");
+inspect(\_::$Config->SuperAccess);
+if(\Req::Receive("restore","GET")) echo \MiMFa\Library\Revise::Restore(\_::$Info)
+    ?\MiMFa\Library\Html::Success("Data Restored Successfully!")
+    :\MiMFa\Library\Html::Warning("Data is restored!");
 \MiMFa\Library\User::$Active = false;
-\_::$INFO = new Information();
-if(RECEIVE(null,"POST")) echo \MiMFa\Library\Revise::HandleForm(\_::$INFO);
+if(\Req::Receive(null,"POST")) echo \MiMFa\Library\Revise::HandleForm(\_::$Info);
 else {
-    $form = \MiMFa\Library\Revise::GetForm(\_::$INFO);
+    $form = \MiMFa\Library\Revise::GetForm(\_::$Info);
     $form->Title = "Edit Information";
     $form->Id = "EditInformation";
-    $form->Buttons = \MiMFa\Library\HTML::Button("Restore",\_::$PATH."?restore=true");
-    $form->Draw();
+    $form->Buttons = \MiMFa\Library\Html::Button("Restore",\Req::$Path."?restore=true");
+    $form->Render();
 }
 \MiMFa\Library\User::$Active = true;
 ?>

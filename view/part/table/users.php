@@ -1,54 +1,54 @@
 <?php
-ACCESS(\_::$CONFIG->AdminAccess);
+inspect(\_::$Config->AdminAccess);
+use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
-use MiMFa\Library\DataBase;
-MODULE("Table");
-$mod = new Table(\_::$CONFIG->DataBasePrefix."User");
-$table1 = \_::$CONFIG->DataBasePrefix."UserGroup";
+module("Table");
+$mod = new Table(\_::$Back->User->DataTable);
+$table1 = \_::$Back->User->GroupDataTable->Name;
 $mod->SelectQuery = "
     SELECT A.{$mod->KeyColumn}, B.Title AS 'Group', A.Image, A.Name, A.Bio, A.Signature, A.Email, A.Status, A.CreateTime
-    FROM {$mod->Table} AS A
-    LEFT OUTER JOIN $table1 AS B ON A.GroupID=B.ID;
+    FROM {$mod->DataTable->Name} AS A
+    LEFT OUTER JOIN $table1 AS B ON A.GroupId=B.Id;
 ";
-$mod->KeyColumns = ["Name", "Signature"];
-$mod->ExcludeColumns = ["Signature", "MetaData"];
+$mod->KeyColumns = ["Name" , "Signature" ];
+$mod->ExcludeColumns = ["Signature" , "MetaData" ];
 $mod->Updatable = true;
 $mod->AllowServerSide = true;
-$mod->UpdateAccess = \_::$CONFIG->AdminAccess;
+$mod->UpdateAccess = \_::$Config->AdminAccess;
 $mod->CellsTypes = [
-    "ID"=>"number",
-    "GroupID"=> function(){
+    "Id" =>"number",
+    "GroupId" => function(){
         $std = new stdClass();
         $std->Title = "Group";
         $std->Type = "select";
-        $std->Options = DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."UserGroup", "ID", "Title");
+        $std->Options = table("UserGroup")->DoSelectPairs("Id" , "Title" );
         return $std;
     },
-    "Name"=>"string",
-    "Image"=>"image",
-    "Bio"=>"strings",
+    "Name" =>"string",
+    "Image" =>"image" ,
+    "Bio" =>"strings",
     "Email"=>"email",
-    "Signature"=>"string",
-    "Password"=>"password",
+    "Signature" =>"string",
+    "Password" =>"password",
     "FirstName"=>"string",
     "MiddleName"=>"string",
     "LastName"=>"string",
-    "Gender"=>"enum",
+    "Gender" =>"enum",
     "Contact"=>"tel",
     "Organization"=>"string",
-    "Address"=>"string",
-    "Path"=>"string",
-    "Status"=>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
-    "UpdateTime"=>function($t, $v){
+    "Address" =>"string",
+    "Path" =>"string",
+    "Status" =>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
+    "UpdateTime" =>function($t, $v){
         $std = new stdClass();
-        $std->Type = getAccess(\_::$CONFIG->SuperAccess)?"calendar":"hidden";
-        $std->Value = \_::$CONFIG->GetFormattedDateTime();
+        $std->Type = auth(\_::$Config->SuperAccess)?"calendar":"hidden";
+        $std->Value = Convert::ToDateTimeString();
         return $std;
     },
-    "CreateTime"=> function($t, $v){
-        return getAccess(\_::$CONFIG->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
+    "CreateTime" => function($t, $v){
+        return auth(\_::$Config->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
-    "MetaData"=>"json"
+    "MetaData" =>"json"
     ];
-$mod->Draw();
+$mod->Render();
 ?>

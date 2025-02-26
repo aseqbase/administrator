@@ -1,16 +1,16 @@
 <?php
-ACCESS(\_::$CONFIG->AdminAccess);
+inspect(\_::$Config->AdminAccess);
 use MiMFa\Module\Table;
-MODULE("Table");
-$mod = new Table("Translate_Lexicon");
+module("Table");
+$mod = new Table(table("Translate_Lexicon"));
 $mod->KeyColumns = ["KeyCode"];
 $mod->KeyColumn = "KeyCode";
-$mod->Updatable = RECEIVE("update");
+$mod->Updatable = \Req::Receive("update");
 $mod->AllowServerSide = true;
-$mod->UpdateAccess = \_::$CONFIG->AdminAccess;
+$mod->UpdateAccess = \_::$Config->AdminAccess;
 $mod->CellsTypes = [
     "KeyCode"=> "text",
     "ValueOptions"=> "json"
 ];
-$mod->Draw();
+$mod->Render();
 ?>
