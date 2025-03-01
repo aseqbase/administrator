@@ -2,15 +2,15 @@
 inspect(\_::$Config->AdminAccess);
 use MiMFa\Module\Table;
 module("Table");
-$mod = new Table(table("Translate_Lexicon"));
-$mod->KeyColumns = ["KeyCode"];
-$mod->KeyColumn = "KeyCode";
-$mod->Updatable = \Req::Receive("update");
-$mod->AllowServerSide = true;
-$mod->UpdateAccess = \_::$Config->AdminAccess;
-$mod->CellsTypes = [
+$module = new Table(table("Translate_Lexicon"));
+$module->KeyColumns = ["KeyCode"];
+$module->KeyColumn = "KeyCode";
+$module->Updatable = \Req::Receive("update");
+$module->AllowServerSide = true;
+$module->UpdateAccess = \_::$Config->AdminAccess;
+$module->CellsTypes = [
     "KeyCode"=> "text",
     "ValueOptions"=> "json"
 ];
-$mod->Render();
+$module->Render();
 ?>

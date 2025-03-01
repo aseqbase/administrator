@@ -1,5 +1,5 @@
 <?php
-(new MiMFa\Library\Router())->if(auth(\_::$Config->AdminAccess))
+(new MiMFa\Library\Router())->if(auth(\_::$Config->SuperAccess))
     ->Get(function () {
         view("part", [
             "Name" => "system/configuration",

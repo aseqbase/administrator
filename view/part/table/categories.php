@@ -3,19 +3,19 @@ inspect(\_::$Config->AdminAccess);
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
-$mod = new Table(table("Category"));
-$mod->SelectQuery = "
-    SELECT A.{$mod->KeyColumn}, A.Name, B.Name AS 'Parent', A.Image, A.Title, A.Description, A.Status, A.Access, A.UpdateTime
-    FROM {$mod->DataTable->Name} AS A
-    LEFT OUTER JOIN {$mod->DataTable->Name} AS B ON A.ParentId=B.Id
+$module = new Table(table("Category"));
+$module->SelectQuery = "
+    SELECT A.{$module->KeyColumn}, A.Name, B.Name AS 'Parent', A.Image, A.Title, A.Description, A.Status, A.Access, A.UpdateTime
+    FROM {$module->DataTable->Name} AS A
+    LEFT OUTER JOIN {$module->DataTable->Name} AS B ON A.ParentId=B.Id
     ORDER BY A.ParentId ASC
 ";
-$mod->KeyColumns = ["Image" , "Name" , "Title" ];
-$mod->ExcludeColumns = ["Content" , "Access" , "MetaData" , "CreateTime" ];
-$mod->AllowServerSide = true;
-$mod->Updatable = true;
-$mod->UpdateAccess = \_::$Config->AdminAccess;
-$mod->CellsTypes = [
+$module->KeyColumns = ["Image" , "Name" , "Title" ];
+$module->ExcludeColumns = ["Content" , "Access" , "MetaData" , "CreateTime" ];
+$module->AllowServerSide = true;
+$module->Updatable = true;
+$module->UpdateAccess = \_::$Config->AdminAccess;
+$module->CellsTypes = [
     "Id" =>"number",
      "ParentId" => function(){
         $std = new stdClass();
@@ -47,5 +47,5 @@ $mod->CellsTypes = [
     },
     "MetaData" =>"json"
 ];
-$mod->Render();
+$module->Render();
 ?>

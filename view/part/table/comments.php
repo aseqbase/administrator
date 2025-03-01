@@ -1,28 +1,28 @@
 <?php
 inspect(\_::$Config->AdminAccess);
 use MiMFa\Library\Convert;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Module\Table;
 module("Table");
-$mod = new Table(table("Comment"));
+$module = new Table(table("Comment"));
 $contentT = table("Content" )->Name;
-$mod->SelectQuery = "
-    SELECT A.{$mod->KeyColumn}, C.Title AS 'Title' , C.Id AS 'Post', A.Subject AS 'Subject' , A.Content AS 'Content' , A.Name AS 'author', A.Status, A.Access, A.CreateTime, A.UpdateTime
-    FROM {$mod->DataTable->Name} AS A
+$module->SelectQuery = "
+    SELECT A.{$module->KeyColumn}, C.Title AS 'Title' , C.Id AS 'Post', A.Subject AS 'Subject' , A.Content AS 'Content' , A.Name AS 'author', A.Status, A.Access, A.CreateTime, A.UpdateTime
+    FROM {$module->DataTable->Name} AS A
     LEFT OUTER JOIN $contentT AS C ON A.Relation=C.Id
     ORDER BY A.`UpdateTime` DESC
 ";
-$mod->KeyColumns = ["Subject" ];
-$mod->IncludeColumns = ['Title' , 'author', 'Subject' , 'Content' , 'Status' , 'Access' , 'CreateTime' , 'UpdateTime' ];
-$mod->AllowServerSide = true;
-$mod->Updatable = true;
-$mod->UpdateAccess = \_::$Config->AdminAccess;
-$mod->CellsValues = [
+$module->KeyColumns = ["Subject" ];
+$module->IncludeColumns = ['Title' , 'author', 'Subject' , 'Content' , 'Status' , 'Access' , 'CreateTime' , 'UpdateTime' ];
+$module->AllowServerSide = true;
+$module->Updatable = true;
+$module->UpdateAccess = \_::$Config->AdminAccess;
+$module->CellsValues = [
     "Title" =>function($v, $k, $r){
         return Html::Link($v, \_::$Address->ContentPath. $r["Post"],["target"=>"_blank"]);
     }
 ];
-$mod->CellsTypes = [
+$module->CellsTypes = [
     "Id" =>auth(\_::$Config->SuperAccess)?"disabled":false,
     "Relation" =>"string",
     "UserId" =>"number",
@@ -57,5 +57,5 @@ $mod->CellsTypes = [
     },
     "MetaData" =>"json"
     ];
-$mod->Render();
+$module->Render();
 ?>

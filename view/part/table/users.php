@@ -3,19 +3,19 @@ inspect(\_::$Config->AdminAccess);
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
-$mod = new Table(\_::$Back->User->DataTable);
+$module = new Table(\_::$Back->User->DataTable);
 $table1 = \_::$Back->User->GroupDataTable->Name;
-$mod->SelectQuery = "
-    SELECT A.{$mod->KeyColumn}, B.Title AS 'Group', A.Image, A.Name, A.Bio, A.Signature, A.Email, A.Status, A.CreateTime
-    FROM {$mod->DataTable->Name} AS A
+$module->SelectQuery = "
+    SELECT A.{$module->KeyColumn}, B.Title AS 'Group', A.Image, A.Name, A.Bio, A.Signature, A.Email, A.Status, A.CreateTime
+    FROM {$module->DataTable->Name} AS A
     LEFT OUTER JOIN $table1 AS B ON A.GroupId=B.Id;
 ";
-$mod->KeyColumns = ["Name" , "Signature" ];
-$mod->ExcludeColumns = ["Signature" , "MetaData" ];
-$mod->Updatable = true;
-$mod->AllowServerSide = true;
-$mod->UpdateAccess = \_::$Config->AdminAccess;
-$mod->CellsTypes = [
+$module->KeyColumns = ["Name" , "Signature" ];
+$module->ExcludeColumns = ["Signature" , "MetaData" ];
+$module->Updatable = true;
+$module->AllowServerSide = true;
+$module->UpdateAccess = \_::$Config->AdminAccess;
+$module->CellsTypes = [
     "Id" =>"number",
     "GroupId" => function(){
         $std = new stdClass();
@@ -50,5 +50,5 @@ $mod->CellsTypes = [
     },
     "MetaData" =>"json"
     ];
-$mod->Render();
+$module->Render();
 ?>

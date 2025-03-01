@@ -3,13 +3,13 @@ inspect(\_::$Config->AdminAccess);
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
-$mod = new Table(table("Tag"));
-$mod->KeyColumns = ["Name" , "Title" ];
-$mod->ExcludeColumns = ["MetaData" ];
-$mod->AllowServerSide = true;
-$mod->Updatable = true;
-$mod->UpdateAccess = \_::$Config->AdminAccess;
-$mod->CellsTypes = [
+$module = new Table(table("Tag"));
+$module->KeyColumns = ["Name" , "Title" ];
+$module->ExcludeColumns = ["MetaData" ];
+$module->AllowServerSide = true;
+$module->Updatable = true;
+$module->UpdateAccess = \_::$Config->AdminAccess;
+$module->CellsTypes = [
     "Id" =>"number",
     "Name" =>"string",
     "Title" =>"string",
@@ -25,5 +25,5 @@ $mod->CellsTypes = [
     },
     "MetaData" =>"json"
 ];
-$mod->Render();
+$module->Render();
 ?>

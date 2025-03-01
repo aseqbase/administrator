@@ -2,13 +2,13 @@
 inspect(\_::$Config->AdminAccess);
 use MiMFa\Module\Table;
 module("Table");
-$mod = new Table(\_::$Back->User->GroupDataTable);
-$mod->KeyColumns = ["Title" ];
-$mod->ExcludeColumns = ["Id" , "Name" , "MetaData" ];
-$mod->Updatable = true;
-$mod->AllowServerSide = true;
-$mod->UpdateAccess = \_::$Config->AdminAccess;
-$mod->CellsTypes = [
+$module = new Table(\_::$Back->User->GroupDataTable);
+$module->KeyColumns = ["Title" ];
+$module->ExcludeColumns = ["Id" , "Name" , "MetaData" ];
+$module->Updatable = true;
+$module->AllowServerSide = true;
+$module->UpdateAccess = \_::$Config->AdminAccess;
+$module->CellsTypes = [
     "Id" =>"number",
     "Name" =>"string",
     "Title" =>"string",
@@ -23,5 +23,5 @@ $mod->CellsTypes = [
     "Status" =>[-1=>"Blocked",0=>"Undifined",1=>"Activated"],
     "MetaData" => "json"
 ];
-$mod->Render();
+$module->Render();
 ?>

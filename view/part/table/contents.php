@@ -3,29 +3,29 @@ inspect(\_::$Config->AdminAccess);
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
-$mod = new Table(table("Content" ));
+$module = new Table(table("Content" ));
 $table1 = \_::$Back->User->DataTable->Name;
-$mod->SelectQuery = "
-    SELECT A.{$mod->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIds AS 'Category', A.Priority, A.Status, A.Access, B.Name AS 'author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
-    FROM {$mod->DataTable->Name} AS A
+$module->SelectQuery = "
+    SELECT A.{$module->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIds AS 'Category', A.Priority, A.Status, A.Access, B.Name AS 'author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
+    FROM {$module->DataTable->Name} AS A
     LEFT OUTER JOIN $table1 AS B ON A.AuthorId=B.Id
     LEFT OUTER JOIN $table1 AS C ON A.EditorId=C.Id
     ORDER BY A.`Priority` DESC, A.`CreateTime` DESC
 ";
-$mod->KeyColumns = ["Image" , "Title" ];
-$mod->IncludeColumns = ['Type' , 'Image' , 'Title' , 'Category', 'Priority' , 'Status' , 'Access' , 'author', 'Editor', 'CreateTime' , 'UpdateTime' ];
-$mod->AllowServerSide = true;
-$mod->Updatable = true;
-$mod->UpdateAccess = \_::$Config->AdminAccess;
+$module->KeyColumns = ["Image" , "Title" ];
+$module->IncludeColumns = ['Type' , 'Image' , 'Title' , 'Category', 'Priority' , 'Status' , 'Access' , 'author', 'Editor', 'CreateTime' , 'UpdateTime' ];
+$module->AllowServerSide = true;
+$module->Updatable = true;
+$module->UpdateAccess = \_::$Config->AdminAccess;
 $users = table("User")->DoSelectPairs("Id" , "Name" );
-$mod->CellsValues = [
+$module->CellsValues = [
     "Category"=>function($v, $k, $r){
         $val = \_::$Back->Query->GetCategoryDirection(first(Convert::FromJson($v)));
         if(isValid($val)) return \MiMFa\Library\Html::Link($val,"/cat".$val);
         return $v;
     }
 ];
-$mod->CellsTypes = [
+$module->CellsTypes = [
     "Id" =>auth(\_::$Config->SuperAccess)?"disabled":false,
     "Name" =>"string",
     "Type" =>"enum",
@@ -92,5 +92,5 @@ $mod->CellsTypes = [
     },
     "MetaData" =>"json"
     ];
-$mod->Render();
+$module->Render();
 ?>

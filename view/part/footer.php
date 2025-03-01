@@ -1,7 +1,7 @@
 <footer>
     <?php
     use MiMFa\Library\Style;
-    use MiMFa\Library\HTML;
+    use MiMFa\Library\Html;
     module("Shortcuts");
     $module = new \MiMFa\Module\Shortcuts();
     $module->Items = \_::$Info->Contacts;
