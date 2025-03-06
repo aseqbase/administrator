@@ -88,6 +88,7 @@ StyleCopReport.xml
 *.tlh
 *.tmp
 *.tmp_proj
+*.csproj
 *_wpftmp.csproj
 *.log
 *.tlog
@@ -97,6 +98,10 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
+
+# Files built by PHP Project
+*.phpproj
+*.phpproj.user
 
 # Chutzpah Test files
 _Chutzpah*
@@ -396,3 +401,28 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# aseqbase
+/single
+/sequence
+/administrator
+/private
+/public
+/test
+/tmp
+/temp
+/ms
+/ums
+/gms
+/erp
+/vendor
+/shop
+/.vs
+/.vscode
+/.git
+/.package
+/MiMFa aseqbase.sln
+*.zip
+*.rar
+# temporary
+/-installer/*.php

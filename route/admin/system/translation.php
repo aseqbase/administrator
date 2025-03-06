@@ -39,12 +39,12 @@ use \MiMFa\Library\Convert;
             $c -=2;
             if($c > 0 && \_::$Back->Translate->SetAll($dic))
                 \Res::Flip(Html::Success("$c key values setted successfuly in lexicon!"));
-            else die(Html::Error("There occured a problem!"));
+            else \Res::Error("There occured a problem!");
         })
         ->Delete(function() {
             if(\_::$Back->Translate->ClearAll())
                 \Res::Flip(Html::Success("All key values cleared successfuly from the lexicon!"));
-            else die(Html::Error("There occured a problem!"));
+            else \Res::Error("There occured a problem!");
         })
         ->Get(function() {
             view("part", [
