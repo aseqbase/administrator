@@ -3,7 +3,7 @@
     ->Get(function () {
         view("part", [
             "Name" => "table/contents",
-            "Image" => "/asset/symbol/document.png",
+            "Image" => "th-large",
             "Title" => "Contents Management"
         ]);
     })

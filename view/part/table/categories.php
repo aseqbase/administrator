@@ -32,7 +32,7 @@ $module->CellsTypes = [
     "Access" =>function(){
         $std = new stdClass();
         $std->Type="number";
-        $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->UserAccess];
+        $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->SuperAccess];
         return $std;
     },
     "Status" =>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
@@ -47,5 +47,6 @@ $module->CellsTypes = [
     },
     "MetaData" =>"json"
 ];
+swap($module, $data);
 $module->Render();
 ?>

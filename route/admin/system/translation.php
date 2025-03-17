@@ -3,9 +3,11 @@ inspect(\_::$Config->AdminAccess);
 use \MiMFa\Library\Router;
 use \MiMFa\Library\Html;
 use \MiMFa\Library\Convert;
-(new Router())->Route()
-    ->if(\Req::Patch("export")??false)
-        ->Patch(function() {
+use MiMFa\Module\Part;
+
+(new Router())->Route
+    ->if(\Req::Get("export")??false)
+        ->Get(function() {//Exports
             $cells = [""];
             $dic = [];
             foreach (\_::$Back->Translate->GetAll("ORDER BY `KeyCode` ASC") as $value){
@@ -16,10 +18,10 @@ use \MiMFa\Library\Convert;
                     $dic[$k] = null;
             }
             $cells[0] = loop($dic, function($k){return $k;});
-            \MiMFa\Library\Local::Download(Convert::FromCells($cells), "Lexicon.csv");
+            \MiMFa\Library\Local::Load(Convert::FromCells($cells), "Lexicon.csv");
         })
-    ->else()
-        ->Post(function() {
+    ->else
+        ->Post(function() {//Imports
             $c = 0;
             $keys = [];
             foreach (Convert::ToCells(urldecode(first(\Req::Post()))) as $row) {
@@ -41,19 +43,25 @@ use \MiMFa\Library\Convert;
                 \Res::Flip(Html::Success("$c key values setted successfuly in lexicon!"));
             else \Res::Error("There occured a problem!");
         })
-        ->Delete(function() {
+        ->Delete(function() {//Deletes
             if(\_::$Back->Translate->ClearAll())
                 \Res::Flip(Html::Success("All key values cleared successfuly from the lexicon!"));
             else \Res::Error("There occured a problem!");
         })
-        ->Get(function() {
+        ->Get(function() {//Shows
+            $upd = \Req::Receive("update");
             view("part", [
-                "Name", "table/lexicon",
+                "Name" => "table/lexicon",
                 "Title" => "Translation",
-                "Image" => "/asset/symbol/replace.png",
+                "Image" => "language",
+                "Updatable" => $upd,
                 "Content" => Html::Center(
-                    (\Req::Receive("update")?Html::Button("View Lexicon","/".\Req::$Direction):Html::Button("Edit Lexicon","/".\Req::$Direction."?update=true")).
-                    Html::Button("Export Lexicon","sendPatch(null, {'export':true}, '.content');").
+                    (
+                        $upd?
+                            Html::Button("View Lexicon","/".\Req::$Direction):
+                            Html::Button("Edit Lexicon","/".\Req::$Direction."?update=true")
+                    ).
+                    Html::Button("Export Lexicon","/".\Req::$Direction."?export=true", ["target"=>"blank"]).
                     Html::Button("Import Lexicon","
                         var input = document.createElement('input');
                         input.setAttribute('Type' , 'file');
@@ -70,13 +78,17 @@ use \MiMFa\Library\Convert;
                         }
                         $(input).trigger('click');
                         return false;
-                    ").
+                    "
+                   ).
                     Html::Button("Clear Lexicon", "
                         if(confirm('Are you sure to clear all lexicon records?'))
                             sendDelete(null, {'truncate':true}, '.content');
                     ", ["class"=>"error"])
                 , ["class"=>"content"])
             ]);
+        })
+        ->Default(function() {//Deletes
+            part("table/lexicon");
         })
         ->Handle();
 ?>

@@ -25,5 +25,6 @@ $module->CellsTypes = [
     },
     "MetaData" =>"json"
 ];
+swap($module, $data);
 $module->Render();
 ?>

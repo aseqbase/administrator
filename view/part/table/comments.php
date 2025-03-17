@@ -19,7 +19,7 @@ $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;
 $module->CellsValues = [
     "Title" =>function($v, $k, $r){
-        return Html::Link($v, \_::$Address->ContentPath. $r["Post"],["target"=>"_blank"]);
+        return Html::Link($v, \_::$Address->ContentRoute. $r["Post"],["target"=>"_blank"]);
     }
 ];
 $module->CellsTypes = [
@@ -43,7 +43,7 @@ $module->CellsTypes = [
         $std = new stdClass();
         $std->Title = "Minimum Access";
         $std->Type="number";
-        $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->UserAccess];
+        $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->SuperAccess];
         return $std;
     },
     "UpdateTime" =>function($t, $v){
@@ -57,5 +57,6 @@ $module->CellsTypes = [
     },
     "MetaData" =>"json"
     ];
+swap($module, $data);
 $module->Render();
 ?>
