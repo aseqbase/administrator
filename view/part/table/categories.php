@@ -10,11 +10,16 @@ $module->SelectQuery = "
     LEFT OUTER JOIN {$module->DataTable->Name} AS B ON A.ParentId=B.Id
     ORDER BY A.ParentId ASC
 ";
-$module->KeyColumns = ["Image" , "Name" , "Title" ];
+$module->KeyColumns = ["Name" , "Title"];
 $module->ExcludeColumns = ["Content" , "Access" , "MetaData" , "CreateTime" ];
 $module->AllowServerSide = true;
 $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;
+$module->CellsValues = [
+    "Name"=>function($v, $k, $r){
+        return \MiMFa\Library\Html::Link($v,\_::$Address->CategoryRoute.$r["Id"]);
+    }
+];
 $module->CellsTypes = [
     "Id" =>"number",
      "ParentId" => function(){

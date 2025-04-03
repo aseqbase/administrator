@@ -19,9 +19,12 @@ $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;
 $users = table("User")->DoSelectPairs("Id" , "Name" );
 $module->CellsValues = [
+    "Title"=>function($v, $k, $r){
+        return \MiMFa\Library\Html::Link($v,\_::$Address->ContentRoute.$r["Id"]);
+    },
     "Category"=>function($v, $k, $r){
-        $val = \_::$Back->Query->GetCategoryDirection(first(Convert::FromJson($v)));
-        if(isValid($val)) return \MiMFa\Library\Html::Link($val,"/cat".$val);
+        $val = trim(\_::$Back->Query->GetCategoryRoute(first(Convert::FromJson($v))), "/\\");
+        if(isValid($val)) return \MiMFa\Library\Html::Link($val,\_::$Address->CategoryRoute.$val);
         return $v;
     }
 ];

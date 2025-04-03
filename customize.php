@@ -17,8 +17,7 @@ if (auth(\_::$Config->AdminAccess)) {
             "Items" => array(
                 array("Name" => "CONTENTS", "Path" => "/admin/content/contents", "Access" => \_::$Config->AdminAccess, "Image" => "th-large"),
                 array("Name" => "TAGS", "Path" => "/admin/content/tags", "Access" => \_::$Config->AdminAccess, "Image" => "tags"),
-                array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$Config->AdminAccess, "Image" => "code-fork"),
-                array("Name" => "COMMENTS", "Path" => "/admin/content/comments", "Access" => \_::$Config->AdminAccess, "Image" => "comment")
+                array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$Config->AdminAccess, "Image" => "code-fork")
             )
         ),
         array(
@@ -28,7 +27,10 @@ if (auth(\_::$Config->AdminAccess)) {
             "Image" => "user",
             "Items" => array(
                 array("Name" => "USERS", "Path" => "/admin/user/users", "Access" => \_::$Config->AdminAccess, "Image" => "user"),
-                array("Name" => "GROUPS", "Path" => "/admin/user/groups", "Access" => \_::$Config->AdminAccess, "Image" => "group")
+                array("Name" => "GROUPS", "Path" => "/admin/user/groups", "Access" => \_::$Config->AdminAccess, "Image" => "group"),
+                array("Name" => "COMMENTS", "Path" => "/admin/user/comments", "Access" => \_::$Config->AdminAccess, "Image" => "comment"),
+                array("Name" => "MESSAGES", "Path" => "/admin/user/messages", "Access" => \_::$Config->AdminAccess, "Image" => "envelope"),
+                array("Name" => "PAYMENTS", "Path" => "/admin/user/payments", "Access" => \_::$Config->AdminAccess, "Image" => "credit-card")
             )
         ),
         array(
