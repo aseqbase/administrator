@@ -6,7 +6,10 @@
 \_::$Config->DataBaseError = 3;
 if (auth(\_::$Config->AdminAccess)) {
     $origin = array_keys(\_::$Sequences)[0] == __DIR__.DIRECTORY_SEPARATOR?1:2;
-    \_::$Aseq = new Address(null, array_keys(\_::$Sequences)[$origin], array_values(\_::$Sequences)[$origin]);
+    $name = \_::$Aseq->Name ?? "qb";
+    \_::$Aseq = new Address(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequences)[$origin], array_values(\_::$Sequences)[$origin]);
+    if(\_::$Config->DataBaseAddNameToPrefix) \_::$Config->DataBasePrefix = str_replace("{$name}_", (\_::$Aseq->Name ?? "qb")."_", \_::$Config->DataBasePrefix);
+    
     \_::$Info->MainMenus = \_::$Info->SideMenus = array(
         array("Name" => "DASHBOARD", "Path" => "/", "Access" => \_::$Config->AdminAccess, "Image" => "home"),
         array(

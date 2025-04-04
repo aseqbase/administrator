@@ -6,14 +6,14 @@ module("Table");
 $module = new Table(table("Content" ));
 $table1 = \_::$Back->User->DataTable->Name;
 $module->SelectQuery = "
-    SELECT A.{$module->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIds AS 'Category', A.Priority, A.Status, A.Access, B.Name AS 'author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
+    SELECT A.{$module->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIds AS 'Category', A.Priority, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
     FROM {$module->DataTable->Name} AS A
     LEFT OUTER JOIN $table1 AS B ON A.AuthorId=B.Id
     LEFT OUTER JOIN $table1 AS C ON A.EditorId=C.Id
     ORDER BY A.`Priority` DESC, A.`CreateTime` DESC
 ";
 $module->KeyColumns = ["Image" , "Title" ];
-$module->IncludeColumns = ['Type' , 'Image' , 'Title' , 'Category', 'Priority' , 'Status' , 'Access' , 'author', 'Editor', 'CreateTime' , 'UpdateTime' ];
+$module->IncludeColumns = ['Type' , 'Image' , 'Title' , 'Category', 'Priority' , 'Status' , 'Access' , 'Author', 'Editor', 'CreateTime' , 'UpdateTime' ];
 $module->AllowServerSide = true;
 $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;

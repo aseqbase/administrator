@@ -17,7 +17,6 @@ $module->AllowServerSide = true;
 $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;
 $module->CellsValues = [
-    "Relation" =>fn($v)=> \Req::$Host.$v,
     "Contact" =>fn($v)=> Html::Link($v, "mailto:$v")
 ];
 $module->CellsTypes = [
