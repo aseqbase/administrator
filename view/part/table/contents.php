@@ -23,7 +23,7 @@ $module->CellsValues = [
         return \MiMFa\Library\Html::Link($v,\_::$Address->ContentRoute.$r["Id"]);
     },
     "Category"=>function($v, $k, $r){
-        $val = trim(\_::$Back->Query->GetCategoryRoute(first(Convert::FromJson($v))), "/\\");
+        $val = trim(\_::$Back->Query->GetCategoryRoute(first(Convert::FromJson($v)))??"", "/\\");
         if(isValid($val)) return \MiMFa\Library\Html::Link($val,\_::$Address->CategoryRoute.$val);
         return $v;
     }

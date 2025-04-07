@@ -9,7 +9,8 @@ if (auth(\_::$Config->AdminAccess)) {
     $name = \_::$Aseq->Name ?? "qb";
     \_::$Aseq = new Address(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequences)[$origin], array_values(\_::$Sequences)[$origin]);
     if(\_::$Config->DataBaseAddNameToPrefix) \_::$Config->DataBasePrefix = str_replace("{$name}_", (\_::$Aseq->Name ?? "qb")."_", \_::$Config->DataBasePrefix);
-    
+    \_::$Info->SenderEmail = "do-not-reply@" . getDomain(\_::$Aseq->Route);
+    \_::$Info->ReceiverEmail = "info@" . getDomain(\_::$Aseq->Route);
     \_::$Info->MainMenus = \_::$Info->SideMenus = array(
         array("Name" => "DASHBOARD", "Path" => "/", "Access" => \_::$Config->AdminAccess, "Image" => "home"),
         array(
