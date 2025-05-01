@@ -17,7 +17,7 @@ $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;
 $module->CellsValues = [
     "Name"=>function($v, $k, $r){
-        return \MiMFa\Library\Html::Link($v,\_::$Address->CategoryRoute.$r["Id"]);
+        return \MiMFa\Library\Html::Link($v,\_::$Address->CategoryRoute.$r["Id"], ["target"=>"blank"]);
     }
 ];
 $module->CellsTypes = [
@@ -27,7 +27,7 @@ $module->CellsTypes = [
         $std->Title = "Parent";
         $std->Description = "The parent category which is related";
         $std->Type = "select";
-        $std->Options = table("Category")->DoSelectPairs("`Id`", "`Name`", "TRUE ORDER BY  `ParentId` ASC");
+        $std->Options = table("Category")->SelectPairs("`Id`", "`Name`", "TRUE ORDER BY  `ParentId` ASC");
         return $std;
     },
     "Name" =>"string",

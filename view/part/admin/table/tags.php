@@ -11,7 +11,7 @@ $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;
 $module->CellsValues = [
     "Name"=>function($v, $k, $r){
-        return \MiMFa\Library\Html::Link($v,\_::$Address->TagRoute.$r["Id"]);
+        return \MiMFa\Library\Html::Link($v,\_::$Address->TagRoute.$r["Id"], ["target"=>"blank"]);
     }
 ];
 $module->CellsTypes = [

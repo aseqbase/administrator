@@ -2,8 +2,8 @@
 //ini_set('display_errors', 1);
 //ini_set('display_startup_errors', 1);
 //ini_set('display_startup_errors', E_ALL);
-
-if (isset($_POST["BASE"])) {
+$resetBase = false;
+if ($resetBase = isset($_POST["BASE"])) {
     if (empty($_POST["BASE"])) {
         setcookie("BASE", "", 0, "/");
         unset($_COOKIE["BASE"]);
@@ -29,4 +29,6 @@ $GLOBALS["SEQUENCES_PATCH"] = array();
 
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "initialize.php");
 require_once($GLOBALS["BASE_DIR"] . "index.php");
+
+if($resetBase) \Res::Load();
 ?>

@@ -3,13 +3,13 @@
 ->if(auth(\_::$Config->AdminAccess))
     ->Get(function () {
         view("part", [
-            "Name" => "table/categories",
+            "Name" => "admin/table/categories",
             "Image" => "code-fork",
             "Title" => "Categories Management"
         ]);
     })
     ->Default(function () {
-        part("table/categories");
+        part("admin/table/categories");
     })
 ->Handle();
 ?>

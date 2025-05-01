@@ -13,13 +13,13 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
 (new Router())->Post(function() use(&$form) {
     $res = $form->Handle();
     if($form->Result) {
-        $rec = \Req::Post();
-        table("Comment")->DoUpdate("`Id`=:Id", [":Id"=>$rec["Id"], "Status"=>$rec["Status"], "UpdateTime"=>\_::$Config->CurrentDateTime]);
+        $rec = \Req::ReceivePost();
+        table("Comment")->Update("`Id`=:Id", [":Id"=>$rec["Id"], "Status"=>$rec["Status"], "Content"=>$rec["MailMessage"], "UpdateTime"=>\_::$Config->CurrentDateTime]);
         \Res::Flip($res);
     }
     else \Res::End($res);
 })->Patch(function() use(&$form) {
-    $r = \Req::Patch();
+    $r = \Req::ReceivePatch();
     $isadmin = \_::$Back->User->Access(\_::$Config->AdminAccess);
     $form->Set(
         title: "Reply to ".$r["Name"],
@@ -29,9 +29,9 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
             Html::Field("number", "Status", $r["Status"]<1?1:$r["Status"]+1, "To indicate how many reply sent them", "Reply Time"),
             Html::Field($isadmin?"email":"hidden", "SenderEmail", $isadmin?\_::$Info->ReceiverEmail:\_::$Back->User->Email, "Email sender", "From"),
             Html::Field("email", "ReceiverEmail",  $r["Contact"], "Email receiver", "To"),
-            Html::Field("text", "MailSubject", "Reply to your message: ".between($r["Subject"], "in ".\_::$Info->Product), "Reply subject", "Subject"),
-            Html::Field("content", "MailMessage", "Dear ".$r["Name"].",".PHP_EOL.PHP_EOL.PHP_EOL.
-            join(PHP_EOL, [
+            Html::Field("text", "MailSubject", "Reply to your message: ".between($r["Subject"], "in ".\_::$Info->Name), "Reply subject", "Subject"),
+            Html::Field("content", "MailMessage", "Dear ".$r["Name"].","."\n\r\n\r\n\r".
+            join("\n\r", [
                 \_::$Back->User->MakeSign("Sincerely"),
                 "",
                 "On ".Convert::ToShownDateTimeString($r["CreateTime"])." ".$r["Name"]." &amp;lt;". $r["Contact"]."&amp;gt; wrote:",
@@ -100,7 +100,7 @@ $module->CellsTypes = [
         $std = new stdClass();
         $std->Title = "User Group Access";
         $std->Type = "select";
-        $std->Options = table("UserGroup")->DoSelectPairs("Id" , "Title" );
+        $std->Options = table("UserGroup")->SelectPairs("Id" , "Title" );
         return $std;
     },
     "Access" =>function(){

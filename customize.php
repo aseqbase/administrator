@@ -12,8 +12,8 @@ if (auth(\_::$Config->AdminAccess)) {
     \_::$Info->SenderEmail = "do-not-reply@" . getDomain(\_::$Aseq->Route);
     \_::$Info->ReceiverEmail = "info@" . getDomain(\_::$Aseq->Route);
     \_::$Info->MainMenus = \_::$Info->SideMenus = array(
-        array("Name" => "DASHBOARD", "Path" => "/", "Access" => \_::$Config->AdminAccess, "Image" => "home"),
-        array(
+        "Admin-Main" => array("Name" => "DASHBOARD", "Path" => "/", "Access" => \_::$Config->AdminAccess, "Image" => "home"),
+        "Admin-Content" => array(
             "Name" => "CONTENTS",
             "Path" => "/admin/content/contents",
             "Access" => \_::$Config->AdminAccess,
@@ -24,7 +24,7 @@ if (auth(\_::$Config->AdminAccess)) {
                 array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$Config->AdminAccess, "Image" => "code-fork")
             )
         ),
-        array(
+        "Admin-User" => array(
             "Name" => "USERS",
             "Path" => "/admin/user/users",
             "Access" => \_::$Config->AdminAccess,
@@ -37,53 +37,53 @@ if (auth(\_::$Config->AdminAccess)) {
                 array("Name" => "PAYMENTS", "Path" => "/admin/user/payments", "Access" => \_::$Config->AdminAccess, "Image" => "credit-card")
             )
         ),
-        array(
-            "Name" => "PLUGINS",
-            "Path" => "/admin/plugin/plugins",
-            "Access" => \_::$Config->AdminAccess,
-            "Image" => "puzzle-piece",
-            "Items" => array(
-                array("Name" => "PLUGINS", "Path" => "/admin/plugin/plugins", "Access" => \_::$Config->AdminAccess, "Image" => "puzzle-piece"),
-                array("Name" => "MARKET", "Path" => "http://github.com/aseqbase", "Access" => \_::$Config->AdminAccess, "Image" => "shopping-bag")
-            )
-        ),
-        array(
-            "Name" => "APPEARANCES",
-            "Path" => "/admin/system/template",
-            "Access" => \_::$Config->AdminAccess,
-            "Image" => "th",
-            "Items" => array(
-                array("Name" => "TEMPLATES", "Path" => "/admin/system/templates", "Access" => \_::$Config->AdminAccess, "Image" => "eye"),
-                array("Name" => "EDIT", "Path" => "/admin/system/template", "Access" => \_::$Config->AdminAccess, "Image" => "edit")
-            )
-        ),
-        array(
-            "Name" => "SYSTEMS",
-            "Path" => "/admin/system/information",
-            "Access" => \_::$Config->AdminAccess,
-            "Image" => "cog",
-            "Items" => array(
-                array("Name" => "INFORMATIONS", "Path" => "/admin/system/information", "Access" => \_::$Config->AdminAccess, "Image" => "info"),
-                array("Name" => "TRANSLATIONS", "Path" => "/admin/system/translation", "Access" => \_::$Config->AdminAccess, "Image" => "language"),
-                array("Name" => "CONFIGURATIONS", "Path" => "/admin/system/configuration", "Access" => \_::$Config->AdminAccess, "Image" => "cog")
-            )
-        ),
-        array("Name" => \_::$Info->Name, "Path" => \_::$Info->Path, "Access" => \_::$Config->AdminAccess, "Image" => "th", "Items" => \_::$Info->MainMenus)
+        // "Admin-Plugin" => array(
+        //     "Name" => "PLUGINS",
+        //     "Path" => "/admin/plugin/plugins",
+        //     "Access" => \_::$Config->AdminAccess,
+        //     "Image" => "puzzle-piece",
+        //     "Items" => array(
+        //         array("Name" => "PLUGINS", "Path" => "/admin/plugin/plugins", "Access" => \_::$Config->AdminAccess, "Image" => "puzzle-piece"),
+        //         array("Name" => "MARKET", "Path" => "http://github.com/aseqbase", "Access" => \_::$Config->AdminAccess, "Image" => "shopping-bag")
+        //     )
+        // ),
+        // "Admin-Front" => array(
+        //     "Name" => "APPEARANCES",
+        //     "Path" => "/admin/system/template",
+        //     "Access" => \_::$Config->AdminAccess,
+        //     "Image" => "th",
+        //     "Items" => array(
+        //         array("Name" => "TEMPLATES", "Path" => "/admin/system/templates", "Access" => \_::$Config->AdminAccess, "Image" => "eye"),
+        //         array("Name" => "EDIT", "Path" => "/admin/system/template", "Access" => \_::$Config->AdminAccess, "Image" => "edit")
+        //     )
+        // ),
+        // "Admin-Back" => array(
+        //     "Name" => "SYSTEMS",
+        //     "Path" => "/admin/system/information",
+        //     "Access" => \_::$Config->AdminAccess,
+        //     "Image" => "cog",
+        //     "Items" => array(
+        //         array("Name" => "INFORMATIONS", "Path" => "/admin/system/information", "Access" => \_::$Config->AdminAccess, "Image" => "info"),
+        //         array("Name" => "TRANSLATIONS", "Path" => "/admin/system/translation", "Access" => \_::$Config->AdminAccess, "Image" => "language"),
+        //         array("Name" => "CONFIGURATIONS", "Path" => "/admin/system/configuration", "Access" => \_::$Config->AdminAccess, "Image" => "cog")
+        //     )
+        // ),
+        "User-0" => array("Name" => \_::$Info->Name, "Path" => \_::$Info->Path, "Access" => \_::$Config->AdminAccess, "Image" => "th", "Items" => \_::$Info->MainMenus)
     );
     \_::$Info->Shortcuts = array(
-        array("Name" => "MENU", "Path" => "viewSideMenu()", "Image" => "bars"),
-        array("Name" => "CONTENTS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/content/contents", "Image" => "th-large"),
-        array("Name" => "HOME", "Access" => \_::$Config->AdminAccess, "Path" => "/home", "Image" => "home"),
-        array("Name" => "USERS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/user/users", "Image" => "user"),
-        array("Name" => "SYSTEMS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog"),
+        "Admin-1" => array("Name" => "MENU", "Path" => "viewSideMenu()", "Image" => "bars"),
+        "Admin-2" => array("Name" => "CONTENTS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/content/contents", "Image" => "th-large"),
+        "Admin-0" => array("Name" => "HOME", "Access" => \_::$Config->AdminAccess, "Path" => \_::$Info->HomePath, "Image" => "home"),
+        "Admin-3" => array("Name" => "USERS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/user/users", "Image" => "user"),
+        "Admin-4" => array("Name" => "SYSTEMS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog"),
     );
-    \_::$Info->Services = array(
-        array("Name" => "USERS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/user/users", "Image" => "user"),
-        array("Name" => "CONTENTS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/content/contents", "Image" => "th-large"),
-        array("Name" => "TAGS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/content/tags", "Image" => "tags"),
-        array("Name" => "TEMPLATE", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/template", "Image" => "quote-left"),
-        array("Name" => "TRANSLATIONS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/translation", "Image" => "language"),
-        array("Name" => "SYSTEMS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog")
+    \_::$Info->Services = \_::$Info->Services??array(
+        "Admin-1" => array("Name" => "USERS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/user/users", "Image" => "user"),
+        "Admin-2" => array("Name" => "CONTENTS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/content/contents", "Image" => "th-large"),
+        "Admin-3" => array("Name" => "TAGS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/content/tags", "Image" => "tags"),
+        "Admin-4" => array("Name" => "TEMPLATE", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/template", "Image" => "quote-left"),
+        "Admin-5" => array("Name" => "TRANSLATIONS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/translation", "Image" => "language"),
+        "Admin-6" => array("Name" => "SYSTEMS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog")
     );
 }
 ?>

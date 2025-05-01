@@ -3,13 +3,13 @@
 ->if(auth(\_::$Config->AdminAccess))
     ->Get(function () {
         view("part", [
-            "Name" => "table/plugins",
+            "Name" => "admin/table/plugins",
             "Image" => "puzzle-piece",
             "Title" => "Plugins Management"
         ]);
     })
     ->Default(function () {
-        part("table/plugins");
+        part("admin/table/plugins");
     })
     ->Handle();
 ?>

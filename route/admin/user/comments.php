@@ -3,13 +3,13 @@
 ->if(auth(\_::$Config->AdminAccess))
     ->Get(function () {
         view("part", [
-            "Name" => "table/comments",
+            "Name" => "admin/table/comments",
             "Image" => "comment",
             "Title" => "Comments Management"
         ]);
     })
     ->anyway()->Default(function () {
-        part("table/comments");
+        part("admin/table/comments");
     })
     ->Handle();
 ?>

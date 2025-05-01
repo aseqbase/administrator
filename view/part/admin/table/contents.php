@@ -3,28 +3,28 @@ inspect(\_::$Config->AdminAccess);
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
-$module = new Table(table("Content" ));
+$module = new Table("Content");
 $table1 = \_::$Back->User->DataTable->Name;
 $module->SelectQuery = "
     SELECT A.{$module->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIds AS 'Category', A.Priority, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
     FROM {$module->DataTable->Name} AS A
     LEFT OUTER JOIN $table1 AS B ON A.AuthorId=B.Id
     LEFT OUTER JOIN $table1 AS C ON A.EditorId=C.Id
-    ORDER BY A.`Priority` DESC, A.`CreateTime` DESC
+    ORDER BY A.`Priority` DESC, A.`UpdateTime` DESC, A.`CreateTime` DESC
 ";
 $module->KeyColumns = ["Image" , "Title" ];
 $module->IncludeColumns = ['Type' , 'Image' , 'Title' , 'Category', 'Priority' , 'Status' , 'Access' , 'Author', 'Editor', 'CreateTime' , 'UpdateTime' ];
 $module->AllowServerSide = true;
 $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;
-$users = table("User")->DoSelectPairs("Id" , "Name" );
+$users = table("User")->SelectPairs("Id" , "Name" );
 $module->CellsValues = [
     "Title"=>function($v, $k, $r){
-        return \MiMFa\Library\Html::Link($v,\_::$Address->ContentRoute.$r["Id"]);
+        return \MiMFa\Library\Html::Link($v,\_::$Address->ContentRoute.$r["Id"], ["target"=>"blank"]);
     },
     "Category"=>function($v, $k, $r){
         $val = trim(\_::$Back->Query->GetCategoryRoute(first(Convert::FromJson($v)))??"", "/\\");
-        if(isValid($val)) return \MiMFa\Library\Html::Link($val,\_::$Address->CategoryRoute.$val);
+        if(isValid($val)) return \MiMFa\Library\Html::Link($val,\_::$Address->CategoryRoute.$val, ["target"=>"blank"]);
         return $v;
     }
 ];
@@ -43,7 +43,7 @@ $module->CellsTypes = [
         $std->Options = [
             "Type" =>"select",
             "Key" =>"CategoryIds" ,
-            "Options"=>table("Category")->DoSelectPairs("`Id`", "`Name`", "TRUE ORDER BY  `ParentId` ASC")
+            "Options"=>table("Category")->SelectPairs("`Id`", "`Name`", "ORDER BY `ParentId` ASC")
         ];
         return $std;
     },
@@ -54,7 +54,7 @@ $module->CellsTypes = [
         $std->Options = [
             "Type" =>"select",
             "Key" =>"TagIds" ,
-            "Options"=>table("Tag")->DoSelectPairs("`Id`", "`Name`")
+            "Options"=>table("Tag")->SelectPairs("`Id`", "`Name`")
         ];
         return $std;
     },

@@ -3,13 +3,13 @@
 ->if(auth(\_::$Config->SuperAccess))
     ->Get(function () {
         view("part", [
-            "Name" => "system/configuration",
+            "Name" => "admin/system/configuration",
             "Image" => "puzzle-piece",
             "Title" => "Configuration"
         ]);
     })
     ->Default(function () {
-        part("system/configuration");
+        part("admin/system/configuration");
     })
     ->Handle();
 ?>

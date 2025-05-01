@@ -21,7 +21,7 @@ $module->CellsTypes = [
         $std = new stdClass();
         $std->Title = "Group";
         $std->Type = "select";
-        $std->Options = table("UserGroup")->DoSelectPairs("Id" , "Title" );
+        $std->Options = table("UserGroup")->SelectPairs("Id" , "Title" );
         return $std;
     },
     "Name" =>"string",

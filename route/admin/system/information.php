@@ -3,13 +3,13 @@
 ->if(auth(\_::$Config->AdminAccess))
     ->Get(function () {
         view("part", [
-            "Name" => "system/information",
+            "Name" => "admin/system/information",
             "Image" => "quote-left",
             "Title" => "Information"
         ]);
     })
     ->Default(function () {
-        part("system/information");
+        part("admin/system/information");
     })
     ->Handle();
 ?>

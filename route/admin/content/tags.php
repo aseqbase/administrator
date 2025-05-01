@@ -3,13 +3,13 @@
 ->if(auth(\_::$Config->AdminAccess))
     ->Get(function () {
         view("part", [
-            "Name" => "table/tags",
+            "Name" => "admin/table/tags",
             "Image" => "tags",
             "Title" => "Tags Management"
         ]);
     })
     ->Default(function () {
-        part("table/tags");
+        part("admin/table/tags");
     })
     ->Handle();
 ?>
