@@ -8,8 +8,8 @@ $table1 = \_::$Back->User->GroupDataTable->Name;
 $module->SelectQuery = "
     SELECT A.{$module->KeyColumn}, B.Title AS 'Group', A.Image, A.Name, A.Bio, A.Signature, A.Email, A.Status, A.CreateTime
     FROM {$module->DataTable->Name} AS A
-    LEFT OUTER JOIN $table1 AS B ON A.GroupId=B.Id;
-";
+    LEFT OUTER JOIN $table1 AS B ON A.GroupId=B.Id
+    WHERE B.Access<=".\_::$Back->User->Access();
 $module->KeyColumns = ["Name" , "Signature" ];
 $module->ExcludeColumns = ["Signature" , "MetaData" ];
 $module->Updatable = true;
@@ -21,7 +21,7 @@ $module->CellsTypes = [
         $std = new stdClass();
         $std->Title = "Group";
         $std->Type = "select";
-        $std->Options = table("UserGroup")->SelectPairs("Id" , "Title" );
+        $std->Options = table("UserGroup")->SelectPairs("Id" , "Title", "Access<=".\_::$Back->User->Access());
         return $std;
     },
     "Name" =>"string",

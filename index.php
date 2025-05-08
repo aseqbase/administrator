@@ -2,12 +2,13 @@
 //ini_set('display_errors', 1);
 //ini_set('display_startup_errors', 1);
 //ini_set('display_startup_errors', E_ALL);
-$resetBase = false;
-if ($resetBase = isset($_POST["BASE"])) {
-    if (empty($_POST["BASE"])) {
-        setcookie("BASE", "", 0, "/");
-        unset($_COOKIE["BASE"]);
-    } else setcookie("BASE", $_POST["BASE"], 0, "/");
+$resetBase = null;
+if (isset($_GET["BASE"]) || isset($_POST["BASE"])) {
+    setcookie("BASE", "", 0, "/");
+    unset($_COOKIE["BASE"]);
+    $resetBase = null;
+    if (!empty($resetBase = $_GET["BASE"]??$_POST["BASE"]??null))
+        setcookie("BASE", $resetBase, 0, "/");
 }
 
 /*
@@ -17,7 +18,7 @@ if ($resetBase = isset($_POST["BASE"])) {
 $relativePath = __DIR__;//str_replace(str_replace(["\\","/"], DIRECTORY_SEPARATOR, $_SERVER['DOCUMENT_ROOT']), "", subject: __DIR__);
 $dirs = preg_split("/[\/\\\]/", trim($relativePath, "/\\"));
 $GLOBALS["ASEQ"] = end($dirs);//join(".", $dirs);/* Change it to null if the file is in the root directory */
-$GLOBALS["BASE"] = (isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null) ?? ".aseq";/* Change it to the base directory if deferents */
+$GLOBALS["BASE"] = $resetBase ?? $_COOKIE["BASE"] ?? ".aseq";/* Change it to the base directory if deferents */
 
 /*
     Change \_::$Sequences
@@ -29,6 +30,4 @@ $GLOBALS["SEQUENCES_PATCH"] = array();
 
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "initialize.php");
 require_once($GLOBALS["BASE_DIR"] . "index.php");
-
-if($resetBase) \Res::Load();
 ?>

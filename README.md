@@ -18,6 +18,16 @@ A goldsmith management system, is special for an aseqbase website...
   or
 	
  	> composer require aseqbase/administrator
-3. Change the value of `$GLOBALS["ASEQ"]` located on `/index.php`, to the current subdomains sequence (like [my-subdomain-name]) or if this file is in the root address, leave null for that
+3. Create an opitonal file name `global.php` on the root directory with the bellow codes:
+  ```
+  <?php
+  	$ASEQ = '[my-subdomain-name]'; // (Optional) The current subdomain sequence or leave null if this file is in the root directory
+  	$BASE = '[the-base-directory]'; // (Optional) The base directory you want to inherit all properties except what you changed
+	  $SEQUENCES_PATCH = []; 	// (Optional) An array to apply your custom changes in \_::$Sequences
+								// newdirectory, newaseq; // Add new directory to the \_::$Sequences
+								// directory, newaseq; // Update directory in the \_::$Sequences
+								// directory, null; // Remove thw directory from the \_::$Sequences
+  ?>
+  ```
 4. Use it through its special link (http://[my-domain-name].com/administration or http://[my-subdomain-name].[my-domain-name].com/administration)
 5. Enjoy...

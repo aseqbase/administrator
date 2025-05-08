@@ -10,7 +10,6 @@ $module->SelectQuery = "
     SELECT A.{$module->KeyColumn}, C.Title AS 'Title' , C.Id AS 'Post', A.Subject AS 'Subject', A.Content AS 'Content', A.Name AS 'Author', A.Status, A.Access, A.CreateTime, A.UpdateTime
     FROM {$module->DataTable->Name} AS A
     LEFT OUTER JOIN $contentT AS C ON A.Relation=C.Id
-    WHERE A.Relation REGEXP '^[0-9]+$'
     ORDER BY A.`UpdateTime` DESC
 ";
 $module->KeyColumns = ["Subject" ];
@@ -20,7 +19,7 @@ $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;
 $module->CellsValues = [
     "Title" =>function($v, $k, $r){
-        return Html::Link($v, \_::$Address->ContentRoute. $r["Post"],["target"=>"_blank"]);
+        return $r["Post"]?Html::Link($v, \_::$Address->ContentRoute. $r["Post"],["target"=>"_blank"]):null;
     },
     "Contact" =>fn($v)=> Html::Link($v, "mailto:$v")
 ];

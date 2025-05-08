@@ -12,7 +12,7 @@ if (auth(\_::$Config->AdminAccess)) {
     \_::$Info->SenderEmail = "do-not-reply@" . getDomain(\_::$Aseq->Route);
     \_::$Info->ReceiverEmail = "info@" . getDomain(\_::$Aseq->Route);
     \_::$Info->MainMenus = \_::$Info->SideMenus = array(
-        "Admin-Main" => array("Name" => "DASHBOARD", "Path" => "/", "Access" => \_::$Config->AdminAccess, "Image" => "home"),
+        "Admin-Main" => array("Name" => "DASHBOARD", "Path" => "/sign/dashboard", "Access" => \_::$Config->AdminAccess, "Image" => "home"),
         "Admin-Content" => array(
             "Name" => "CONTENTS",
             "Path" => "/admin/content/contents",
@@ -73,7 +73,7 @@ if (auth(\_::$Config->AdminAccess)) {
     \_::$Info->Shortcuts = array(
         "Admin-1" => array("Name" => "MENU", "Path" => "viewSideMenu()", "Image" => "bars"),
         "Admin-2" => array("Name" => "CONTENTS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/content/contents", "Image" => "th-large"),
-        "Admin-0" => array("Name" => "HOME", "Access" => \_::$Config->AdminAccess, "Path" => \_::$Info->HomePath, "Image" => "home"),
+        "Admin-0" => array("Name" => "HOME", "Access" => \_::$Config->AdminAccess, "Path" => "/sign/dashboard", "Image" => "home"),
         "Admin-3" => array("Name" => "USERS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/user/users", "Image" => "user"),
         "Admin-4" => array("Name" => "SYSTEMS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog"),
     );
