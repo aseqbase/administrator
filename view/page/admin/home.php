@@ -5,7 +5,14 @@ use \MiMFa\Library\User;
 module("RingSlide");
 $module = new \MiMFa\Module\RingSlide();
 $module->Image = \_::$Info->LogoPath;
-$module->Items = \_::$Info->Services;
+$module->Items = array(
+	"Admin-1" => array("Name" => "USERS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/user/users", "Image" => "user"),
+	"Admin-2" => array("Name" => "CONTENTS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/content/contents", "Image" => "th-large"),
+	"Admin-3" => array("Name" => "TAGS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/content/tags", "Image" => "tags"),
+	"Admin-4" => array("Name" => "TEMPLATE", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/template", "Image" => "quote-left"),
+	"Admin-5" => array("Name" => "TRANSLATIONS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/translation", "Image" => "language"),
+	"Admin-6" => array("Name" => "SYSTEMS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog")
+);
 swap($module, $data);
 \Res::Render(
 	Html::Style("
