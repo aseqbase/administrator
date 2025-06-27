@@ -10,7 +10,7 @@ $module->SelectQuery = "
     FROM {$module->DataTable->Name} AS A
     LEFT OUTER JOIN $table1 AS B ON A.AuthorId=B.Id
     LEFT OUTER JOIN $table1 AS C ON A.EditorId=C.Id
-    ORDER BY A.`Priority` DESC, A.`UpdateTime` DESC, A.`CreateTime` DESC
+    ORDER BY A.Name ASC, A.Priority DESC, A.UpdateTime DESC, A.CreateTime DESC
 ";
 $module->KeyColumns = ["Image" , "Title" ];
 $module->IncludeColumns = ['Type' , 'Image' , 'Title' , 'Category', 'Priority' , 'Status' , 'Access' , 'Author', 'Editor', 'CreateTime' , 'UpdateTime' ];
@@ -93,7 +93,12 @@ $module->CellsTypes = [
     "CreateTime" => function($t, $v){
         return auth(\_::$Config->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
-    "MetaData" =>"json"
+    "MetaData" =>function ($t, $v, $k, $r) {
+        $std = new stdClass();
+        $std->Type = "json";
+        if(\_::$Config->AllowTranslate && !$r["Title"] && !$r["Content"]) $std->Value = "{\"lang\":\"".\_::$Back->Translate->Language."\"}";
+        return $std;
+    },
     ];
 swap($module, $data);
 $module->Render();

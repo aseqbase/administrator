@@ -17,30 +17,32 @@ if (auth(\_::$Config->AdminAccess)) {
             "Name" => "CONTENTS",
             "Path" => "/admin/content/contents",
             "Access" => \_::$Config->AdminAccess,
+            "Description" => "To manage all contents in the website",
             "Image" => "th-large",
             "Items" => array(
-                array("Name" => "CONTENTS", "Path" => "/admin/content/contents", "Access" => \_::$Config->AdminAccess, "Image" => "th-large"),
-                array("Name" => "TAGS", "Path" => "/admin/content/tags", "Access" => \_::$Config->AdminAccess, "Image" => "tags"),
-                array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$Config->AdminAccess, "Image" => "code-fork")
+                array("Name" => "CONTENTS", "Path" => "/admin/content/contents", "Access" => \_::$Config->AdminAccess, "Description" => "To manage website's posts and pages", "Image" => "th-large"),
+                array("Name" => "TAGS", "Path" => "/admin/content/tags", "Access" => \_::$Config->AdminAccess, "Description" => "To manage website's tags", "Image" => "tags"),
+                array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$Config->AdminAccess, "Description" => "To manage website's categories", "Image" => "code-fork")
             )
         ),
         "Admin-User" => array(
             "Name" => "USERS",
             "Path" => "/admin/user/users",
             "Access" => \_::$Config->AdminAccess,
+            "Description" => "To manage all interactions with the website",
             "Image" => "user",
             "Items" => array(
-                array("Name" => "USERS", "Path" => "/admin/user/users", "Access" => \_::$Config->AdminAccess, "Image" => "user"),
-                array("Name" => "GROUPS", "Path" => "/admin/user/groups", "Access" => \_::$Config->AdminAccess, "Image" => "group"),
-                array("Name" => "COMMENTS", "Path" => "/admin/user/comments", "Access" => \_::$Config->AdminAccess, "Image" => "comment"),
-                array("Name" => "MESSAGES", "Path" => "/admin/user/messages", "Access" => \_::$Config->AdminAccess, "Image" => "envelope"),
-                array("Name" => "PAYMENTS", "Path" => "/admin/user/payments", "Access" => \_::$Config->AdminAccess, "Image" => "credit-card")
+                array("Name" => "USERS", "Path" => "/admin/user/users", "Access" => \_::$Config->AdminAccess, "Description" => "To manage all the website's users", "Image" => "user"),
+                array("Name" => "GROUPS", "Path" => "/admin/user/groups", "Access" => \_::$Config->AdminAccess, "Description" => "To manage all the user groups of the website", "Image" => "group"),
+                array("Name" => "COMMENTS", "Path" => "/admin/user/comments", "Access" => \_::$Config->AdminAccess, "Description" => "To manage all received comments", "Image" => "comment"),
+                array("Name" => "MESSAGES", "Path" => "/admin/user/messages", "Access" => \_::$Config->AdminAccess, "Description" => "To manage all received emails and messages", "Image" => "envelope")
             )
         ),
         // "Admin-Plugin" => array(
         //     "Name" => "PLUGINS",
         //     "Path" => "/admin/plugin/plugins",
         //     "Access" => \_::$Config->AdminAccess,
+        //     "Description" => "To manage modules and components of the website",
         //     "Image" => "puzzle-piece",
         //     "Items" => array(
         //         array("Name" => "PLUGINS", "Path" => "/admin/plugin/plugins", "Access" => \_::$Config->AdminAccess, "Image" => "puzzle-piece"),
@@ -51,6 +53,7 @@ if (auth(\_::$Config->AdminAccess)) {
         //     "Name" => "APPEARANCES",
         //     "Path" => "/admin/system/template",
         //     "Access" => \_::$Config->AdminAccess,
+        //     "Description" => "To manage the fornt-end website (template and appearances)",
         //     "Image" => "th",
         //     "Items" => array(
         //         array("Name" => "TEMPLATES", "Path" => "/admin/system/templates", "Access" => \_::$Config->AdminAccess, "Image" => "eye"),
@@ -61,6 +64,7 @@ if (auth(\_::$Config->AdminAccess)) {
         //     "Name" => "SYSTEMS",
         //     "Path" => "/admin/system/information",
         //     "Access" => \_::$Config->AdminAccess,
+        //     "Description" => "To manage the back-end website settings",
         //     "Image" => "cog",
         //     "Items" => array(
         //         array("Name" => "INFORMATIONS", "Path" => "/admin/system/information", "Access" => \_::$Config->AdminAccess, "Image" => "info"),
@@ -68,7 +72,14 @@ if (auth(\_::$Config->AdminAccess)) {
         //         array("Name" => "CONFIGURATIONS", "Path" => "/admin/system/configuration", "Access" => \_::$Config->AdminAccess, "Image" => "cog")
         //     )
         // ),
-        "User-0" => array("Name" => \_::$Info->Name, "Path" => \_::$Info->Path, "Access" => \_::$Config->AdminAccess, "Image" => "th", "Items" => \_::$Info->MainMenus)
+        "User-0" => array(
+            "Name" => \_::$Info->Name,
+            "Path" => \_::$Info->Path,
+            "Access" => \_::$Config->AdminAccess,
+            "Description" => "The main menu of the website",
+            "Image" => "globe",
+            "Items" => \_::$Info->MainMenus
+        )
     );
     \_::$Info->Shortcuts = array(
         "Admin-1" => array("Name" => "MENU", "Path" => "viewSideMenu()", "Image" => "bars"),

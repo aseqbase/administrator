@@ -40,7 +40,7 @@ $module->CellsTypes = [
         $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->SuperAccess];
         return $std;
     },
-    "Status" =>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
+    "Status" =>[-1=>"Unpublished",0=>"Drafted",1=>"Published"],
     "UpdateTime" =>function($t, $v){
         $std = new stdClass();
         $std->Type = auth(\_::$Config->SuperAccess)?"calendar":"hidden";

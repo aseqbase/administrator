@@ -8,7 +8,7 @@
             "Title" => "Comments Management"
         ]);
     })
-    ->anyway()->Default(function () {
+    ->Default(function () {
         part("admin/table/comments");
     })
     ->Handle();

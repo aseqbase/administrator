@@ -112,24 +112,44 @@ $module->CellsValues = [
     "From" => fn($v) => $v?Html::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$Back->User->Name."', From:'".\_::$Back->User->Email."', To:'$v'});"):"",
     "To" => fn($v) => $v?Html::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$Back->User->Name."', From:'".\_::$Back->User->Email."', To:'$v'});"):""
 ];
+$issuper = auth(\_::$Config->SuperAccess);
 $module->CellsTypes = [
-    "Id" => auth(\_::$Config->SuperAccess) ? "disabled" : false,
-    "UserId" => "number",
-    "Name" => "string",
-    "Subject" => "string",
-    "From" => "email",
+    "Id" =>  $issuper? "disabled" : false,
+    "UserId" => function ($t, $v, $k, $r) use($issuper) {
+        $std = new stdClass();
+        $std->Type = $issuper ? "disabled" : "number";
+        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Back->User->Id;
+        return $std;
+    },
+    "Name" => function ($t, $v, $k, $r) {
+        $std = new stdClass();
+        $std->Type = "string";
+        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Back->User->Name;
+        return $std;
+    },
+    "Subject" => function ($t, $v, $k, $r) {
+        $std = new stdClass();
+        $std->Type = "string";
+        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Info->FullName;
+        return $std;
+    },
+    "From" => function ($t, $v, $k, $r) {
+        $std = new stdClass();
+        $std->Type = "email";
+        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Back->User->Email;
+        return $std;
+    },
     "To" => function () {
         $std = new stdClass();
-        $std->Title = "To";
         $std->Type = "string";
         $std->Description = "Your message recipient(s), separate each emails by a comma for a bulk sending...";
         return $std;
     },
-    "Content" => function ($t, $v) {
+    "Content" => function ($t, $v, $k, $r) {
         $std = new stdClass();
         $std->Title = "Message";
         $std->Type = "content";
-        $std->Value = $v ? $v : \_::$Back->User->MakeSign("Sincerely");
+        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Back->User->MakeSign("Sincerely");
         return $std;
     },
     "Attach" => "json",

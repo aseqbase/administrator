@@ -18,12 +18,12 @@ use MiMFa\Module\Part;
         foreach (\_::$Back->Translate->GetAll("ORDER BY `KeyCode` ASC") as $value) {
             foreach ($value as $k => $v)
                 $dic[$k] = $v;
-            $cells[] = loop($dic, function ($k, $v) {
+            $cells[] = loop($dic, function ($v) {
                 return $v; });
             foreach ($dic as $k => $v)
                 $dic[$k] = null;
         }
-        $cells[0] = loop($dic, function ($k) {
+        $cells[0] = loop($dic, function ($v, $k) {
             return $k; });
         \MiMFa\Library\Local::Load(Convert::FromCells($cells), "Lexicon.csv");
     })
