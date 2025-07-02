@@ -60,18 +60,18 @@ if (auth(\_::$Config->AdminAccess)) {
         //         array("Name" => "EDIT", "Path" => "/admin/system/template", "Access" => \_::$Config->AdminAccess, "Image" => "edit")
         //     )
         // ),
-        // "Admin-Back" => array(
-        //     "Name" => "SYSTEMS",
-        //     "Path" => "/admin/system/information",
-        //     "Access" => \_::$Config->AdminAccess,
-        //     "Description" => "To manage the back-end website settings",
-        //     "Image" => "cog",
-        //     "Items" => array(
-        //         array("Name" => "INFORMATIONS", "Path" => "/admin/system/information", "Access" => \_::$Config->AdminAccess, "Image" => "info"),
-        //         array("Name" => "TRANSLATIONS", "Path" => "/admin/system/translation", "Access" => \_::$Config->AdminAccess, "Image" => "language"),
-        //         array("Name" => "CONFIGURATIONS", "Path" => "/admin/system/configuration", "Access" => \_::$Config->AdminAccess, "Image" => "cog")
-        //     )
-        // ),
+        "Admin-Back" => array(
+            "Name" => "SYSTEMS",
+            "Path" => "/admin/system/information",
+            "Access" => \_::$Config->AdminAccess,
+            "Description" => "To manage the back-end website settings",
+            "Image" => "cog",
+            "Items" => array(
+                array("Name" => "INFORMATIONS", "Path" => "/admin/system/information", "Access" => \_::$Config->AdminAccess, "Image" => "info"),
+                array("Name" => "TRANSLATIONS", "Path" => "/admin/system/translation", "Access" => \_::$Config->AdminAccess, "Image" => "language"),
+                //array("Name" => "CONFIGURATIONS", "Path" => "/admin/system/configuration", "Access" => \_::$Config->AdminAccess, "Image" => "cog")
+            )
+        ),
         "User-0" => array(
             "Name" => \_::$Info->Name,
             "Path" => \_::$Info->Path,
