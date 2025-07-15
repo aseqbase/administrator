@@ -3,7 +3,7 @@ inspect(\_::$Config->AdminAccess);
 use \MiMFa\Library\Router;
 use \MiMFa\Library\Html;
 use \MiMFa\Library\Convert;
-use MiMFa\Module\Part;
+use MiMFa\Library\Script;
 
 (new Router())->Route
     ->if(!auth(\_::$Config->AdminAccess))
@@ -72,25 +72,7 @@ use MiMFa\Module\Part;
                     Html::Button("Edit Lexicon", "/" . \Req::$Direction . "?update=true")
                 ) .
                 Html::Button("Export Lexicon", "/" . \Req::$Direction . "?export=true", ["target" => "blank"]) .
-                Html::Button(
-                    "Import Lexicon", "
-                        var input = document.createElement('input');
-                        input.setAttribute('Type' , 'file');
-                        input.onchange = evt => {
-                            const [file] = input.files;
-                            if (file) {
-                                //URL.createObjectUrl(file);
-                                const reader = new FileReader();
-                                reader.addEventListener('load', (event) => {
-                                    sendFile(null, 'data='+encodeURIComponent(event.target.result), '.content');
-                                });
-                                reader.readAsText(file);
-                            }
-                        }
-                        $(input).trigger('click');
-                        return false;
-                    "
-                ) .
+                Html::Button("Import Lexicon", Script::ImportFile($timeout = 300000)) .
                 Html::Button("Clear Lexicon", "
                         if(confirm('Are you sure to clear all lexicon records?'))
                             sendDelete(null, {'truncate':true}, '.content');
@@ -100,7 +82,7 @@ use MiMFa\Module\Part;
             )
         ]);
     })
-    ->Default(function () {//Deletes
+    ->Default(function () {
         part("admin/table/lexicon");
     })
     ->Handle();

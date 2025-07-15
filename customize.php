@@ -5,9 +5,9 @@
 \_::$Config->DisplayStartupError = 1;
 \_::$Config->DataBaseError = 3;
 if (auth(\_::$Config->AdminAccess)) {
-    $origin = array_keys(\_::$Sequences)[0] == __DIR__.DIRECTORY_SEPARATOR?1:2;
+    \_::$Config->AdminOrigin = array_keys(\_::$Sequences)[0] == __DIR__.DIRECTORY_SEPARATOR?1:2;
     $name = \_::$Aseq->Name ?? "qb";
-    \_::$Aseq = new Address(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequences)[$origin], array_values(\_::$Sequences)[$origin]);
+    \_::$Aseq = new Address(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequences)[\_::$Config->AdminOrigin], array_values(\_::$Sequences)[\_::$Config->AdminOrigin]);
     if(\_::$Config->DataBaseAddNameToPrefix) \_::$Config->DataBasePrefix = str_replace("{$name}_", (\_::$Aseq->Name ?? "qb")."_", \_::$Config->DataBasePrefix);
     \_::$Info->SenderEmail = "do-not-reply@" . getDomain(\_::$Aseq->Route);
     \_::$Info->ReceiverEmail = "info@" . getDomain(\_::$Aseq->Route);
@@ -89,4 +89,3 @@ if (auth(\_::$Config->AdminAccess)) {
         "Admin-4" => array("Name" => "SYSTEMS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog"),
     );
 }
-?>

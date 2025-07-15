@@ -6,18 +6,19 @@ module("Table");
 $module = new Table("Content");
 $table1 = \_::$Back->User->DataTable->Name;
 $module->SelectQuery = "
-    SELECT A.{$module->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIds AS 'Category', A.Priority, A.Status, A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
+    SELECT A.{$module->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIds AS 'Category', A.Priority, A.Status, A.MetaData AS 'Lang', A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
     FROM {$module->DataTable->Name} AS A
     LEFT OUTER JOIN $table1 AS B ON A.AuthorId=B.Id
     LEFT OUTER JOIN $table1 AS C ON A.EditorId=C.Id
     ORDER BY A.Name ASC, A.Priority DESC, A.UpdateTime DESC, A.CreateTime DESC
 ";
 $module->KeyColumns = ["Image" , "Title" ];
-$module->IncludeColumns = ['Type' , 'Image' , 'Title' , 'Category', 'Priority' , 'Status' , 'Access' , 'Author', 'Editor', 'CreateTime' , 'UpdateTime' ];
+$module->IncludeColumns = ['Type' , 'Image' , 'Title' , 'Category', 'Priority' , 'Status' , 'Lang' , 'Access' , 'Author', 'Editor', 'CreateTime' , 'UpdateTime' ];
 $module->AllowServerSide = true;
 $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;
 $users = table("User")->SelectPairs("Id" , "Name" );
+$langs = \_::$Back->Translate->GetLanguages();
 $module->CellsValues = [
     "Title"=>function($v, $k, $r){
         return \MiMFa\Library\Html::Link($v,\_::$Address->ContentRoute.$r["Id"], ["target"=>"blank"]);
@@ -26,6 +27,12 @@ $module->CellsValues = [
         $val = trim(\_::$Back->Query->GetCategoryRoute(first(Convert::FromJson($v)))??"", "/\\");
         if(isValid($val)) return \MiMFa\Library\Html::Link($val,\_::$Address->CategoryRoute.$val, ["target"=>"blank"]);
         return $v;
+    },
+    "Lang"=>function($v) use($langs){
+        return $v?get(get($langs, get(Convert::FromJson($v), "lang")), "Title")??"Default":"Default";
+    },
+    "Status"=>function($v){
+        return \MiMFa\Library\Html::Span($v>0?"Published":($v<0?"Unpublished":"Drafted"));
     }
 ];
 $module->CellsTypes = [
