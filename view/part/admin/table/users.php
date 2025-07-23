@@ -6,12 +6,12 @@ module("Table");
 $module = new Table(\_::$Back->User->DataTable);
 $table1 = \_::$Back->User->GroupDataTable->Name;
 $module->SelectQuery = "
-    SELECT A.{$module->KeyColumn}, B.Title AS 'Group', A.Image, A.Name, A.Bio, A.Signature, A.Email, A.Status, A.CreateTime
+    SELECT A.{$module->KeyColumn}, B.Title AS 'Group', A.Signature, A.Image, A.Name, A.Bio, A.Email, A.Status, A.CreateTime
     FROM {$module->DataTable->Name} AS A
     LEFT OUTER JOIN $table1 AS B ON A.GroupId=B.Id
     WHERE B.Access<=".\_::$Back->User->Access();
 $module->KeyColumns = ["Name" , "Signature" ];
-$module->ExcludeColumns = ["Signature" , "MetaData" ];
+$module->ExcludeColumns = ["MetaData" ];
 $module->Updatable = true;
 $module->AllowServerSide = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;

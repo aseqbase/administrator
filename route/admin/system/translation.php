@@ -5,12 +5,12 @@ use \MiMFa\Library\Html;
 use \MiMFa\Library\Convert;
 use MiMFa\Library\Script;
 
-(new Router())->Route
+(new Router())
     ->if(!auth(\_::$Config->AdminAccess))
     ->Default(function () {
         part(MiMFa\Library\User::$InHandlerPath);
     })
-    ->else
+    ->else()
     ->if(\Req::ReceiveGet("export") ?? false)
     ->Get(function () {//Exports
         $cells = [""];
@@ -27,7 +27,7 @@ use MiMFa\Library\Script;
             return $k; });
         \MiMFa\Library\Local::Load(Convert::FromCells($cells), "Lexicon.csv");
     })
-    ->else
+    ->else()
     ->Post(function () {//Imports
         $c = 0;
         $keys = [];
@@ -46,7 +46,7 @@ use MiMFa\Library\Script;
             }
             $c++;
         }
-        $c -= 2;
+        $c = count($dic);
         if ($c > 0 && \_::$Back->Translate->SetAll($dic))
             \Res::Flip(Html::Success("$c key values setted successfuly in lexicon!"));
         else

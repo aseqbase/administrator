@@ -2,8 +2,8 @@
 use \MiMFa\Library\Html;
 use \MiMFa\Library\User;
 
-module("RingSlide");
-$module = new \MiMFa\Module\RingSlide();
+module("RingTabs");
+$module = new \MiMFa\Module\RingTabs();
 $module->Image = \_::$Info->LogoPath;
 $module->Items = array(
 	"Admin-1" => array("Name" => "USERS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/user/users", "Image" => "user"),

@@ -1,9 +1,9 @@
 <?php
 \_::$Config->AllowSigning = true;
-\_::$Config->ReportError = E_ALL;
-\_::$Config->DisplayError = 1;
-\_::$Config->DisplayStartupError = 1;
-\_::$Config->DataBaseError = 3;
+\_::$Config->ReportError = \_::$Config->ReportError?\_::$Config->ReportError:E_ALL;
+\_::$Config->DisplayError = \_::$Config->DisplayError?\_::$Config->DisplayError:1;
+\_::$Config->DisplayStartupError = \_::$Config->DisplayStartupError?\_::$Config->DisplayStartupError:1;
+\_::$Config->DataBaseError = \_::$Config->DataBaseError?\_::$Config->DataBaseError:1;
 if (auth(\_::$Config->AdminAccess)) {
     \_::$Config->AdminOrigin = array_keys(\_::$Sequences)[0] == __DIR__.DIRECTORY_SEPARATOR?1:2;
     $name = \_::$Aseq->Name ?? "qb";
