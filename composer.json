@@ -27,25 +27,40 @@
             "php -S localhost:8000", 
             "net start MySQL",
             "php index.php"
+        ],
+        "install": [
+            "php -installer/Installer.php",
+            "MiMFa\\Installer::Install"
+        ],
+        "update": [
+            "php -installer/Installer.php",
+            "MiMFa\\Installer::Update"
+        ],
+        "post-install-cmd": [
+            "MiMFa\\Installer::Install"
+        ],
+        "post-update-cmd": [
+            "MiMFa\\Installer::Update"
         ]
     },
-     "autoload": {
+    "autoload": {
+        "files": [ "-installer/Installer.php" ],
         "psr-4": {
-            "\\": "../"
+            "MiMFa\\": ["model/","-installer/", "../model/","../-installer/"]
         }
     },
     "extra": {
         "installer-paths": {
             "./": ["type:framework", "type:patch"],
-            "{$name}/": ["type:project", "type:directory"],
-            "model/library/": ["type:library"],
-            "model/component/": ["type:component"],
-            "model/module/": ["type:module"],
-            "model/template/": ["type:template"],
-            "view/": ["type:view"],
-            "route/": ["type:route"],
-            "compute/": ["type:compute"],
-            "asset/": ["type:asset"]
+            "./{$name}/": ["type:project", "type:directory"],
+            "./model/library/": ["type:library"],
+            "./model/component/": ["type:component"],
+            "./model/module/": ["type:module"],
+            "./model/template/": ["type:template"],
+            "./view/": ["type:view"],
+            "./route/": ["type:route"],
+            "./compute/": ["type:compute"],
+            "./asset/": ["type:asset"]
         }
     }
 }
