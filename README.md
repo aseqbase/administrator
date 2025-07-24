@@ -4,20 +4,9 @@ A goldsmith management system, is special for an aseqbase website...
 * <a href="http://github.com//aseqbase/aseqbase">aseqbase/aseqbase</a>
 ## Installations
 1. Install all dependencies
-  ### To make the Main Domain of aseqbase administrator
-  2. Open a terminal in the home directory (public_html) of the website, then install the project by:
+2. Open a terminal in the home directory (public_html) of the website, then install the project by:
 	
- 	> composer create-project aseqbase/administrator
-  or
-	
- 	> composer require aseqbase/administrator
-  ### To make the Sub Domain of aseqbase administrator
-  2. Open a terminal in your subdomain directory (public_html/[my-subdomain-name]/), then install the framework by:
-	
- 	> composer create-project aseqbase/administrator
-  or
-	
- 	> composer require aseqbase/administrator
+ 	> composer create-project aseqbase/administrator my-subdomain-name
 3. Create an opitonal file name `global.php` on the root directory with the bellow codes:
   ```
   <?php
