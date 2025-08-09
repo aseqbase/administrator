@@ -103,7 +103,7 @@ $module->AppendControlsCreator = function ($id, $r) use ($module) {
         CreateTime:" . Script::Convert($r["CreateTime"]) . "
     }, 'form',
     (data, err) => {
-        if(!err) " . $module->Modal->ShowScript(null, null, '${data}') . "
+        if(!err) " . $module->Modal->InitializeScript(null, null, '${data}') . "
     });";
     return [Html::Icon("reply", $d), $st ? "#$st" : ""];
 };

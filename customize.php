@@ -5,9 +5,9 @@
 \_::$Config->DisplayStartupError = \_::$Config->DisplayStartupError?\_::$Config->DisplayStartupError:1;
 \_::$Config->DataBaseError = \_::$Config->DataBaseError?\_::$Config->DataBaseError:1;
 if (auth(\_::$Config->AdminAccess)) {
-    \_::$Config->AdminOrigin = array_keys(\_::$Sequences)[0] == __DIR__.DIRECTORY_SEPARATOR?1:2;
+    \_::$Config->AdminOrigin = array_key_first(\_::$Sequences) === __DIR__.DIRECTORY_SEPARATOR?0:1;
     $name = \_::$Aseq->Name ?? "qb";
-    \_::$Aseq = new Address(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequences)[\_::$Config->AdminOrigin], array_values(\_::$Sequences)[\_::$Config->AdminOrigin]);
+    \_::$Aseq = new Address(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequences)[\_::$Config->AdminOrigin+1], array_values(\_::$Sequences)[\_::$Config->AdminOrigin+1]);
     if(\_::$Config->DataBaseAddNameToPrefix) \_::$Config->DataBasePrefix = str_replace("{$name}_", (\_::$Aseq->Name ?? "qb")."_", \_::$Config->DataBasePrefix);
     \_::$Info->SenderEmail = "do-not-reply@" . getDomain(\_::$Aseq->Route);
     \_::$Info->ReceiverEmail = "info@" . getDomain(\_::$Aseq->Route);
@@ -20,7 +20,7 @@ if (auth(\_::$Config->AdminAccess)) {
             "Description" => "To manage all contents in the website",
             "Image" => "th-large",
             "Items" => array(
-                array("Name" => "CONTENTS", "Path" => "/admin/content/contents", "Access" => \_::$Config->AdminAccess, "Description" => "To manage website's posts and pages", "Image" => "th-large"),
+                array("Name" => "CONTENTS", "Path" => "/admin/content/contents", "Access" => \_::$Config->AdminAccess, "Description" => "To manage website's posts and pages", "Image" => "file"),
                 array("Name" => "TAGS", "Path" => "/admin/content/tags", "Access" => \_::$Config->AdminAccess, "Description" => "To manage website's tags", "Image" => "tags"),
                 array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$Config->AdminAccess, "Description" => "To manage website's categories", "Image" => "code-fork")
             )
@@ -33,7 +33,7 @@ if (auth(\_::$Config->AdminAccess)) {
             "Image" => "user",
             "Items" => array(
                 array("Name" => "USERS", "Path" => "/admin/user/users", "Access" => \_::$Config->AdminAccess, "Description" => "To manage all the website's users", "Image" => "user"),
-                array("Name" => "GROUPS", "Path" => "/admin/user/groups", "Access" => \_::$Config->AdminAccess, "Description" => "To manage all the user groups of the website", "Image" => "group"),
+                array("Name" => "GROUPS", "Path" => "/admin/user/groups", "Access" => \_::$Config->AdminAccess, "Description" => "To manage all the user groups of the website", "Image" => "user-group"),
                 array("Name" => "COMMENTS", "Path" => "/admin/user/comments", "Access" => \_::$Config->AdminAccess, "Description" => "To manage all received comments", "Image" => "comment"),
                 array("Name" => "MESSAGES", "Path" => "/admin/user/messages", "Access" => \_::$Config->AdminAccess, "Description" => "To manage all received emails and messages", "Image" => "envelope")
             )

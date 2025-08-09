@@ -4,7 +4,7 @@
     ->Get(function () {
         view("part", [
             "Name" => "admin/table/usergroups",
-            "Image" => "address-book",
+            "Image" => "user-group",
             "Title" => "User Groups Management"
         ]);
     })
