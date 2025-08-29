@@ -15,7 +15,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
 (new Router())->Post(function () use (&$form) {
     $res = $form->Handle();
     if ($form->Result) {
-        $rec = \Req::ReceivePost();
+        $rec = receivePost();
         table("Message")->Update("`Id`=:Id", [":Id" => $rec["Id"], "Status" => $rec["Status"], "UpdateTime" => \_::$Config->CurrentDateTime]);
         table("Message")->Insert([
             "ReplyId" => $rec["Id"],
@@ -25,15 +25,15 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
             "To" => $rec["ReceiverEmail"],
             "Subject" => $rec["MailSubject"],
             "Content" => $rec["MailMessage"],
-            "Type" => \Req::$Url,
+            "Type" => \_::$Url,
             "Access" => \_::$Config->AdminAccess,
             "Status" => -1
         ]);
-        \Res::Flip($res);
+        flipResponse($res);
     } else
-        \Res::End($res);
+        response($res);
 })->Patch(function () use (&$form) {
-    $r = \Req::ReceivePatch();
+    $r = receivePatch();
     $isadmin = \_::$Back->User->Access(\_::$Config->AdminAccess);
     $sender = $isadmin ? ($r["To"] ?? \_::$Info->ReceiverEmail) : \_::$Back->User->Email;
     $form->Set(
@@ -61,7 +61,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
     $form->Image = "reply";
     $form->Template = "s";
     $form->Router->Get()->Switch();
-    return \Res::End($form->ToString());
+    return response($form->ToString());
 })->Handle();
 if ($form->Status)
     return;

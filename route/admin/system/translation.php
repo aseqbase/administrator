@@ -11,7 +11,7 @@ use MiMFa\Library\Script;
         part(MiMFa\Library\User::$InHandlerPath);
     })
     ->else()
-    ->if(\Req::ReceiveGet("export") ?? false)
+    ->if(receiveGet("export") ?? false)
     ->Get(function () {//Exports
         $cells = [""];
         $dic = [];
@@ -31,7 +31,7 @@ use MiMFa\Library\Script;
     ->Post(function () {//Imports
         $c = 0;
         $keys = [];
-        foreach (Convert::ToCells(urldecode(first(\Req::ReceivePost()))) as $row) {
+        foreach (Convert::ToCells(urldecode(first(receivePost()))) as $row) {
             if ($c === 0) {
                 $keys = $row;
                 // $length = count($row);
@@ -48,18 +48,18 @@ use MiMFa\Library\Script;
         }
         $c = count($dic);
         if ($c > 0 && \_::$Back->Translate->SetAll($dic))
-            \Res::Flip(Html::Success("$c key values setted successfuly in lexicon!"));
+            flipResponse(Html::Success("$c key values setted successfuly in lexicon!"));
         else
-            \Res::Error("There occured a problem!");
+            renderError("There occured a problem!");
     })
     ->Delete(function () {//Deletes
         if (\_::$Back->Translate->ClearAll())
-            \Res::Flip(Html::Success("All key values cleared successfuly from the lexicon!"));
+            flipResponse(Html::Success("All key values cleared successfuly from the lexicon!"));
         else
-            \Res::Error("There occured a problem!");
+            renderError("There occured a problem!");
     })
     ->Get(function () {//Shows
-        $upd = \Req::Receive("update");
+        $upd = receive("update");
         view("part", [
             "Name" => "admin/table/lexicon",
             "Title" => "Translation",
@@ -68,10 +68,10 @@ use MiMFa\Library\Script;
             "Content" => Html::Center(
                 (
                     $upd ?
-                    Html::Button("View Lexicon", "/" . \Req::$Direction) :
-                    Html::Button("Edit Lexicon", "/" . \Req::$Direction . "?update=true")
+                    Html::Button("View Lexicon", "/" . \_::$Direction) :
+                    Html::Button("Edit Lexicon", "/" . \_::$Direction . "?update=true")
                 ) .
-                Html::Button("Export Lexicon", "/" . \Req::$Direction . "?export=true", ["target" => "blank"]) .
+                Html::Button("Export Lexicon", "/" . \_::$Direction . "?export=true", ["target" => "blank"]) .
                 Html::Button("Import Lexicon", Script::ImportFile($timeout = 300000)) .
                 Html::Button("Clear Lexicon", "
                         if(confirm('Are you sure to clear all lexicon records?'))

@@ -14,7 +14,7 @@ $module->Items = array(
 	"Admin-6" => array("Name" => "SYSTEMS", "Access" => \_::$Config->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog")
 );
 swap($module, $data);
-\Res::Render(
+render(
 	Html::Style("
 		.page-home {
 			padding: 10px 10px 50px;
