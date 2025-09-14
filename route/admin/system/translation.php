@@ -50,13 +50,13 @@ use MiMFa\Library\Script;
         if ($c > 0 && \_::$Back->Translate->SetAll($dic))
             flipResponse(Html::Success("$c key values setted successfuly in lexicon!"));
         else
-            renderError("There occured a problem!");
+            renderError("There occurred a problem!");
     })
     ->Delete(function () {//Deletes
         if (\_::$Back->Translate->ClearAll())
             flipResponse(Html::Success("All key values cleared successfuly from the lexicon!"));
         else
-            renderError("There occured a problem!");
+            renderError("There occurred a problem!");
     })
     ->Get(function () {//Shows
         $upd = receive("update");
