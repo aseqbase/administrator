@@ -8,7 +8,7 @@ use MiMFa\Library\Script;
 (new Router())
     ->if(!auth(\_::$Config->AdminAccess))
     ->Default(function () {
-        part(MiMFa\Library\User::$InHandlerPath);
+        part(\User::$InHandlerPath);
     })
     ->else()
     ->if(receiveGet("export") ?? false)

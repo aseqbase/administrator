@@ -4,7 +4,7 @@ use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
 $module = new Table("Content");
-$table1 = \_::$Back->User->DataTable->Name;
+$table1 = \_::$User->DataTable->Name;
 $module->SelectQuery = "
     SELECT A.{$module->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIds AS 'Category', A.Priority, A.Status, A.MetaData AS 'Lang', A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
     FROM {$module->DataTable->Name} AS A
@@ -80,7 +80,7 @@ $module->CellsTypes = [
         $std->Title = "Author";
         $std->Type = auth(\_::$Config->SuperAccess)?"select":"hidden";
         $std->Options = $users;
-        if(!isValid($v)) $std->Value = \_::$Back->User->Id;
+        if(!isValid($v)) $std->Value = \_::$User->Id;
         return $std;
     },
     "EditorId" =>function($t, $v) use($users){
@@ -88,7 +88,7 @@ $module->CellsTypes = [
         $std->Title = "Editor";
         $std->Type = auth(\_::$Config->SuperAccess)?"select":"hidden";
         $std->Options = $users;
-        if(!isValid($v)) $std->Value = \_::$Back->User->Id;
+        if(!isValid($v)) $std->Value = \_::$User->Id;
         return $std;
     },
     "UpdateTime" =>function($t, $v){

@@ -19,8 +19,8 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
         table("Message")->Update("`Id`=:Id", [":Id" => $rec["Id"], "Status" => $rec["Status"], "UpdateTime" => \_::$Config->CurrentDateTime]);
         table("Message")->Insert([
             "ReplyId" => $rec["Id"],
-            "UserId" => \_::$Back->User ? \_::$Back->User->Id : null,
-            "Name" => \_::$Back->User ? \_::$Back->User->Name : null,
+            "UserId" => \_::$User ? \_::$User->Id : null,
+            "Name" => \_::$User ? \_::$User->Name : null,
             "From" => $rec["SenderEmail"],
             "To" => $rec["ReceiverEmail"],
             "Subject" => $rec["MailSubject"],
@@ -34,8 +34,8 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
         response($res);
 })->Patch(function () use (&$form) {
     $r = receivePatch();
-    $isadmin = \_::$Back->User->Access(\_::$Config->AdminAccess);
-    $sender = $isadmin ? ($r["To"] ?? \_::$Info->ReceiverEmail) : \_::$Back->User->Email;
+    $isadmin = \_::$User->Access(\_::$Config->AdminAccess);
+    $sender = $isadmin ? ($r["To"] ?? \_::$Info->ReceiverEmail) : \_::$User->Email;
     $form->Set(
         title: "Reply to " . $r["Name"],
         method: "POST",
@@ -47,7 +47,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
             Html::Field("text", "MailSubject", "Reply to your message: " . between($r["Subject"], "in " . \_::$Info->Name), "Reply subject", "Subject"),
             Html::Field("content", "MailMessage", "Dear " . $r["Name"] . "," . "\n\r\n\r\n\r" .
                 join("\n\r", [
-                    \_::$Back->User->MakeSign("Sincerely"),
+                    \_::$User->MakeSign("Sincerely"),
                     "",
                     "On " . Convert::ToShownDateTimeString($r["CreateTime"]) . " " . $r["Name"] . " &amp;lt;" . $r["From"] . "&amp;gt; wrote:",
                     "\"\"",
@@ -109,8 +109,8 @@ $module->AppendControlsCreator = function ($id, $r) use ($module) {
 };
 $module->CellsValues = [
     "ReplyTo" => fn($v) => $v?Html::Icon("eye", "{$module->Modal->Name}_View('$v');"):"",
-    "From" => fn($v) => $v?Html::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$Back->User->Name."', From:'".\_::$Back->User->Email."', To:'$v'});"):"",
-    "To" => fn($v) => $v?Html::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$Back->User->Name."', From:'".\_::$Back->User->Email."', To:'$v'});"):""
+    "From" => fn($v) => $v?Html::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$User->Name."', From:'".\_::$User->Email."', To:'$v'});"):"",
+    "To" => fn($v) => $v?Html::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$User->Name."', From:'".\_::$User->Email."', To:'$v'});"):""
 ];
 $issuper = auth(\_::$Config->SuperAccess);
 $module->CellsTypes = [
@@ -118,13 +118,13 @@ $module->CellsTypes = [
     "UserId" => function ($t, $v, $k, $r) use($issuper) {
         $std = new stdClass();
         $std->Type = $issuper ? "disabled" : "number";
-        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Back->User->Id;
+        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$User->Id;
         return $std;
     },
     "Name" => function ($t, $v, $k, $r) {
         $std = new stdClass();
         $std->Type = "string";
-        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Back->User->Name;
+        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$User->Name;
         return $std;
     },
     "Subject" => function ($t, $v, $k, $r) {
@@ -136,7 +136,7 @@ $module->CellsTypes = [
     "From" => function ($t, $v, $k, $r) {
         $std = new stdClass();
         $std->Type = "email";
-        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Back->User->Email;
+        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$User->Email;
         return $std;
     },
     "To" => function () {
@@ -149,7 +149,7 @@ $module->CellsTypes = [
         $std = new stdClass();
         $std->Title = "Message";
         $std->Type = "content";
-        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Back->User->MakeSign("Sincerely");
+        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$User->MakeSign("Sincerely");
         return $std;
     },
     "Attach" => "json",

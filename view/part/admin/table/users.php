@@ -3,13 +3,13 @@ inspect(\_::$Config->AdminAccess);
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
-$module = new Table(\_::$Back->User->DataTable);
-$table1 = \_::$Back->User->GroupDataTable->Name;
+$module = new Table(\_::$User->DataTable);
+$table1 = \_::$User->GroupDataTable->Name;
 $module->SelectQuery = "
     SELECT A.{$module->KeyColumn}, B.Title AS 'Group', A.Signature, A.Image, A.Name, A.Bio, A.Email, A.Status, A.CreateTime
     FROM {$module->DataTable->Name} AS A
     LEFT OUTER JOIN $table1 AS B ON A.GroupId=B.Id
-    WHERE B.Access<=".\_::$Back->User->Access();
+    WHERE B.Access<=".\_::$User->Access();
 $module->KeyColumns = ["Name" , "Signature" ];
 $module->ExcludeColumns = ["MetaData" ];
 $module->Updatable = true;
@@ -21,7 +21,7 @@ $module->CellsTypes = [
         $std = new stdClass();
         $std->Title = "Group";
         $std->Type = "select";
-        $std->Options = table("UserGroup")->SelectPairs("Id" , "Title", "Access<=".\_::$Back->User->Access());
+        $std->Options = table("UserGroup")->SelectPairs("Id" , "Title", "Access<=".\_::$User->Access());
         return $std;
     },
     "Name" =>"string",
