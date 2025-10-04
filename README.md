@@ -7,7 +7,10 @@ A goldsmith management system, is special for an aseqbase website...
 2. Open a terminal in the home directory (public_html) of the website, then install the project by:
 	
  	> composer create-project aseqbase/administrator my-subdomain-name
-3. Create an opitonal file name `global.php` on the root directory with the bellow codes:
+	> cd my-subdomain-name
+ 	> composer run-script install
+3. Follow steps
+4. Create an opitonal file name `global.php` on the root directory with the bellow codes:
   ```
   <?php
   	$ASEQ = '[my-subdomain-name]'; // (Optional) The current subdomain sequence or leave null if this file is in the root directory
@@ -18,5 +21,5 @@ A goldsmith management system, is special for an aseqbase website...
 								// directory, null; // Remove thw directory from the \_::$Sequences
   ?>
   ```
-4. Use it through its special link (http://[my-domain-name].com/administration or http://[my-subdomain-name].[my-domain-name].com/administration)
-5. Enjoy...
+5. Use it through its special link (http://[my-domain-name].com/administration or http://[my-subdomain-name].[my-domain-name].com/administration)
+6. Enjoy...
