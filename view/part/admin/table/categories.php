@@ -17,7 +17,7 @@ $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;
 $module->CellsValues = [
     "Name"=>function($v, $k, $r){
-        return \MiMFa\Library\Html::Link($v,\_::$Address->CategoryRoute.$r["Id"], ["target"=>"blank"]);
+        return \MiMFa\Library\Html::Link($v,\_::$Base->CategoryRoot.$r["Id"], ["target"=>"blank"]);
     }
 ];
 $module->CellsTypes = [

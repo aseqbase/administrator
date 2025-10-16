@@ -7,10 +7,10 @@
 if (auth(\_::$Config->AdminAccess)) {
     \_::$Config->AdminOrigin = array_key_first(\_::$Sequences) === __DIR__.DIRECTORY_SEPARATOR?0:1;
     $name = \_::$Aseq->Name ?? "qb";
-    \_::$Aseq = new Address(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequences)[\_::$Config->AdminOrigin+1], array_values(\_::$Sequences)[\_::$Config->AdminOrigin+1]);
+    \_::$Aseq = new Router(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequences)[\_::$Config->AdminOrigin+1], array_values(\_::$Sequences)[\_::$Config->AdminOrigin+1]);
     if(\_::$Config->DataBaseAddNameToPrefix) \_::$Config->DataBasePrefix = str_replace("{$name}_", (\_::$Aseq->Name ?? "qb")."_", \_::$Config->DataBasePrefix);
-    \_::$Info->SenderEmail = "do-not-reply@" . getDomain(\_::$Aseq->Route);
-    \_::$Info->ReceiverEmail = "info@" . getDomain(\_::$Aseq->Route);
+    \_::$Info->SenderEmail = "do-not-reply@" . getDomain(\_::$Base->Root);
+    \_::$Info->ReceiverEmail = "info@" . getDomain(\_::$Base->Root);
     \_::$Info->MainMenus = \_::$Info->SideMenus = array(
         "Admin-Main" => array("Name" => "DASHBOARD", "Path" => "/sign/dashboard", "Access" => \_::$Config->AdminAccess, "Image" => "home"),
         "Admin-Content" => array(

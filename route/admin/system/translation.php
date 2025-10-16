@@ -1,6 +1,6 @@
 <?php
 inspect(\_::$Config->AdminAccess);
-use \MiMFa\Library\Router;
+
 use \MiMFa\Library\Html;
 use \MiMFa\Library\Convert;
 use MiMFa\Library\Script;
@@ -68,10 +68,10 @@ use MiMFa\Library\Script;
             "Content" => Html::Center(
                 (
                     $upd ?
-                    Html::Button("View Lexicon", "/" . \_::$Direction) :
-                    Html::Button("Edit Lexicon", "/" . \_::$Direction . "?update=true")
+                    Html::Button("View Lexicon", "/" . \_::$Base->Direction) :
+                    Html::Button("Edit Lexicon", "/" . \_::$Base->Direction . "?update=true")
                 ) .
-                Html::Button("Export Lexicon", "/" . \_::$Direction . "?export=true", ["target" => "blank"]) .
+                Html::Button("Export Lexicon", "/" . \_::$Base->Direction . "?export=true", ["target" => "blank"]) .
                 Html::Button("Import Lexicon", Script::ImportFile($timeout = 300000)) .
                 Html::Button("Clear Lexicon", "
                         if(confirm('Are you sure to clear all lexicon records?'))

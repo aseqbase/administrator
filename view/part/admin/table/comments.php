@@ -19,7 +19,7 @@ $module->Updatable = true;
 $module->UpdateAccess = \_::$Config->AdminAccess;
 $module->CellsValues = [
     "Title" =>function($v, $k, $r){
-        return $r["Post"]?Html::Link($v, \_::$Address->ContentRoute. $r["Post"],["target"=>"_blank"]):null;
+        return $r["Post"]?Html::Link($v, \_::$Base->ContentRoot. $r["Post"],["target"=>"_blank"]):null;
     },
     "Contact" =>fn($v)=> Html::Link($v, "mailto:$v")
 ];

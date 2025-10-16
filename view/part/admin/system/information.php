@@ -9,7 +9,7 @@ else {
     $form = \MiMFa\Library\Revise::GetForm(\_::$Info);
     $form->Title = "Edit Information";
     $form->Id = "EditInformation";
-    $form->Buttons = \MiMFa\Library\Html::Button("Restore",\_::$Path."?restore=true");
+    $form->Buttons = \MiMFa\Library\Html::Button("Restore",\_::$Base->Path."?restore=true");
     $form->Render();
 }
 \User::$Active = true;

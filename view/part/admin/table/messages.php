@@ -4,7 +4,6 @@ inspect(\_::$Config->AdminAccess);
 use MiMFa\Library\Contact;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Html;
-use MiMFa\Library\Router;
 use MiMFa\Library\Script;
 use MiMFa\Module\Form;
 use MiMFa\Module\Table;
@@ -25,7 +24,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
             "To" => $rec["ReceiverEmail"],
             "Subject" => $rec["MailSubject"],
             "Content" => $rec["MailMessage"],
-            "Type" => \_::$Url,
+            "Type" => \_::$Base->Url,
             "Access" => \_::$Config->AdminAccess,
             "Status" => -1
         ]);

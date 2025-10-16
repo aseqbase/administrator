@@ -1,5 +1,5 @@
 <?php
-(new MiMFa\Library\Router())
+(new Router())
 ->if(auth(\_::$Config->SuperAccess))
     ->Get(function () {
         view("part", [
