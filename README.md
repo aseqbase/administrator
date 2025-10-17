@@ -39,17 +39,17 @@ A goldsmith management system, is special for an aseqbase website...
   1. Do one of the following options:
 	  	* Visit its special URL (for example, `http://administrator.[my-domain-name].com`, or `http://[my-domain-name].com/administrator`)
 		* On the local server:
-			* Create or update file named `global.php` in the root directory with at least the following script:
+			1. Create or update file named `global.php` in the root directory with at least the following script:
 	  			``` php
 	  			<?php
 					$BASE = 'administrator'; // To set the base directory you want to see at the root of `localhost`
 	 			 ?>
 	  			```
-			* Use the following command on the root directory
+			2. Use the following command on the root directory
 				``` bash
 				> composer start
 		  		```
-		  	* Visit the URL `localhost:8000` on the local browser
+		  	3. Visit the URL `localhost:8000` on the local browser
   2. Enjoy...
 
 <h3>Updating</h3>
