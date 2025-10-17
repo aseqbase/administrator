@@ -1,5 +1,5 @@
 # Administration panel for the aseqbase website
-A goldsmith management system, is special for an aseqbase website...
+A default Content Management System is special for an aseqbase website...
 ## Dependencies
 * <a href="http://github.com//aseqbase/aseqbase">aseqbase/aseqbase</a>
 <h2>Managements</h2>
