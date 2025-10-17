@@ -1,23 +1,24 @@
-# Administration panel for the aseqbase website
+# Administrator (Project)
+> aseqbase/administrator
 A default Content Management System is special for an aseqbase website...
 ## Dependencies
 * <a href="http://github.com//aseqbase/aseqbase">aseqbase/aseqbase</a>
 <h2>Managements</h2>
 <h3>Installing</h3>
 
-  1. Install all dependencies mentioned above
+  1. Install all dependencies mentioned before
   2. Follow one of these options:
-		* Open a terminal in the destination directory (for example, `D:\MyWebsite\$1\`) of the website, then install the package by:
+		* Open a terminal in the destination directory (for example, `D:\MyWebsite\administrator\`) of the website, then install the project by:
 			``` bash
 			> composer create-project aseqbase/administrator
 			```
-		* Prompts below to create a manageable package (update, uninstall, etc.):
+		* Prompts below to create a manageable project (update, uninstall, etc.):
 			``` bash
 			> composer require aseqbase/administrator
 			> cd vendor/aseqbase/administrator
 			> composer dev:install
 			```
-  3. Put the destination directory of your package on the appeared step (for example, `D:\MyWebsite\administrator\`)
+  3. Put the destination directory of your project on the appeared step (for example, `D:\MyWebsite\administrator\`)
 		``` bash
 		Destination Directory [D:\MyWebsite\]: D:\MyWebsite\administrator\
 		```
@@ -26,8 +27,8 @@ A default Content Management System is special for an aseqbase website...
 	  ``` php
 	  <?php
 		$BASE = '.aseq'; 			// (Optional) The base directory you want to inherit all properties except what you changed
-		$ASEQ = 'administrator'; 	// (Optional) The current subdomain sequence, or leave null if this file is in the root directory
-		$SEQUENCES_PATCH = [];		// (Optional) An array to apply your custom changes in \_::$Sequences
+		$ASEQ = 'administrator'; 				// (Optional) The current subdomain sequence, or leave null if this file is in the root directory
+		$SEQUENCES_PATCH = [];	// (Optional) An array to apply your custom changes in \_::$Sequences
 									// newdirectory, newaseq; // Add new directory to the \_::$Sequences
 									// directory, newaseq; // Update directory in the \_::$Sequences
 									// directory, null; // Remove thw directory from the \_::$Sequences
@@ -54,7 +55,7 @@ A default Content Management System is special for an aseqbase website...
 
 <h3>Updating</h3>
 
-  1. Keep your package updated using
+  1. Keep your project updated using
 		``` bash
   		> cd vendor/aseqbase/administrator
 		> composer dev:update
@@ -64,7 +65,7 @@ A default Content Management System is special for an aseqbase website...
 
 <h3>Uninstalling</h3>
 
-  1. Uninstall the package and the constructed database using
+  1. Uninstall the project and the constructed database using
 		``` bash
   		> cd vendor/aseqbase/administrator
 		> composer dev:unistall
