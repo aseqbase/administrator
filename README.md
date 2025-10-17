@@ -1,6 +1,8 @@
 # Administrator (Project)
 > aseqbase/administrator
-A default Content Management System is special for an aseqbase website...
+
+A default Content Management System is special for an aseqbase website...A standard, out-of-the-box Content Management System holds particular significance when it comes to building and maintaining an aseqbase website. The inherent characteristics of a default CMS provide a foundational structure that is especially well-suited for the specific requirements and potential of such a website. Utilizing a pre-configured CMS offers several advantages for aseqbase websites, streamlining the development process and ensuring a cohesive user experience. Therefore, opting for a default Content Management System is a strategic choice that can greatly enhance the functionality and overall effectiveness of an aseqbase website.
+
 ## Dependencies
 * <a href="http://github.com//aseqbase/aseqbase">aseqbase/aseqbase</a>
 <h2>Managements</h2>
