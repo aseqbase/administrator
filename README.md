@@ -7,7 +7,7 @@ A default Content Management System is special for an aseqbase website...
 
   1. Install all dependencies mentioned above
   2. Follow one of these options:
-		* Open a terminal in the destination directory (for example, `public_html/administrator/`) of the website, then install the package by:
+		* Open a terminal in the destination directory (for example, `D:\MyWebsite\$1\`) of the website, then install the package by:
 			``` bash
 			> composer create-project aseqbase/administrator
 			```
