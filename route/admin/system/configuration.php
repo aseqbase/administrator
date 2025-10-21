@@ -1,6 +1,6 @@
 <?php
 (new Router())
-->if(auth(\_::$Config->SuperAccess))
+->if(\_::$User->GetAccess(\_::$User->SuperAccess))
     ->Get(function () {
         view("part", [
             "Name" => "admin/system/configuration",

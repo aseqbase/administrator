@@ -1,7 +1,7 @@
 <?php
 (new Router())
-->if(auth(\_::$Config->AdminAccess))
+->if(\_::$User->GetAccess(\_::$User->AdminAccess))
     ->Get(function () {
-        view(\_::$Config->DefaultViewName, ["Name" => "admin/home"]);
+        view(\_::$Front->DefaultViewName, ["Name" => "admin/home"]);
     })->Handle();
 ?>

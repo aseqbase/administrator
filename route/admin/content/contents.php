@@ -1,5 +1,5 @@
 <?php
-(new Router())->if(auth(\_::$Config->AdminAccess))
+(new Router())->if(\_::$User->GetAccess(\_::$User->AdminAccess))
     ->Get(function () {
         view("part", [
             "Name" => "admin/table/contents",

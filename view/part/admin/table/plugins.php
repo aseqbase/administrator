@@ -1,3 +1,3 @@
 <?php
-inspect(\_::$Config->AdminAccess);
+inspect(\_::$User->AdminAccess);
 ?>

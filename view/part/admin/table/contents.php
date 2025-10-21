@@ -1,5 +1,5 @@
 <?php
-inspect(\_::$Config->AdminAccess);
+inspect(\_::$User->AdminAccess);
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
@@ -16,16 +16,16 @@ $module->KeyColumns = ["Image" , "Title" ];
 $module->IncludeColumns = ['Type' , 'Image' , 'Title' , 'Category', 'Priority' , 'Status' , 'Lang' , 'Access' , 'Author', 'Editor', 'CreateTime' , 'UpdateTime' ];
 $module->AllowServerSide = true;
 $module->Updatable = true;
-$module->UpdateAccess = \_::$Config->AdminAccess;
+$module->UpdateAccess = \_::$User->AdminAccess;
 $users = table("User")->SelectPairs("Id" , "Name" );
 $langs = \_::$Back->Translate->GetLanguages();
 $module->CellsValues = [
     "Title"=>function($v, $k, $r){
-        return \MiMFa\Library\Html::Link($v,\_::$Base->ContentRoot.$r["Id"], ["target"=>"blank"]);
+        return \MiMFa\Library\Html::Link($v,\_::$Address->ContentRoot.$r["Id"], ["target"=>"blank"]);
     },
     "Category"=>function($v, $k, $r){
         $val = trim(\_::$Back->Query->GetCategoryRoute(first(Convert::FromJson($v)))??"", "/\\");
-        if(isValid($val)) return \MiMFa\Library\Html::Link($val,\_::$Base->CategoryRoot.$val, ["target"=>"blank"]);
+        if(isValid($val)) return \MiMFa\Library\Html::Link($val,\_::$Address->CategoryRoot.$val, ["target"=>"blank"]);
         return $v;
     },
     "Lang"=>function($v) use($langs){
@@ -36,7 +36,7 @@ $module->CellsValues = [
     }
 ];
 $module->CellsTypes = [
-    "Id" =>auth(\_::$Config->SuperAccess)?"disabled":false,
+    "Id" =>\_::$User->GetAccess(\_::$User->SuperAccess)?"disabled":false,
     "Name" =>"string",
     "Type" =>"enum",
     "Title" =>"string",
@@ -69,7 +69,7 @@ $module->CellsTypes = [
     "Access" =>function(){
         $std = new stdClass();
         $std->Type="number";
-        $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->SuperAccess];
+        $std->Attributes=["min"=>\_::$User->BanAccess,"max"=>\_::$User->SuperAccess];
         return $std;
     },
     "Attach" =>"json",
@@ -78,7 +78,7 @@ $module->CellsTypes = [
     "AuthorId" =>function($t, $v) use($users){
         $std = new stdClass();
         $std->Title = "Author";
-        $std->Type = auth(\_::$Config->SuperAccess)?"select":"hidden";
+        $std->Type = \_::$User->GetAccess(\_::$User->SuperAccess)?"select":"hidden";
         $std->Options = $users;
         if(!isValid($v)) $std->Value = \_::$User->Id;
         return $std;
@@ -86,24 +86,24 @@ $module->CellsTypes = [
     "EditorId" =>function($t, $v) use($users){
         $std = new stdClass();
         $std->Title = "Editor";
-        $std->Type = auth(\_::$Config->SuperAccess)?"select":"hidden";
+        $std->Type = \_::$User->GetAccess(\_::$User->SuperAccess)?"select":"hidden";
         $std->Options = $users;
         if(!isValid($v)) $std->Value = \_::$User->Id;
         return $std;
     },
     "UpdateTime" =>function($t, $v){
         $std = new stdClass();
-        $std->Type = auth(\_::$Config->SuperAccess)?"calendar":"hidden";
+        $std->Type = \_::$User->GetAccess(\_::$User->SuperAccess)?"calendar":"hidden";
         $std->Value = Convert::ToDateTimeString();
         return $std;
     },
     "CreateTime" => function($t, $v){
-        return auth(\_::$Config->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
+        return \_::$User->GetAccess(\_::$User->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
     "MetaData" =>function ($t, $v, $k, $r) {
         $std = new stdClass();
         $std->Type = "json";
-        if(\_::$Config->AllowTranslate && !$r["Title"] && !$r["Content"]) $std->Value = "{\"lang\":\"".\_::$Back->Translate->Language."\"}";
+        if(\_::$Back->AllowTranslate && !$r["Title"] && !$r["Content"]) $std->Value = "{\"lang\":\"".\_::$Back->Translate->Language."\"}";
         return $std;
     },
     ];

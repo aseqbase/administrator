@@ -1,5 +1,5 @@
 <?php
-inspect(\_::$Config->AdminAccess);
+inspect(\_::$User->AdminAccess);
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
@@ -8,10 +8,10 @@ $module->KeyColumns = ["Name" , "Title" ];
 $module->ExcludeColumns = ["MetaData" ];
 $module->AllowServerSide = true;
 $module->Updatable = true;
-$module->UpdateAccess = \_::$Config->AdminAccess;
+$module->UpdateAccess = \_::$User->AdminAccess;
 $module->CellsValues = [
     "Name"=>function($v, $k, $r){
-        return \MiMFa\Library\Html::Link($v,\_::$Base->TagRoot.$r["Id"], ["target"=>"blank"]);
+        return \MiMFa\Library\Html::Link($v,\_::$Address->TagRoot.$r["Id"], ["target"=>"blank"]);
     }
 ];
 $module->CellsTypes = [
@@ -21,12 +21,12 @@ $module->CellsTypes = [
     "Description" =>"strings",
     "UpdateTime" =>function($t, $v){
         $std = new stdClass();
-        $std->Type = auth(\_::$Config->SuperAccess)?"calendar":"hidden";
+        $std->Type = \_::$User->GetAccess(\_::$User->SuperAccess)?"calendar":"hidden";
         $std->Value = Convert::ToDateTimeString();
         return $std;
     },
     "CreateTime" => function($t, $v){
-        return auth(\_::$Config->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
+        return \_::$User->GetAccess(\_::$User->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
     "MetaData" =>"json"
 ];

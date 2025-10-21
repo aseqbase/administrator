@@ -1,5 +1,5 @@
 <?php
-inspect(\_::$Config->AdminAccess);
+inspect(\_::$User->AdminAccess);
 
 use MiMFa\Library\Contact;
 use MiMFa\Library\Convert;
@@ -24,8 +24,8 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
             "To" => $rec["ReceiverEmail"],
             "Subject" => $rec["MailSubject"],
             "Content" => $rec["MailMessage"],
-            "Type" => \_::$Base->Url,
-            "Access" => \_::$Config->AdminAccess,
+            "Type" => \_::$Address->Url,
+            "Access" => \_::$User->AdminAccess,
             "Status" => -1
         ]);
         flipResponse($res);
@@ -33,7 +33,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
         response($res);
 })->Patch(function () use (&$form) {
     $r = receivePatch();
-    $isadmin = \_::$User->Access(\_::$Config->AdminAccess);
+    $isadmin = \_::$User->GetAccess(\_::$User->AdminAccess);
     $sender = $isadmin ? ($r["To"] ?? \_::$Info->ReceiverEmail) : \_::$User->Email;
     $form->Set(
         title: "Reply to " . $r["Name"],
@@ -76,8 +76,8 @@ $module->KeyColumns = ["Subject"];
 $module->IncludeColumns = ["ReplyTo", "Name", "Subject", "Content", "From", "To", "Type", "CreateTime"];
 $module->AllowServerSide = true;
 $module->Updatable = true;
-$module->ModifyAccess = \_::$Config->SuperAccess;
-$module->UpdateAccess = \_::$Config->AdminAccess;
+$module->ModifyAccess = \_::$User->SuperAccess;
+$module->UpdateAccess = \_::$User->AdminAccess;
 $module->CreateModal();
 $module->ControlHandler = function ($r, $func) {
     switch ($func) {
@@ -111,7 +111,7 @@ $module->CellsValues = [
     "From" => fn($v) => $v?Html::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$User->Name."', From:'".\_::$User->Email."', To:'$v'});"):"",
     "To" => fn($v) => $v?Html::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$User->Name."', From:'".\_::$User->Email."', To:'$v'});"):""
 ];
-$issuper = auth(\_::$Config->SuperAccess);
+$issuper = \_::$User->GetAccess(\_::$User->SuperAccess);
 $module->CellsTypes = [
     "Id" =>  $issuper? "disabled" : false,
     "UserId" => function ($t, $v, $k, $r) use($issuper) {
@@ -164,17 +164,17 @@ $module->CellsTypes = [
         $std = new stdClass();
         $std->Title = "Minimum Access";
         $std->Type = "number";
-        $std->Attributes = ["min" => \_::$Config->BanAccess, "max" => \_::$Config->SuperAccess];
+        $std->Attributes = ["min" => \_::$User->BanAccess, "max" => \_::$User->SuperAccess];
         return $std;
     },
     "UpdateTime" => function ($t, $v) {
         $std = new stdClass();
-        $std->Type = auth(\_::$Config->SuperAccess) ? "calendar" : "hidden";
+        $std->Type = \_::$User->GetAccess(\_::$User->SuperAccess) ? "calendar" : "hidden";
         $std->Value = Convert::ToDateTimeString();
         return $std;
     },
     "CreateTime" => function ($t, $v) {
-        return auth(\_::$Config->SuperAccess) ? "calendar" : (isValid($v) ? "hidden" : false);
+        return \_::$User->GetAccess(\_::$User->SuperAccess) ? "calendar" : (isValid($v) ? "hidden" : false);
     },
     "MetaData" => "json"
 ];

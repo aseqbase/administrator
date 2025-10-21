@@ -1,5 +1,5 @@
 <?php
-inspect(\_::$Config->AdminAccess);
+inspect(\_::$User->AdminAccess);
 use MiMFa\Library\Convert;
 use MiMFa\Library\Html;
 use MiMFa\Module\Table;
@@ -16,15 +16,15 @@ $module->KeyColumns = ["Subject" ];
 $module->IncludeColumns = ['Title' , 'Author', 'Subject' , 'Content' , 'Status' , 'Access' , 'CreateTime' , 'UpdateTime' ];
 $module->AllowServerSide = true;
 $module->Updatable = true;
-$module->UpdateAccess = \_::$Config->AdminAccess;
+$module->UpdateAccess = \_::$User->AdminAccess;
 $module->CellsValues = [
     "Title" =>function($v, $k, $r){
-        return $r["Post"]?Html::Link($v, \_::$Base->ContentRoot. $r["Post"],["target"=>"_blank"]):null;
+        return $r["Post"]?Html::Link($v, \_::$Address->ContentRoot. $r["Post"],["target"=>"_blank"]):null;
     },
     "Contact" =>fn($v)=> Html::Link($v, "mailto:$v")
 ];
 $module->CellsTypes = [
-    "Id" =>auth(\_::$Config->SuperAccess)?"disabled":false,
+    "Id" =>\_::$User->GetAccess(\_::$User->SuperAccess)?"disabled":false,
     "Relation" =>"string",
     "UserId" =>"number",
     "Name" =>"string",
@@ -44,17 +44,17 @@ $module->CellsTypes = [
         $std = new stdClass();
         $std->Title = "Minimum Access";
         $std->Type="number";
-        $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->SuperAccess];
+        $std->Attributes=["min"=>\_::$User->BanAccess,"max"=>\_::$User->SuperAccess];
         return $std;
     },
     "UpdateTime" =>function($t, $v){
         $std = new stdClass();
-        $std->Type = auth(\_::$Config->SuperAccess)?"calendar":"hidden";
+        $std->Type = \_::$User->GetAccess(\_::$User->SuperAccess)?"calendar":"hidden";
         $std->Value = Convert::ToDateTimeString();
         return $std;
     },
     "CreateTime" => function($t, $v){
-        return auth(\_::$Config->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
+        return \_::$User->GetAccess(\_::$User->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
     "MetaData" =>"json"
     ];

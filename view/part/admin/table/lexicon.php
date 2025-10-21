@@ -1,5 +1,5 @@
 <?php
-inspect(\_::$Config->AdminAccess);
+inspect(\_::$User->AdminAccess);
 
 use MiMFa\Library\Convert;
 module("Table");
@@ -12,7 +12,7 @@ $module->AllowLabelTranslation = false;
 $module->AllowServerSide = true;
 $module->AddAccess = 
 $module->DuplicateAccess = false;
-$module->UpdateAccess = \_::$Config->AdminAccess;
+$module->UpdateAccess = \_::$User->AdminAccess;
 
 foreach ($langs as $k=>$value)
     $module->CellsValues[$k] = function ($v) use ($k) {

@@ -1,14 +1,14 @@
 <?php
-inspect(\_::$Config->AdminAccess);
+inspect(\_::$User->AdminAccess);
 
 use \MiMFa\Library\Html;
 use \MiMFa\Library\Convert;
 use MiMFa\Library\Script;
 
 (new Router())
-    ->if(!auth(\_::$Config->AdminAccess))
+    ->if(!\_::$User->GetAccess(\_::$User->AdminAccess))
     ->Default(function () {
-        part(\User::$InHandlerPath);
+        part(\_::$User->InHandlerPath);
     })
     ->else()
     ->if(receiveGet("export") ?? false)
@@ -68,10 +68,10 @@ use MiMFa\Library\Script;
             "Content" => Html::Center(
                 (
                     $upd ?
-                    Html::Button("View Lexicon", "/" . \_::$Base->Direction) :
-                    Html::Button("Edit Lexicon", "/" . \_::$Base->Direction . "?update=true")
+                    Html::Button("View Lexicon", "/" . \_::$Address->Direction) :
+                    Html::Button("Edit Lexicon", "/" . \_::$Address->Direction . "?update=true")
                 ) .
-                Html::Button("Export Lexicon", "/" . \_::$Base->Direction . "?export=true", ["target" => "blank"]) .
+                Html::Button("Export Lexicon", "/" . \_::$Address->Direction . "?export=true", ["target" => "blank"]) .
                 Html::Button("Import Lexicon", Script::ImportFile($timeout = 300000)) .
                 Html::Button("Clear Lexicon", "
                         if(confirm('Are you sure to clear all lexicon records?'))
