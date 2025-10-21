@@ -28,8 +28,8 @@ A default Content Management System is special for an aseqbase website...A stand
   * [optional] Create an optional file named `global.php` in the `administrator` directory with the following script:
 	  ``` php
 	  <?php
-		$BASE = '.aseq'; 			// (Optional) The base directory you want to inherit all properties except what you changed
-		$ASEQ = 'administrator'; 				// (Optional) The current subdomain sequence, or leave null if this file is in the root directory
+		$BASE = '.aseq'; 			// (Optional) The parent directory you want to inherit all properties except what you changed
+		$ASEQ = 'administrator'; 			// (Optional) The current subdomain sequence, or leave null if this file is in the root directory
 		$SEQUENCES_PATCH = [];	// (Optional) An array to apply your custom changes in \_::$Sequences
 									// newdirectory, newaseq; // Add new directory to the \_::$Sequences
 									// directory, newaseq; // Update directory in the \_::$Sequences
@@ -59,6 +59,10 @@ A default Content Management System is special for an aseqbase website...A stand
 
   1. Keep your project updated using
 		``` bash
+		> composer administrator:update
+		```
+		or
+		``` bash
   		> cd vendor/aseqbase/administrator
 		> composer dev:update
 		```
@@ -69,8 +73,26 @@ A default Content Management System is special for an aseqbase website...A stand
 
   1. Uninstall the project and the constructed database using
 		``` bash
+		> composer administrator:unistall
+		```
+		or
+		``` bash
   		> cd vendor/aseqbase/administrator
 		> composer dev:unistall
 		```
   2. Follow the steps to finish the uninstallation of sources, database, etc.
+  3. Enjoy...
+
+<h4>Creating</h4>
+
+  1. Create a new file by a predefined template name (for example, global, config, back, router, front, user, info, etc.) using
+		``` bash
+		> composer administrator:create [predefined-template-name]
+		```
+		or
+		``` bash
+  		> cd vendor/aseqbase/administrator
+		> composer dev:create [predefined-template-name]
+		```
+  2. Follow the steps to finish creating the file.
   3. Enjoy...
