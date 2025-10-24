@@ -48,18 +48,18 @@ use MiMFa\Library\Script;
         }
         $c = count($dic);
         if ($c > 0 && \_::$Back->Translate->SetAll($dic))
-            flipResponse(Html::Success("$c key values setted successfuly in lexicon!"));
+            deliverSpark(Html::Success("$c key values setted successfuly in lexicon!"));
         else
-            renderError("There occurred a problem!");
+            error("There occurred a problem!");
     })
     ->Delete(function () {//Deletes
         if (\_::$Back->Translate->ClearAll())
-            flipResponse(Html::Success("All key values cleared successfuly from the lexicon!"));
+            deliverSpark(Html::Success("All key values cleared successfuly from the lexicon!"));
         else
-            renderError("There occurred a problem!");
+            error("There occurred a problem!");
     })
     ->Get(function () {//Shows
-        $upd = receive("update");
+        $upd = getReceived("update");
         view("part", [
             "Name" => "admin/table/lexicon",
             "Title" => "Translation",
@@ -75,7 +75,7 @@ use MiMFa\Library\Script;
                 Html::Button("Import Lexicon", Script::ImportFile($timeout = 300000)) .
                 Html::Button("Clear Lexicon", "
                         if(confirm('Are you sure to clear all lexicon records?'))
-                            sendDelete(null, {'truncate':true}, '.content');
+                            sendDeleteRequest(null, {'truncate':true}, '.content');
                     ", ["class" => "error"])
                 ,
                 ["class" => "content"]

@@ -13,7 +13,7 @@ $module->Items = array(
 	"Admin-5" => array("Name" => "TRANSLATIONS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/system/translation", "Image" => "language"),
 	"Admin-6" => array("Name" => "SYSTEMS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog")
 );
-swap($module, $data);
+dip($module, $data);
 render(
 	Html::Style("
 		.page-home {

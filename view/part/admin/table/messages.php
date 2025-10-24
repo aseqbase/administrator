@@ -28,9 +28,9 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
             "Access" => \_::$User->AdminAccess,
             "Status" => -1
         ]);
-        flipResponse($res);
+        deliverSpark($res);
     } else
-        response($res);
+        deliver($res);
 })->Patch(function () use (&$form) {
     $r = receivePatch();
     $isadmin = \_::$User->GetAccess(\_::$User->AdminAccess);
@@ -60,7 +60,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
     $form->Image = "reply";
     $form->Template = "s";
     $form->Router->Get()->Switch();
-    return response($form->ToString());
+    return deliver($form->ToString());
 })->Handle();
 if ($form->Status)
     return;
@@ -91,7 +91,7 @@ $module->ControlHandler = function ($r, $func) {
 };
 $module->AppendControlsCreator = function ($id, $r) use ($module) {
     $st = intval($r["Status"] ?? 0);
-    $d = "sendPatch(null, {
+    $d = "sendPatchRequest(null, {
         Id:" . Script::Convert($r["Id"]) . ",
         Status:" . Script::Convert($st = $st < 0 ? 0 : $st) . ",
         Name:" . Script::Convert($r["Name"]) . ",
@@ -178,6 +178,6 @@ $module->CellsTypes = [
     },
     "MetaData" => "json"
 ];
-swap($module, $data);
+dip($module, $data);
 $module->Render();
 ?>

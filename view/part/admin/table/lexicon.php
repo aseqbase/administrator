@@ -23,5 +23,5 @@ $module->CellsTypes = [
     "KeyCode" => "text",
     "ValueOptions" => "json"
 ];
-swap($module, $data);
+dip($module, $data);
 $module->Render();
