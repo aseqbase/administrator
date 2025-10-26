@@ -14,7 +14,7 @@ $module->Items = array(
 	"Admin-6" => array("Name" => "SYSTEMS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog")
 );
 dip($module, $data);
-render(
+response(
 	Html::Style("
 		.page-home {
 			padding: 10px 10px 50px;
