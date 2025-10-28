@@ -4,5 +4,5 @@ $module->AllowChangeColor = true;
 $module->AllowAnimate = 
 $module->AllowMiddle = false;
 $module->Items = \_::$Info->Shortcuts;
-dip($module, $data);
+pod($module, $data);
 $module->Render();

@@ -5,7 +5,7 @@ $module->Description = \_::$Info->Owner;
 $module->Items = \_::$Info->SideMenus;
 $module->Image = \_::$Info->LogoPath;
 $module->Shortcuts = \_::$Info->Contacts;
-dip($module, $data);
+pod($module, $data);
 $module->Render();
 ?>
 <script type="text/javascript">

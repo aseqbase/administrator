@@ -50,6 +50,6 @@ $module->CellsTypes = [
     },
     "MetaData" =>"json"
     ];
-dip($module, $data);
+pod($module, $data);
 $module->Render();
 ?>

@@ -13,7 +13,7 @@ $module->Items = array(
 	"Admin-5" => array("Name" => "TRANSLATIONS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/system/translation", "Image" => "language"),
 	"Admin-6" => array("Name" => "SYSTEMS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog")
 );
-dip($module, $data);
+pod($module, $data);
 response(
 	Html::Style("
 		.page-home {

@@ -24,6 +24,6 @@ $module->CellsTypes = [
     "Status" =>[-1=>"Blocked",0=>"Undifined",1=>"Activated"],
     "MetaData" => "json"
 ];
-dip($module, $data);
+pod($module, $data);
 $module->Render();
 ?>

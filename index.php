@@ -21,33 +21,33 @@ $GLOBALS["BASE"] = $resetBase ?? $_COOKIE["BASE"] ?? ".aseq";/* Change it to the
 
 /*
     Change \_::$Sequence
-    newdirectory, newaseq;// Add new directory to the \_::$Sequence
+	newdirectory, newaseq;// Add new directory to the \_::$Sequence
     directory, newaseq;// Update directory in the \_::$Sequence
     directory, null;// Remove thw directory from the \_::$Sequence
 */
 $GLOBALS["SEQUENCES_PATCH"] = array();
 
 /* Don't change the codes below: */
-if(realpath(__DIR__.DIRECTORY_SEPARATOR."global.php")) include_once __DIR__.DIRECTORY_SEPARATOR."global.php";
+$directory = __DIR__.DIRECTORY_SEPARATOR;
+if(realpath($directory."global.php")) include_once $directory."global.php";
 $GLOBALS["NEST"] = empty($GLOBALS["ASEQ"])?0:preg_match_all("/(?<=\S|\s)\.(?=\S|\s)/",$ASEQ)+1;
 if(!isset($GLOBALS["HOST"])){
 	$GLOBALS["HOST"] = (isset($_SERVER['HTTPS'])?"https://":"http://");
+	$http_host = strtolower(trim($_SERVER["HTTP_HOST"]??""));
 	if($NEST > 0){
 		$host_parts = [];
-		if(preg_match("/(\d+\.)+$/",$_SERVER["HTTP_HOST"]))
-			$host_parts = explode(".", strtolower(trim($_SERVER["HTTP_HOST"])));
-		elseif(preg_match("/localhost(:\d{,6})?$/", $_SERVER["HTTP_HOST"]))
-			$host_parts = [strtolower(trim($_SERVER["HTTP_HOST"])), ""];
-		else $host_parts = explode(".", strtolower(trim($_SERVER["HTTP_HOST"])));
+		if(preg_match("/(\d+\.)+$/",$http_host))
+			$host_parts = explode(".", $http_host);
+		elseif(preg_match("/localhost(:\d{,6})?$/", $http_host))
+			$host_parts = [...explode(".", $http_host), ""];
+		else $host_parts = explode(".", $http_host);
 		$hpc = count($host_parts);
 		$GLOBALS["HOST"] .= $host_parts[$hpc-(1+$NEST)];
 		for ($i = $NEST; $i > 0; $i--) $GLOBALS["HOST"] .= ".".$host_parts[$hpc-$i];
 		$GLOBALS["HOST"] = trim($GLOBALS["HOST"], ".");
     }
-	else $GLOBALS["HOST"] .= strtolower(trim($_SERVER["HTTP_HOST"]));
+	else $GLOBALS["HOST"] .= $http_host;
 }
-
-$directory = __DIR__.DIRECTORY_SEPARATOR;
 
 $GLOBALS["BASE_ROOT"] = $GLOBALS["HOST"]."/".$GLOBALS["BASE"]."/";
 $GLOBALS["BASE_DIR"] = $directory;
@@ -55,7 +55,7 @@ for ($i = $NEST; $i > 0; $i--) $GLOBALS["BASE_DIR"] .= "..".DIRECTORY_SEPARATOR;
 $GLOBALS["BASE_DIR"] .= $GLOBALS["BASE"].DIRECTORY_SEPARATOR;
 
 /* Convert sub domains to sub directories */
-$aseq = $GLOBALS["NEST"]>0?preg_replace("/(?<=\S|\s)\.(?=\S|\s)/", "/", $GLOBALS["ASEQ"])."/":"";
+$aseq = $GLOBALS["NEST"]>0?preg_replace("/(?<=\S|\s)\.(?=\S|\s)/", "/", $GLOBALS["ASEQ"]??"")."/":"";
 if(isset($GLOBALS["DIR"])) $GLOBALS["SEQUENCES"][$directory] = $GLOBALS["HOST"]."/".$aseq;
 else {
 	$GLOBALS["ASEQBASE"] = $GLOBALS["ASEQ"];
@@ -79,5 +79,4 @@ if(count($GLOBALS["SEQUENCES_PATCH"]) > 0){
 	}
 }
 
-require_once($GLOBALS["BASE_DIR"] . "index.php");
-?>
+require_once($GLOBALS["BASE_DIR"]."index.php");

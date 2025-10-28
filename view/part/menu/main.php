@@ -7,5 +7,5 @@ $module->Items = \_::$Info->MainMenus;
 $module->AllowItemsImage = false;
 $module->AllowSubItemsImage = true;
 $module->AllowFixed = false;
-dip($module, $data);
+pod($module, $data);
 $module->Render();
