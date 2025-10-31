@@ -46,7 +46,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
             Html::Field("text", "MailSubject", "Reply to your message: " . between($r["Subject"], "in " . \_::$Info->Name), "Reply subject", "Subject"),
             Html::Field("content", "MailMessage", "Dear " . $r["Name"] . "," . "\n\r\n\r\n\r" .
                 join("\n\r", [
-                    \_::$User->MakeSign("Sincerely"),
+                    \_::$User->GenerateSign("Sincerely"),
                     "",
                     "On " . Convert::ToShownDateTimeString($r["CreateTime"]) . " " . $r["Name"] . " &amp;lt;" . $r["From"] . "&amp;gt; wrote:",
                     "\"\"",
@@ -148,7 +148,7 @@ $module->CellsTypes = [
         $std = new stdClass();
         $std->Title = "Message";
         $std->Type = "content";
-        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$User->MakeSign("Sincerely");
+        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$User->GenerateSign("Sincerely");
         return $std;
     },
     "Attach" => "json",
