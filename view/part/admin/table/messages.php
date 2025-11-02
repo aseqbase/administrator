@@ -28,7 +28,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
             "Access" => \_::$User->AdminAccess,
             "Status" => -1
         ]);
-        deliverSpark($res);
+        deliverBreaker($res);
     } else
         deliver($res);
 })->Patch(function () use (&$form) {

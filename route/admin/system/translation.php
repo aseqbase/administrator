@@ -48,13 +48,13 @@ use MiMFa\Library\Script;
         }
         $c = count($dic);
         if ($c > 0 && \_::$Back->Translate->SetAll($dic))
-            deliverSpark(Html::Success("$c key values setted successfuly in lexicon!"));
+            deliverBreaker(Html::Success("$c key values setted successfuly in lexicon!"));
         else
             error("There occurred a problem!");
     })
     ->Delete(function () {//Deletes
         if (\_::$Back->Translate->ClearAll())
-            deliverSpark(Html::Success("All key values cleared successfuly from the lexicon!"));
+            deliverBreaker(Html::Success("All key values cleared successfuly from the lexicon!"));
         else
             error("There occurred a problem!");
     })
