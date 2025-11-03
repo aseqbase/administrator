@@ -5,7 +5,7 @@
 \_::$Config->DisplayStartupError = \_::$Config->DisplayStartupError?:1;
 \_::$Back->DataBaseError = \_::$Back->DataBaseError?:1;
 if (\_::$User->GetAccess(\_::$User->AdminAccess)) {
-    \_::$Config->AdminOrigin = array_key_first(\_::$Sequence) === __DIR__.DIRECTORY_SEPARATOR?0:1;
+    \_::$Config->AdminOrigin = array_key_first(\_::$Sequence) === __DIR__.DIRECTORY_SEPARATOR?1:2;
     $name = \_::$Router->Name ?? "qb";
     if(\_::$Config->AdminOrigin===0) \_::$Router = new Router(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequence)[\_::$Config->AdminOrigin+1], array_values(\_::$Sequence)[\_::$Config->AdminOrigin+1]);
     if(\_::$Back->DataBaseAddNameToPrefix) \_::$Back->DataBasePrefix = str_replace("{$name}_", (\_::$Router->Name ?? "qb")."_", \_::$Back->DataBasePrefix);
