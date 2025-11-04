@@ -91,7 +91,7 @@ $module->ControlHandler = function ($r, $func) {
 };
 $module->AppendControlsCreator = function ($id, $r) use ($module) {
     $st = intval($r["Status"] ?? 0);
-    $d = "sendPatchRequest(null, {
+    $d = "sendPatch(null, {
         Id:" . Script::Convert($r["Id"]) . ",
         Status:" . Script::Convert($st = $st < 0 ? 0 : $st) . ",
         Name:" . Script::Convert($r["Name"]) . ",

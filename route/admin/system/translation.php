@@ -75,7 +75,7 @@ use MiMFa\Library\Script;
                 Html::Button("Import Lexicon", Script::ImportFile($timeout = 300000)) .
                 Html::Button("Clear Lexicon", "
                         if(confirm('Are you sure to clear all lexicon records?'))
-                            sendDeleteRequest(null, {'truncate':true}, '.content');
+                            sendDelete(null, {'truncate':true}, '.content');
                     ", ["class" => "error"])
                 ,
                 ["class" => "content"]
