@@ -1,5 +1,5 @@
 <?php
-use \MiMFa\Library\Html;
+use \MiMFa\Library\Struct;
 
 
 module("RingTabs");
@@ -15,19 +15,19 @@ $module->Items = array(
 );
 pod($module, $data);
 response(
-	Html::Style("
+	Struct::Style("
 		.page-home {
 			padding: 10px 10px 50px;
 		}
 	") .
-	Html::Page(
+	Struct::Page(
 		part("small-header", print: false) .
 		$module->Handle() .
 		(!\_::$User->AllowSigning || \_::$User->GetAccess(\_::$User->UserAccess) ? "" :
-			Html::Center(
-				Html::SmallSlot(
-					Html::Button("Sign In", \_::$User->InHandlerPath) .
-					Html::Button("Sign up", \_::$User->UpHandlerPath)
+			Struct::Center(
+				Struct::SmallSlot(
+					Struct::Button("Sign In", \_::$User->InHandlerPath) .
+					Struct::Button("Sign up", \_::$User->UpHandlerPath)
 					,
 					["data-aos" => "zoom-out", "data-aos-duration" => "600"]
 				),

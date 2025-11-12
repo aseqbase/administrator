@@ -1,7 +1,7 @@
 <?php
-inspect(\_::$User->AdminAccess);
+auth(\_::$User->AdminAccess);
 use MiMFa\Library\Convert;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Module\Table;
 module("Table");
 $module = new Table(table("Comment"));
@@ -19,9 +19,9 @@ $module->Updatable = true;
 $module->UpdateAccess = \_::$User->AdminAccess;
 $module->CellsValues = [
     "Title" =>function($v, $k, $r){
-        return $r["Post"]?Html::Link($v, \_::$Address->ContentRoot. $r["Post"],["target"=>"_blank"]):null;
+        return $r["Post"]?Struct::Link($v, \_::$Address->ContentRoot. $r["Post"],["target"=>"_blank"]):null;
     },
-    "Contact" =>fn($v)=> Html::Link($v, "mailto:$v")
+    "Contact" =>fn($v)=> Struct::Link($v, "mailto:$v")
 ];
 $module->CellsTypes = [
     "Id" =>\_::$User->GetAccess(\_::$User->SuperAccess)?"disabled":false,

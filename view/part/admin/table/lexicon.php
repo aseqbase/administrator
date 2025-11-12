@@ -1,5 +1,5 @@
 <?php
-inspect(\_::$User->AdminAccess);
+auth(\_::$User->AdminAccess);
 
 use MiMFa\Library\Convert;
 module("Table");

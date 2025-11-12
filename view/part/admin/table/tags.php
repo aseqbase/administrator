@@ -1,5 +1,5 @@
 <?php
-inspect(\_::$User->AdminAccess);
+auth(\_::$User->AdminAccess);
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
@@ -11,7 +11,7 @@ $module->Updatable = true;
 $module->UpdateAccess = \_::$User->AdminAccess;
 $module->CellsValues = [
     "Name"=>function($v, $k, $r){
-        return \MiMFa\Library\Html::Link($v,\_::$Address->TagRoot.$r["Id"], ["target"=>"blank"]);
+        return \MiMFa\Library\Struct::Link($v,\_::$Address->TagRoot.$r["Id"], ["target"=>"blank"]);
     }
 ];
 $module->CellsTypes = [

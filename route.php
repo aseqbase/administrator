@@ -16,14 +16,14 @@
                 status: \_::$User->ActiveStatus,
             )!= false){
                 view(\_::$Front->DefaultViewName, ["Content"=>
-                MiMFa\Library\Html::Heading1("Your Admin Account Created Successfully").
-                MiMFa\Library\Html::Table([
+                MiMFa\Library\Struct::Heading1("Your Admin Account Created Successfully").
+                MiMFa\Library\Struct::Table([
                     ["Name", "Value",  "Description"],
                     ["UserName", $un,  ""],
                     ["Password", $ps,  "Please change it immediately"],
                     ["Email", $em, isEmail($em)?"":"It is a fake email, Please change it immediately"]
                 ]).
-                (\_::$User->SignIn($un, $ps)!==false?MiMFa\Library\Html::Success("You are signed in now!"):"")
+                (\_::$User->SignIn($un, $ps)!==false?MiMFa\Library\Struct::Success("You are signed in now!"):"")
             ]);
         }
         } else

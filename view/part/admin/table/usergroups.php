@@ -1,5 +1,5 @@
 <?php
-inspect(\_::$User->AdminAccess);
+auth(\_::$User->AdminAccess);
 use MiMFa\Module\Table;
 module("Table");
 $module = new Table(\_::$User->GroupDataTable);

@@ -1,9 +1,9 @@
 <?php
-inspect(\_::$User->AdminAccess);
+auth(\_::$User->AdminAccess);
 
 use MiMFa\Library\Contact;
 use MiMFa\Library\Convert;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 use MiMFa\Module\Form;
 use MiMFa\Module\Table;
@@ -17,14 +17,14 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
         $rec = receivePost();
         table("Message")->Update("`Id`=:Id", [":Id" => $rec["Id"], "Status" => $rec["Status"], "UpdateTime" => \_::$Config->CurrentDateTime]);
         table("Message")->Insert([
-            "ReplyId" => $rec["Id"],
+            "RootId" => $rec["Id"],
             "UserId" => \_::$User ? \_::$User->Id : null,
             "Name" => \_::$User ? \_::$User->Name : null,
             "From" => $rec["SenderEmail"],
             "To" => $rec["ReceiverEmail"],
             "Subject" => $rec["MailSubject"],
             "Content" => $rec["MailMessage"],
-            "Type" => \_::$Address->Url,
+            "Relation" => \_::$Address->Url,
             "Access" => \_::$User->AdminAccess,
             "Status" => -1
         ]);
@@ -39,12 +39,12 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
         title: "Reply to " . $r["Name"],
         method: "POST",
         children: [
-            Html::Field("hidden", "Id", $r["Id"]),
-            Html::Field("number", "Status", $r["Status"] < 1 ? 1 : $r["Status"] + 1, "To indicate how many reply sent them", "Reply Time"),
-            Html::Field($isadmin ? "email" : "hidden", "SenderEmail", $sender, "Email sender", "From"),
-            Html::Field("email", "ReceiverEmail", $r["From"], "Email recipient", "To"),
-            Html::Field("text", "MailSubject", "Reply to your message: " . between($r["Subject"], "in " . \_::$Info->Name), "Reply subject", "Subject"),
-            Html::Field("content", "MailMessage", "Dear " . $r["Name"] . "," . "\n\r\n\r\n\r" .
+            Struct::Field("hidden", "Id", $r["Id"]),
+            Struct::Field("number", "Status", $r["Status"] < 1 ? 1 : $r["Status"] + 1, "To indicate how many reply sent them", "Reply Time"),
+            Struct::Field($isadmin ? "email" : "hidden", "SenderEmail", $sender, "Email sender", "From"),
+            Struct::Field("email", "ReceiverEmail", $r["From"], "Email recipient", "To"),
+            Struct::Field("text", "MailSubject", "Reply to your message: " . between($r["Subject"], "in " . \_::$Info->Name), "Reply subject", "Subject"),
+            Struct::Field("content", "MailMessage", "Dear " . $r["Name"] . "," . "\n\r\n\r\n\r" .
                 join("\n\r", [
                     \_::$User->GenerateSign("Sincerely"),
                     "",
@@ -68,12 +68,12 @@ if ($form->Status)
 module("Table");
 $module = new Table(table("Message"));
 $module->SelectQuery = "
-    SELECT *, ReplyId AS 'ReplyTo'
+    SELECT *, RootId AS 'ReplyTo'
     FROM {$module->DataTable->Name}
     ORDER BY `CreateTime` DESC
 ";
 $module->KeyColumns = ["Subject"];
-$module->IncludeColumns = ["ReplyTo", "Name", "Subject", "Content", "From", "To", "Type", "CreateTime"];
+$module->IncludeColumns = ["ReplyTo", "Name", "Subject", "Content", "From", "To", "Relation", "CreateTime"];
 $module->AllowServerSide = true;
 $module->Updatable = true;
 $module->ModifyAccess = \_::$User->SuperAccess;
@@ -104,12 +104,12 @@ $module->AppendControlsCreator = function ($id, $r) use ($module) {
     (data, err) => {
         if(!err) " . $module->Modal->InitializeScript(null, null, '${data}') . "
     });";
-    return [Html::Icon("reply", $d), $st ? "#$st" : ""];
+    return [Struct::Icon("reply", $d), $st ? "#$st" : ""];
 };
 $module->CellsValues = [
-    "ReplyTo" => fn($v) => $v?Html::Icon("eye", "{$module->Modal->Name}_View('$v');"):"",
-    "From" => fn($v) => $v?Html::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$User->Name."', From:'".\_::$User->Email."', To:'$v'});"):"",
-    "To" => fn($v) => $v?Html::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$User->Name."', From:'".\_::$User->Email."', To:'$v'});"):""
+    "ReplyTo" => fn($v) => $v?Struct::Icon("eye", "{$module->Modal->Name}_View('$v');"):"",
+    "From" => fn($v) => $v?Struct::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$User->Name."', From:'".\_::$User->Email."', To:'$v'});"):"",
+    "To" => fn($v) => $v?Struct::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$User->Name."', From:'".\_::$User->Email."', To:'$v'});"):""
 ];
 $issuper = \_::$User->GetAccess(\_::$User->SuperAccess);
 $module->CellsTypes = [
@@ -152,7 +152,7 @@ $module->CellsTypes = [
         return $std;
     },
     "Attach" => "json",
-    "Type" => "string",
+    "Relation" => "string",
     "Status" => function () {
         $std = new stdClass();
         $std->Title = "Replyed Times";

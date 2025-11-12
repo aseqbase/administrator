@@ -1,7 +1,7 @@
 <?php
-inspect(\_::$User->AdminAccess);
+auth(\_::$User->AdminAccess);
 
-use \MiMFa\Library\Html;
+use \MiMFa\Library\Struct;
 use \MiMFa\Library\Convert;
 use MiMFa\Library\Script;
 
@@ -48,13 +48,13 @@ use MiMFa\Library\Script;
         }
         $c = count($dic);
         if ($c > 0 && \_::$Back->Translate->SetAll($dic))
-            deliverBreaker(Html::Success("$c key values setted successfuly in lexicon!"));
+            deliverBreaker(Struct::Success("$c key values setted successfuly in lexicon!"));
         else
             error("There occurred a problem!");
     })
     ->Delete(function () {//Deletes
         if (\_::$Back->Translate->ClearAll())
-            deliverBreaker(Html::Success("All key values cleared successfuly from the lexicon!"));
+            deliverBreaker(Struct::Success("All key values cleared successfuly from the lexicon!"));
         else
             error("There occurred a problem!");
     })
@@ -65,15 +65,15 @@ use MiMFa\Library\Script;
             "Title" => "Translation",
             "Image" => "language",
             "Updatable" => $upd,
-            "Content" => Html::Center(
+            "Content" => Struct::Center(
                 (
                     $upd ?
-                    Html::Button("View Lexicon", "/" . \_::$Address->Direction) :
-                    Html::Button("Edit Lexicon", "/" . \_::$Address->Direction . "?update=true")
+                    Struct::Button("View Lexicon", "/" . \_::$Address->Direction) :
+                    Struct::Button("Edit Lexicon", "/" . \_::$Address->Direction . "?update=true")
                 ) .
-                Html::Button("Export Lexicon", "/" . \_::$Address->Direction . "?export=true", ["target" => "blank"]) .
-                Html::Button("Import Lexicon", Script::ImportFile($timeout = 300000)) .
-                Html::Button("Clear Lexicon", "
+                Struct::Button("Export Lexicon", "/" . \_::$Address->Direction . "?export=true", ["target" => "blank"]) .
+                Struct::Button("Import Lexicon", Script::ImportFile($timeout = 300000)) .
+                Struct::Button("Clear Lexicon", "
                         if(confirm('Are you sure to clear all lexicon records?'))
                             sendDelete(null, {'truncate':true}, '.content');
                     ", ["class" => "error"])

@@ -35,7 +35,8 @@ if (\_::$User->GetAccess(\_::$User->AdminAccess)) {
                 array("Name" => "USERS", "Path" => "/admin/user/users", "Access" => \_::$User->AdminAccess, "Description" => "To manage all the website's users", "Image" => "user"),
                 array("Name" => "GROUPS", "Path" => "/admin/user/groups", "Access" => \_::$User->AdminAccess, "Description" => "To manage all the user groups of the website", "Image" => "user-group"),
                 array("Name" => "COMMENTS", "Path" => "/admin/user/comments", "Access" => \_::$User->AdminAccess, "Description" => "To manage all received comments", "Image" => "comment"),
-                array("Name" => "MESSAGES", "Path" => "/admin/user/messages", "Access" => \_::$User->AdminAccess, "Description" => "To manage all received emails and messages", "Image" => "envelope")
+                array("Name" => "MESSAGES", "Path" => "/admin/user/messages", "Access" => \_::$User->AdminAccess, "Description" => "To manage all received emails and messages", "Image" => "envelope"),
+                array("Name" => "SESSIONS", "Path" => "/admin/user/sessions", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'sessions'", "Image" => "clock")
             )
         ),
         // "Admin-Plugin" => array(

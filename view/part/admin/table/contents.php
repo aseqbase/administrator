@@ -1,5 +1,5 @@
 <?php
-inspect(\_::$User->AdminAccess);
+auth(\_::$User->AdminAccess);
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
@@ -21,18 +21,18 @@ $users = table("User")->SelectPairs("Id" , "Name" );
 $langs = \_::$Back->Translate->GetLanguages();
 $module->CellsValues = [
     "Title"=>function($v, $k, $r){
-        return \MiMFa\Library\Html::Link($v,\_::$Address->ContentRoot.$r["Id"], ["target"=>"blank"]);
+        return \MiMFa\Library\Struct::Link($v,\_::$Address->ContentRoot.$r["Id"], ["target"=>"blank"]);
     },
     "Category"=>function($v, $k, $r){
         $val = trim(\_::$Back->Query->GetCategoryRoute(first(Convert::FromJson($v)))??"", "/\\");
-        if(isValid($val)) return \MiMFa\Library\Html::Link($val,\_::$Address->CategoryRoot.$val, ["target"=>"blank"]);
+        if(isValid($val)) return \MiMFa\Library\Struct::Link($val,\_::$Address->CategoryRoot.$val, ["target"=>"blank"]);
         return $v;
     },
     "Lang"=>function($v) use($langs){
         return $v?get(get($langs, get(Convert::FromJson($v), "lang")), "Title")??"Default":"Default";
     },
     "Status"=>function($v){
-        return \MiMFa\Library\Html::Span($v>0?"Published":($v<0?"Unpublished":"Drafted"));
+        return \MiMFa\Library\Struct::Span($v>0?"Published":($v<0?"Unpublished":"Drafted"));
     }
 ];
 $module->CellsTypes = [
