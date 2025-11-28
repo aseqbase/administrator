@@ -36,7 +36,7 @@ $module->CellsValues = [
     }
 ];
 $module->CellsTypes = [
-    "Id" =>\_::$User->GetAccess(\_::$User->SuperAccess)?"disabled":false,
+    "Id" =>\_::$User->HasAccess(\_::$User->SuperAccess)?"disabled":false,
     "Name" =>"string",
     "Type" =>"enum",
     "Title" =>"string",
@@ -78,7 +78,7 @@ $module->CellsTypes = [
     "AuthorId" =>function($t, $v) use($users){
         $std = new stdClass();
         $std->Title = "Author";
-        $std->Type = \_::$User->GetAccess(\_::$User->SuperAccess)?"select":"hidden";
+        $std->Type = \_::$User->HasAccess(\_::$User->SuperAccess)?"select":"hidden";
         $std->Options = $users;
         if(!isValid($v)) $std->Value = \_::$User->Id;
         return $std;
@@ -86,19 +86,19 @@ $module->CellsTypes = [
     "EditorId" =>function($t, $v) use($users){
         $std = new stdClass();
         $std->Title = "Editor";
-        $std->Type = \_::$User->GetAccess(\_::$User->SuperAccess)?"select":"hidden";
+        $std->Type = \_::$User->HasAccess(\_::$User->SuperAccess)?"select":"hidden";
         $std->Options = $users;
         if(!isValid($v)) $std->Value = \_::$User->Id;
         return $std;
     },
     "UpdateTime" =>function($t, $v){
         $std = new stdClass();
-        $std->Type = \_::$User->GetAccess(\_::$User->SuperAccess)?"calendar":"hidden";
+        $std->Type = \_::$User->HasAccess(\_::$User->SuperAccess)?"calendar":"hidden";
         $std->Value = Convert::ToDateTimeString();
         return $std;
     },
     "CreateTime" => function($t, $v){
-        return \_::$User->GetAccess(\_::$User->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
+        return \_::$User->HasAccess(\_::$User->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
     "MetaData" =>function ($t, $v, $k, $r) {
         $std = new stdClass();

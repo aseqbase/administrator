@@ -33,7 +33,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
         deliver($res);
 })->Patch(function () use (&$form) {
     $r = receivePatch();
-    $isadmin = \_::$User->GetAccess(\_::$User->AdminAccess);
+    $isadmin = \_::$User->HasAccess(\_::$User->AdminAccess);
     $sender = $isadmin ? ($r["To"] ?? \_::$Info->ReceiverEmail) : \_::$User->Email;
     $form->Set(
         title: "Reply to " . $r["Name"],
@@ -111,7 +111,7 @@ $module->CellsValues = [
     "From" => fn($v) => $v?Struct::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$User->Name."', From:'".\_::$User->Email."', To:'$v'});"):"",
     "To" => fn($v) => $v?Struct::Button($v, "{$module->Modal->Name}_Create({Name:'".\_::$User->Name."', From:'".\_::$User->Email."', To:'$v'});"):""
 ];
-$issuper = \_::$User->GetAccess(\_::$User->SuperAccess);
+$issuper = \_::$User->HasAccess(\_::$User->SuperAccess);
 $module->CellsTypes = [
     "Id" =>  $issuper? "disabled" : false,
     "UserId" => function ($t, $v, $k, $r) use($issuper) {
@@ -169,12 +169,12 @@ $module->CellsTypes = [
     },
     "UpdateTime" => function ($t, $v) {
         $std = new stdClass();
-        $std->Type = \_::$User->GetAccess(\_::$User->SuperAccess) ? "calendar" : "hidden";
+        $std->Type = \_::$User->HasAccess(\_::$User->SuperAccess) ? "calendar" : "hidden";
         $std->Value = Convert::ToDateTimeString();
         return $std;
     },
     "CreateTime" => function ($t, $v) {
-        return \_::$User->GetAccess(\_::$User->SuperAccess) ? "calendar" : (isValid($v) ? "hidden" : false);
+        return \_::$User->HasAccess(\_::$User->SuperAccess) ? "calendar" : (isValid($v) ? "hidden" : false);
     },
     "MetaData" => "json"
 ];

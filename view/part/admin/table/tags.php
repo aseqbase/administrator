@@ -21,12 +21,12 @@ $module->CellsTypes = [
     "Description" =>"strings",
     "UpdateTime" =>function($t, $v){
         $std = new stdClass();
-        $std->Type = \_::$User->GetAccess(\_::$User->SuperAccess)?"calendar":"hidden";
+        $std->Type = \_::$User->HasAccess(\_::$User->SuperAccess)?"calendar":"hidden";
         $std->Value = Convert::ToDateTimeString();
         return $std;
     },
     "CreateTime" => function($t, $v){
-        return \_::$User->GetAccess(\_::$User->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
+        return \_::$User->HasAccess(\_::$User->SuperAccess)?"calendar":(isValid($v)?"hidden":false);
     },
     "MetaData" =>"json"
 ];

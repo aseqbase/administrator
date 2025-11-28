@@ -6,7 +6,7 @@ use \MiMFa\Library\Convert;
 use MiMFa\Library\Script;
 
 (new Router())
-    ->if(!\_::$User->GetAccess(\_::$User->AdminAccess))
+    ->if(!\_::$User->HasAccess(\_::$User->AdminAccess))
     ->Default(function () {
         part(\_::$User->InHandlerPath);
     })

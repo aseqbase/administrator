@@ -29,7 +29,7 @@
         } else
             route(404);
     })
-    ->if(!\_::$User->GetAccess(\_::$User->AdminAccess))
+    ->if(!\_::$User->HasAccess(\_::$User->AdminAccess))
     ->On("$|admin")->Default(fn() => view("part", ["Name" => \_::$User->InHandlerPath]))
     ->On()->Default(\_::$Router->DefaultRouteName)
     ->else()
