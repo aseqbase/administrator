@@ -15,7 +15,7 @@ $module->ExcludeColumns = ["MetaData" ];
 $module->Updatable = true;
 $module->AllowServerSide = true;
 $module->UpdateAccess = \_::$User->AdminAccess;
-$module->CekkValue = [
+$module->CellValue = [
     "CreateTime"=>fn($v)=> Convert::ToShownDateTimeString($v)
 ];
 $module->CellsTypes = [
