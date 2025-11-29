@@ -33,7 +33,9 @@ $module->CellsValues = [
     },
     "Status"=>function($v){
         return \MiMFa\Library\Struct::Span($v>0?"Published":($v<0?"Unpublished":"Drafted"));
-    }
+    },
+    "CreateTime"=>fn($v)=> Convert::ToShownDateTimeString($v),
+    "UpdateTime"=>fn($v)=> Convert::ToShownDateTimeString($v)
 ];
 $module->CellsTypes = [
     "Id" =>\_::$User->HasAccess(\_::$User->SuperAccess)?"disabled":false,

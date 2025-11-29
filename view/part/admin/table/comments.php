@@ -21,7 +21,9 @@ $module->CellsValues = [
     "Title" =>function($v, $k, $r){
         return $r["Post"]?Struct::Link($v, \_::$Address->ContentRoot. $r["Post"],["target"=>"_blank"]):null;
     },
-    "Contact" =>fn($v)=> Struct::Link($v, "mailto:$v")
+    "Contact" =>fn($v)=> Struct::Link($v, "mailto:$v"),
+    "CreateTime"=>fn($v)=> Convert::ToShownDateTimeString($v),
+    "UpdateTime"=>fn($v)=> Convert::ToShownDateTimeString($v)
 ];
 $module->CellsTypes = [
     "Id" =>\_::$User->HasAccess(\_::$User->SuperAccess)?"disabled":false,

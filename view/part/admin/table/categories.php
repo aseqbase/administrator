@@ -18,7 +18,8 @@ $module->UpdateAccess = \_::$User->AdminAccess;
 $module->CellsValues = [
     "Name"=>function($v, $k, $r){
         return \MiMFa\Library\Struct::Link($v,\_::$Address->CategoryRoot.$r["Id"], ["target"=>"blank"]);
-    }
+    },
+    "UpdateTime"=>fn($v)=> Convert::ToShownDateTimeString($v)
 ];
 $module->CellsTypes = [
     "Id" =>"number",

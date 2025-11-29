@@ -1,5 +1,7 @@
 <?php
 auth(\_::$User->AdminAccess);
+
+use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
 module("Table");
 $module = new Table(\_::$User->GroupDataTable);
@@ -9,6 +11,10 @@ $module->ExcludeColumns = ["Id" , "Name" , "MetaData" ];
 $module->Updatable = true;
 $module->AllowServerSide = true;
 $module->UpdateAccess = \_::$User->AdminAccess;
+$module->CekkValue = [
+    "CreateTime"=>fn($v)=> Convert::ToShownDateTimeString($v),
+    "UpdateTime"=>fn($v)=> Convert::ToShownDateTimeString($v)
+];
 $module->CellsTypes = [
     "Id" =>"number",
     "Name" =>"string",
