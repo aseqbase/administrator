@@ -19,7 +19,7 @@ $module->Updatable = true;
 $module->UpdateAccess = \_::$User->AdminAccess;
 $module->CellsValues = [
     "Title" =>function($v, $k, $r){
-        return $r["Post"]?Struct::Link($v, \_::$Address->ContentRoot. $r["Post"],["target"=>"_blank"]):null;
+        return $r["Post"]?Struct::Link($v, \_::$Router->ContentRoot. $r["Post"],["target"=>"_blank"]):null;
     },
     "Contact" =>fn($v)=> Struct::Link($v, "mailto:$v"),
     "CreateTime"=>fn($v)=> Convert::ToShownDateTimeString($v),

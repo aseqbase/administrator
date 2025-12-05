@@ -24,7 +24,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
             "To" => $rec["ReceiverEmail"],
             "Subject" => $rec["MailSubject"],
             "Content" => $rec["MailMessage"],
-            "Relation" => \_::$Address->Url,
+            "Relation" => \_::$User->Url,
             "Access" => \_::$User->AdminAccess,
             "Status" => -1
         ]);

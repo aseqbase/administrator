@@ -8,7 +8,7 @@ else {
     $form = \MiMFa\Library\Revise::GetForm(\_::$Front);
     $form->Title = "Edit Template";
     $form->Id = "EditTemplate";
-    $form->Buttons = \MiMFa\Library\Struct::Button("Restore",\_::$Address->Path."?restore=true");
+    $form->Buttons = \MiMFa\Library\Struct::Button("Restore",\_::$User->Path."?restore=true");
     $form->Render();
 }
 ?>

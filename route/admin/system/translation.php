@@ -15,7 +15,7 @@ use MiMFa\Library\Script;
     ->Get(function () {//Exports
         $cells = [""];
         $dic = [];
-        foreach (\_::$Back->Translate->GetAll("ORDER BY `KeyCode` ASC") as $value) {
+        foreach (\_::$Front->Translate->GetAll("ORDER BY `KeyCode` ASC") as $value) {
             foreach ($value as $k => $v)
                 $dic[$k] = $v;
             $cells[] = loop($dic, function ($v) {
@@ -47,13 +47,13 @@ use MiMFa\Library\Script;
             $c++;
         }
         $c = count($dic);
-        if ($c > 0 && \_::$Back->Translate->SetAll($dic))
+        if ($c > 0 && \_::$Front->Translate->SetAll($dic))
             deliverBreaker(Struct::Success("$c key values setted successfuly in lexicon!"));
         else
             error("There occurred a problem!");
     })
     ->Delete(function () {//Deletes
-        if (\_::$Back->Translate->ClearAll())
+        if (\_::$Front->Translate->ClearAll())
             deliverBreaker(Struct::Success("All key values cleared successfuly from the lexicon!"));
         else
             error("There occurred a problem!");
@@ -68,10 +68,10 @@ use MiMFa\Library\Script;
             "Content" => Struct::Center(
                 (
                     $upd ?
-                    Struct::Button("View Lexicon", "/" . \_::$Address->Direction) :
-                    Struct::Button("Edit Lexicon", "/" . \_::$Address->Direction . "?update=true")
+                    Struct::Button("View Lexicon", "/" . \_::$User->Direction) :
+                    Struct::Button("Edit Lexicon", "/" . \_::$User->Direction . "?update=true")
                 ) .
-                Struct::Button("Export Lexicon", "/" . \_::$Address->Direction . "?export=true", ["target" => "blank"]) .
+                Struct::Button("Export Lexicon", "/" . \_::$User->Direction . "?export=true", ["target" => "blank"]) .
                 Struct::Button("Import Lexicon", Script::ImportFile($timeout = 300000)) .
                 Struct::Button("Clear Lexicon", "
                         if(confirm('Are you sure to clear all lexicon records?'))
