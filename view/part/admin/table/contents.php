@@ -21,11 +21,11 @@ $users = table("User")->SelectPairs("Id" , "Name" );
 $langs = \_::$Front->Translate->GetLanguages();
 $module->CellsValues = [
     "Title"=>function($v, $k, $r){
-        return \MiMFa\Library\Struct::Link($v,\_::$Router->ContentRoot.$r["Id"], ["target"=>"blank"]);
+        return \MiMFa\Library\Struct::Link($v,\_::$Address->ContentRoot.$r["Id"], ["target"=>"blank"]);
     },
     "Category"=>function($v, $k, $r){
         $val = trim(\_::$Back->Query->GetCategoryRoute(first(Convert::FromJson($v)))??"", "/\\");
-        if(isValid($val)) return \MiMFa\Library\Struct::Link($val,\_::$Router->CategoryRoot.$val, ["target"=>"blank"]);
+        if(isValid($val)) return \MiMFa\Library\Struct::Link($val,\_::$Address->CategoryRoot.$val, ["target"=>"blank"]);
         return $v;
     },
     "Lang"=>function($v) use($langs){

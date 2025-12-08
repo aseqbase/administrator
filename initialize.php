@@ -6,11 +6,11 @@
 \_::$Back->DataBaseError = \_::$Back->DataBaseError?:1;
 if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
     \_::$Config->AdminOrigin = array_key_first(\_::$Sequence) === __DIR__.DIRECTORY_SEPARATOR?1:2;
-    $name = \_::$Router->Name ?? "qb";
+    $name = \_::$Address->Name ?? "qb";
     if(\_::$Config->AdminOrigin===0) \_::$Router = new Router(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequence)[\_::$Config->AdminOrigin+1], array_values(\_::$Sequence)[\_::$Config->AdminOrigin+1]);
-    if(\_::$Back->DataBaseAddNameToPrefix) \_::$Back->DataBasePrefix = str_replace("{$name}_", (\_::$Router->Name ?? "qb")."_", \_::$Back->DataBasePrefix);
-    \_::$Info->SenderEmail = "do-not-reply@" . getDomain(\_::$Router->Root);
-    \_::$Info->ReceiverEmail = "info@" . getDomain(\_::$Router->Root);
+    if(\_::$Back->DataBaseAddNameToPrefix) \_::$Back->DataBasePrefix = str_replace("{$name}_", (\_::$Address->Name ?? "qb")."_", \_::$Back->DataBasePrefix);
+    \_::$Info->SenderEmail = "do-not-reply@" . getDomain(\_::$Address->Root);
+    \_::$Info->ReceiverEmail = "info@" . getDomain(\_::$Address->Root);
     \_::$Info->MainMenus = \_::$Info->SideMenus = array(
         "Admin-Main" => array("Name" => "DASHBOARD", "Path" => "/sign/dashboard", "Access" => \_::$User->AdminAccess, "Image" => "home"),
         "Admin-Content" => array(
