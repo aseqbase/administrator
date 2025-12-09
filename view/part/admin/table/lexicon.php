@@ -6,12 +6,15 @@ module("Table");
 $table = table("Translate_Lexicon", prefix: false);
 $langs = \_::$Front->Translate->GetLanguages();
 $module = new \MiMFa\Module\Table($table);
-$module->SelectQuery = $table->SelectQuery(join(",",["KeyCode", ...loop($langs, fn($v, $k)=>"ValueOptions AS '".strtoupper($k)."'")]));
-$module->KeyColumn = "KeyCode";
+$module->SelectQuery = $table->SelectQuery(join(",",["Id","KeyCode", ...loop($langs, fn($v, $k)=>"ValueOptions AS '".strtoupper($k)."'")]));
+$module->ExcludeColumns = ["Id"];
 $module->AllowLabelTranslation = false;
 $module->AllowServerSide = true;
+$module->Controlable = true;
 $module->AddAccess = 
-$module->DuplicateAccess = false;
+$module->RemoveAccess = 
+$module->ModifyAccess = 
+$module->DuplicateAccess = 
 $module->UpdateAccess = \_::$User->AdminAccess;
 
 foreach ($langs as $k=>$value)
@@ -20,6 +23,7 @@ foreach ($langs as $k=>$value)
     };
 
 $module->CellsTypes = [
+    "Id" => "hidden",
     "KeyCode" => "text",
     "ValueOptions" => "json"
 ];
