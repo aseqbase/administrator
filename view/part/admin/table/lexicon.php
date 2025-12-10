@@ -21,7 +21,6 @@ foreach ($langs as $k=>$value)
     $module->CellsValues[$k] = function ($v) use ($k) {
         return getBetween(Convert::FromJson($v), $k, \_::$Front->Translate->Language??"x", "x");
     };
-
 $module->CellsTypes = [
     "Id" => "hidden",
     "KeyCode" => "text",
