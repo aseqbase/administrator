@@ -3,6 +3,7 @@ auth(\_::$User->AdminAccess);
 
 use \MiMFa\Library\Struct;
 use \MiMFa\Library\Convert;
+use MiMFa\Library\Internal;
 use MiMFa\Library\Script;
 
 (new Router())
@@ -19,12 +20,14 @@ use MiMFa\Library\Script;
             foreach ($value as $k => $v)
                 $dic[$k] = $v;
             $cells[] = loop($dic, function ($v) {
-                return $v; });
+                return $v;
+            });
             foreach ($dic as $k => $v)
                 $dic[$k] = null;
         }
         $cells[0] = loop($dic, function ($v, $k) {
-            return $k; });
+            return $k;
+        });
         \MiMFa\Library\Local::Load(Convert::FromCells($cells), "Lexicon.csv");
     })
     ->else()
@@ -60,12 +63,33 @@ use MiMFa\Library\Script;
     })
     ->Get(function () {//Shows
         $upd = getReceived("update");
+        $id = "_" . getId();
         view("part", [
             "Name" => "admin/table/lexicon",
             "Title" => "Translation",
             "Image" => "language",
             "Updatable" => $upd,
             "Content" => Struct::Center(
+                Struct::Container([
+                    [
+                        Struct::Division("A ''sample' 'text''", ["id" => $id]),
+                        Struct::TextsInput(
+                            "Sample text",
+                            "A ''sample' 'text''",
+                            attributes: [
+                                "class"=>"be wide ltr",
+                                "oninput" => \_::$Front->MakeFillScript(
+                                    "#$id",
+                                    function ($txt) {
+                                        return __($txt);
+                                    },
+                                    ["\${this.value}"]
+                                )
+                            ]
+                        )
+                    ]
+                ]) .
+                Struct::$BreakLine.
                 (
                     $upd ?
                     Struct::Button("View Lexicon", "/" . \_::$User->Direction) :
