@@ -1,17 +1,19 @@
 <?php
 \_::$User->AllowSigning = true;
-\_::$Config->ReportError = \_::$Config->ReportError?:E_ALL;
-\_::$Config->DisplayError = \_::$Config->DisplayError?:1;
-\_::$Config->DisplayStartupError = \_::$Config->DisplayStartupError?:1;
-\_::$Back->DataBaseError = \_::$Back->DataBaseError?:1;
+\_::$Back->ReportError = \_::$Back->ReportError ?: E_ALL;
+\_::$Back->DisplayError = \_::$Back->DisplayError ?: 1;
+\_::$Back->DisplayStartupError = \_::$Back->DisplayStartupError ?: 1;
+\_::$Back->DataBaseError = \_::$Back->DataBaseError ?: 1;
 if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
-    \_::$Config->AdminOrigin = array_key_first(\_::$Sequence) === __DIR__.DIRECTORY_SEPARATOR?1:2;
+    \_::$Back->AdminOrigin = array_key_first(\_::$Sequence) === __DIR__ . DIRECTORY_SEPARATOR ? 1 : 2;
     $name = \_::$Address->Name ?? "qb";
-    if(\_::$Config->AdminOrigin===0) \_::$Router = new Router(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequence)[\_::$Config->AdminOrigin+1], array_values(\_::$Sequence)[\_::$Config->AdminOrigin+1]);
-    if(\_::$Back->DataBaseAddNameToPrefix) \_::$Back->DataBasePrefix = str_replace("{$name}_", (\_::$Address->Name ?? "qb")."_", \_::$Back->DataBasePrefix);
-    \_::$Info->SenderEmail = "do-not-reply@" . getDomain(\_::$Address->Root);
-    \_::$Info->ReceiverEmail = "info@" . getDomain(\_::$Address->Root);
-    \_::$Info->MainMenus = \_::$Info->SideMenus = array(
+    if (\_::$Back->AdminOrigin === 0)
+        \_::$Router = new Router(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : null, array_keys(\_::$Sequence)[\_::$Back->AdminOrigin + 1], array_values(\_::$Sequence)[\_::$Back->AdminOrigin + 1]);
+    if (\_::$Back->DataBaseAddNameToPrefix)
+        \_::$Back->DataBasePrefix = str_replace("{$name}_", (\_::$Address->Name ?? "qb") . "_", \_::$Back->DataBasePrefix);
+    \_::$Front->SenderEmail = "do-not-reply@" . getDomain(\_::$Address->Root);
+    \_::$Front->ReceiverEmail = "info@" . getDomain(\_::$Address->Root);
+    \_::$Front->MainMenus = \_::$Front->SideMenus = array(
         "Admin-Main" => array("Name" => "DASHBOARD", "Path" => "/sign/dashboard", "Access" => \_::$User->AdminAccess, "Image" => "home"),
         "Admin-Content" => array(
             "Name" => "CONTENTS",
@@ -74,15 +76,15 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
             )
         ),
         "User-0" => array(
-            "Name" => \_::$Info->Name,
-            "Path" => \_::$Info->Path,
+            "Name" => \_::$Front->Name,
+            "Path" => \_::$Front->Path,
             "Access" => \_::$User->AdminAccess,
             "Description" => "The main menu of the website",
             "Image" => "globe",
-            "Items" => \_::$Info->MainMenus
+            "Items" => \_::$Front->MainMenus
         )
     );
-    \_::$Info->Shortcuts = array(
+    \_::$Front->Shortcuts = array(
         "Admin-1" => array("Name" => "MENU", "Path" => "viewSideMenu()", "Image" => "bars"),
         "Admin-2" => array("Name" => "CONTENTS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/content/contents", "Image" => "th-large"),
         "Admin-0" => array("Name" => "HOME", "Access" => \_::$User->AdminAccess, "Path" => "/sign/dashboard", "Image" => "home"),
@@ -90,3 +92,43 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
         "Admin-4" => array("Name" => "SYSTEMS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog"),
     );
 }
+
+
+\_::$Router
+    ->On()->Reset()
+    ->On("~administrator")->Get(function () {
+        $up = "~administrator";
+        $pairs = \_::$User->GroupDataTable->SelectPairs("Id", "Access", "Access>900000000");
+        if (!$pairs)
+            deliverError("There is not at least one admin access group!");
+        if (!\_::$User->DataTable->Exists("GroupId IN (" . join(",", loop($pairs, fn($v, $k) => $k)) . ")")) {
+            if (
+                \_::$User->SignUp(
+                    $un = receiveGet("UserName") ?? $up,
+                    $ps = receiveGet("Password") ?? randomString(24) ?? $up,
+                    $em = receiveGet("Email") ?? \_::$User->GenerateEmail(fake: true),
+                    groupId: receiveGet("GroupId") ?? array_key_last($pairs),
+                    status: \_::$User->ActiveStatus,
+                ) != false
+            ) {
+                view(\_::$Front->DefaultViewName, [
+                    "Content" =>
+                        MiMFa\Library\Struct::Heading1("'Your Admin Account Created Successfully' " . MiMFa\Library\Struct::Icon("print", "window.print();", ["class" => "view unptintable"])) .
+                        MiMFa\Library\Struct::Table([
+                            ["Name", "Value", "Description"],
+                            ["UserName", $un, ""],
+                            ["Password", $ps, "Please change it immediately"],
+                            ["Email", $em, isEmail($em) ? "" : "It is a fake email, Please change it immediately"]
+                        ]) .
+                        MiMFa\Library\Struct::Button("Update your profile", \_::$User->EditHandlerPath, ["class" => "Main"]) .
+                        (\_::$User->SignIn($un, $ps) !== false ? MiMFa\Library\Struct::Success("You are signed in now!") : "")
+                ]);
+            }
+        } else
+            route(404);
+    })
+    ->if(!\_::$User->HasAccess(\_::$User->AdminAccess))
+    ->On("$|admin")->Default(fn() => view("part", ["Name" => \_::$User->InHandlerPath]))
+    ->On()->Default(\_::$Router->DefaultRouteName)
+    ->else()
+    ->On("admin")->Reset()->Default(\_::$User->Direction, alternative: \_::$Router->DefaultRouteName);

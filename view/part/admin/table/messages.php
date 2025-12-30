@@ -15,7 +15,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
     $res = $form->Handle();
     if ($form->Result) {
         $rec = receivePost();
-        table("Message")->Update("`Id`=:Id", [":Id" => $rec["Id"], "Status" => $rec["Status"], "UpdateTime" => \_::$Config->CurrentDateTime]);
+        table("Message")->Update("`Id`=:Id", [":Id" => $rec["Id"], "Status" => $rec["Status"], "UpdateTime" => \_::$Back->CurrentDateTime]);
         table("Message")->Insert([
             "RootId" => $rec["Id"],
             "UserId" => \_::$User ? \_::$User->Id : null,
@@ -34,7 +34,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
 })->Patch(function () use (&$form) {
     $r = receivePatch();
     $isadmin = \_::$User->HasAccess(\_::$User->AdminAccess);
-    $sender = $isadmin ? ($r["To"] ?? \_::$Info->ReceiverEmail) : \_::$User->Email;
+    $sender = $isadmin ? ($r["To"] ?? \_::$Front->ReceiverEmail) : \_::$User->Email;
     $form->Set(
         title: "Reply to " . $r["Name"],
         method: "POST",
@@ -43,7 +43,7 @@ $form->SuccessHandler = "Your reply message sent successfuly!";
             Struct::Field("number", "Status", $r["Status"] < 1 ? 1 : $r["Status"] + 1, "To indicate how many reply sent them", "Reply Time"),
             Struct::Field($isadmin ? "email" : "hidden", "SenderEmail", $sender, "Email sender", "From"),
             Struct::Field("email", "ReceiverEmail", $r["From"], "Email recipient", "To"),
-            Struct::Field("text", "MailSubject", "Reply to your message: " . between($r["Subject"], "in " . \_::$Info->Name), "Reply subject", "Subject"),
+            Struct::Field("text", "MailSubject", "Reply to your message: " . between($r["Subject"], "in " . \_::$Front->Name), "Reply subject", "Subject"),
             Struct::Field("content", "MailMessage", "Dear " . $r["Name"] . "," . "\n\r\n\r\n\r" .
                 join("\n\r", [
                     \_::$User->GenerateSign("Sincerely"),
@@ -130,7 +130,7 @@ $module->CellsTypes = [
     "Subject" => function ($t, $v, $k, $r) {
         $std = new stdClass();
         $std->Type = "string";
-        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Info->FullName;
+        if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Front->FullName;
         return $std;
     },
     "From" => function ($t, $v, $k, $r) {

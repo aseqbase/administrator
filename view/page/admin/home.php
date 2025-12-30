@@ -4,7 +4,7 @@ use \MiMFa\Library\Struct;
 
 module("RingTabs");
 $module = new \MiMFa\Module\RingTabs();
-$module->Image = \_::$Info->LogoPath;
+$module->Image = \_::$Front->LogoPath;
 $module->Items = array(
 	"Admin-1" => array("Name" => "USERS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/user/users", "Image" => "user"),
 	"Admin-2" => array("Name" => "CONTENTS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/content/contents", "Image" => "th-large"),
