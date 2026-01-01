@@ -74,6 +74,7 @@ $module->SelectQuery = "
 ";
 $module->KeyColumns = ["Subject"];
 $module->IncludeColumns = ["ReplyTo", "Name", "Subject", "Content", "From", "To", "Relation", "CreateTime"];
+$module->UploadDirectory = MiMFa\Library\Local::GenerateOrganizedDirectory(\_::$Address->PublicDirectory);
 $module->AllowServerSide = true;
 $module->Updatable = true;
 $module->ModifyAccess = \_::$User->SuperAccess;

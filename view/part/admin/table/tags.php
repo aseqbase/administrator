@@ -6,6 +6,7 @@ module("Table");
 $module = new Table(table("Tag"));
 $module->KeyColumns = ["Name" , "Title" ];
 $module->ExcludeColumns = ["MetaData" ];
+$module->UploadDirectory = MiMFa\Library\Local::GenerateOrganizedDirectory(\_::$Address->PublicDirectory);
 $module->AllowServerSide = true;
 $module->Updatable = true;
 $module->UpdateAccess = \_::$User->AdminAccess;

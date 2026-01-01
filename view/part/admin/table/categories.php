@@ -12,6 +12,7 @@ $module->SelectQuery = "
 ";
 $module->KeyColumns = ["Name" , "Title"];
 $module->ExcludeColumns = ["Content" , "Access" , "MetaData" , "CreateTime" ];
+$module->UploadDirectory = MiMFa\Library\Local::GenerateOrganizedDirectory(\_::$Address->PublicDirectory);
 $module->AllowServerSide = true;
 $module->Updatable = true;
 $module->UpdateAccess = \_::$User->AdminAccess;

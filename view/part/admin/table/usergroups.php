@@ -8,6 +8,7 @@ $module = new Table(\_::$User->GroupDataTable);
 $module->SelectCondition = "Access<=".\_::$User->GetAccess();
 $module->KeyColumns = ["Title" ];
 $module->ExcludeColumns = ["Id" , "Name" , "MetaData" ];
+$module->UploadDirectory = MiMFa\Library\Local::GenerateOrganizedDirectory(\_::$Address->PublicDirectory);
 $module->Updatable = true;
 $module->AllowServerSide = true;
 $module->UpdateAccess = \_::$User->AdminAccess;
