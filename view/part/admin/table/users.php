@@ -12,7 +12,6 @@ $module->SelectQuery = "
     WHERE B.Access<=".\_::$User->GetAccess();
 $module->KeyColumns = ["Name" , "Signature" ];
 $module->ExcludeColumns = ["MetaData" ];
-$module->UploadDirectory = MiMFa\Library\Local::GenerateOrganizedDirectory(\_::$Address->PublicDirectory);
 $module->Updatable = true;
 $module->AllowServerSide = true;
 $module->UpdateAccess = \_::$User->AdminAccess;

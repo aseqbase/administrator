@@ -4,16 +4,15 @@
 \_::$Back->DisplayError = \_::$Back->DisplayError ?: 1;
 \_::$Back->DisplayStartupError = \_::$Back->DisplayStartupError ?: 1;
 \_::$Back->DataBaseError = \_::$Back->DataBaseError ?: 1;
-
 \_::$Back->AdminOrigin = array_key_first(\_::$Sequence) === __DIR__ . DIRECTORY_SEPARATOR ? 0 : 1;
 $name = \_::$Address->Name ?? "qb";
 \_::$Address->Name = (isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : $GLOBALS["BASE"])?:\_::$Address->Name;
 if (\_::$Back->AdminOrigin === 0) { // Change public access directories to the Root sequence
-    //\_::$Address = new Address(isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : $BASE, array_keys(\_::$Sequence)[\_::$Back->AdminOrigin+1]);
-    $roots = array_keys(\_::$Sequence);
-    \_::$Address->PublicDirectory = $roots[\_::$Back->AdminOrigin + 1] . "public" . DIRECTORY_SEPARATOR;
-    \_::$Address->AssetDirectory = $roots[\_::$Back->AdminOrigin + 1] . "asset" . DIRECTORY_SEPARATOR;
+    $root = array_keys(\_::$Sequence)[\_::$Back->AdminOrigin + 1];
+    \_::$Address->PublicAddress = $root . ltrim(\_::$Address->PublicDirectory, DIRECTORY_SEPARATOR);
+    \_::$Address->AssetAddress = $root . ltrim(\_::$Address->AssetAddress, DIRECTORY_SEPARATOR);
 }
+
 if (\_::$Back->DataBaseAddNameToPrefix)
     \_::$Back->DataBasePrefix = str_replace("{$name}_", (\_::$Address->Name ?? "qb") . "_", \_::$Back->DataBasePrefix);
 

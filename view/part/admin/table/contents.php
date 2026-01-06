@@ -14,7 +14,6 @@ $module->SelectQuery = "
 ";
 $module->KeyColumns = ["Image" , "Title" ];
 $module->IncludeColumns = ['Type' , 'Image' , 'Title' , 'Category', 'Priority' , 'Status' , 'Lang' , 'Access' , 'Author', 'Editor', 'CreateTime' , 'UpdateTime' ];
-$module->UploadDirectory = MiMFa\Library\Local::GenerateOrganizedDirectory(\_::$Address->PublicDirectory);
 $module->AllowServerSide = true;
 $module->Updatable = true;
 $module->UpdateAccess = \_::$User->AdminAccess;
