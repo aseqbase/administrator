@@ -3,7 +3,6 @@ auth(\_::$User->AdminAccess);
 
 use \MiMFa\Library\Struct;
 use \MiMFa\Library\Convert;
-use MiMFa\Library\Internal;
 use MiMFa\Library\Script;
 
 (new Router())
@@ -14,41 +13,11 @@ use MiMFa\Library\Script;
     ->else()
     ->if(receiveGet("export") ?? false)
     ->Get(function () {//Exports
-        $cells = [""];
-        $dic = [];
-        foreach (\_::$Front->Translate->GetAll("ORDER BY `KeyCode` ASC") as $value) {
-            foreach ($value as $k => $v)
-                $dic[$k] = $v;
-            $cells[] = loop($dic, function ($v) {
-                return $v;
-            });
-            foreach ($dic as $k => $v)
-                $dic[$k] = null;
-        }
-        $cells[0] = loop($dic, function ($v, $k) {
-            return $k;
-        });
-        \MiMFa\Library\Local::Load(Convert::FromCells($cells), "Lexicon.csv");
+        \MiMFa\Library\Local::Load(Convert::FromCells(Convert::FieldsToCells(\_::$Front->Translate->GetAll("ORDER BY `KeyCode` ASC"))), "Lexicon.csv");
     })
     ->else()
     ->Post(function () {//Imports
-        $c = 0;
-        $keys = [];
-        foreach (Convert::ToCells(urldecode(first(receivePost()))) as $row) {
-            if ($c === 0) {
-                $keys = $row;
-                // $length = count($row);
-                // for ($i = 0; $i < $length; $i++)
-                //     $keys[$i] = $row[$i];
-            } else {
-                $col = [];
-                foreach ($row as $i => $value)
-                    if (isset($keys[$i]))
-                        $col[$keys[$i]] = $value;
-                $dic[] = $col;
-            }
-            $c++;
-        }
+        $dic = Convert::ToFields(urldecode(first(receivePost())));
         $c = count($dic);
         if ($c > 0 && \_::$Front->Translate->SetAll($dic))
             deliverBreaker(Struct::Success("$c key values setted successfuly in lexicon!"));
@@ -72,24 +41,24 @@ use MiMFa\Library\Script;
             "Content" => Struct::Center(
                 Struct::Container([
                     [
-                        Struct::Division("A ''sample' 'text''", ["id" => $id]),
                         Struct::TextsInput(
                             "Sample text",
                             "A ''sample' 'text''",
                             attributes: [
-                                "class"=>"be wide ltr",
+                                "class" => "be wide ltr",
                                 "oninput" => \_::$Front->MakeFillScript(
                                     "#$id",
-                                    function ($txt) {
-                                        return __($txt);
+                                    function ($text) {
+                                        return __($text);
                                     },
                                     ["\${this.value}"]
                                 )
                             ]
-                        )
+                        ),
+                        Struct::Division("A ''sample' 'text''", ["id" => $id]),
                     ]
                 ]) .
-                Struct::$BreakLine.
+                Struct::$BreakLine .
                 (
                     $upd ?
                     Struct::Button("View Lexicon", "/" . \_::$User->Direction) :
