@@ -31,7 +31,7 @@ use MiMFa\Library\Script;
             error("There occurred a problem!");
     })
     ->Get(function () {//Shows
-        $upd = getReceived("update");
+        $upd = received("update");
         $id = "_" . getId();
         view("part", [
             "Name" => "admin/table/lexicon",
@@ -68,7 +68,7 @@ use MiMFa\Library\Script;
                 Struct::Button("Import Lexicon", Script::ImportFile([".csv"], timeout: 300000)) .
                 Struct::Button("Clear Lexicon", "
                         if(confirm('Are you sure to clear all lexicon records?'))
-                            sendDelete(null, {'truncate':true}, '.content');
+                            sendDeleteRequest(null, {'truncate':true}, '.content');
                     ", ["class" => "error"])
                 ,
                 ["class" => "content"]

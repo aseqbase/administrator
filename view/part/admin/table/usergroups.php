@@ -7,7 +7,7 @@ module("Table");
 $module = new Table(\_::$User->GroupDataTable);
 $module->SelectCondition = "Access<=".\_::$User->GetAccess();
 $module->KeyColumns = ["Title" ];
-$module->ExcludeColumns = ["Id" , "Name" , "MetaData" ];
+$module->ExcludeColumns = ["MetaData" ];
 $module->Updatable = true;
 $module->AllowServerSide = true;
 $module->UpdateAccess = \_::$User->AdminAccess;
@@ -27,7 +27,7 @@ $module->CellsTypes = [
         $std->Attributes=["min"=>\_::$User->BanAccess,"max"=>\_::$User->GetAccess()];
         return $std;
     },
-    "Status" =>[-1=>"Blocked",0=>"Undifined",1=>"Activated"],
+    "Status" =>[1=>"Activated",0=>"Undifined",-1=>"Blocked"],
     "MetaData" => "json"
 ];
 pod($module, $data);

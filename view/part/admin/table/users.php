@@ -41,7 +41,7 @@ $module->CellsTypes = [
     "Organization"=>"string",
     "Address" =>"string",
     "Path" =>"string",
-    "Status" =>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
+    "Status" =>[0=>"Deactivated",1=>"Activated",-1=>"Blocked"],
     "UpdateTime" =>function($t, $v){
         $std = new stdClass();
         $std->Type = \_::$User->HasAccess(\_::$User->SuperAccess)?"calendar":"hidden";

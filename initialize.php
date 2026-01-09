@@ -99,7 +99,6 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
     );
 }
 
-
 \_::$Router
     ->On()->Reset()
     ->On("~administrator")->Get(function () {
