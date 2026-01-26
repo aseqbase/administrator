@@ -31,10 +31,10 @@ $module->CellsTypes = [
         $std->Options = table("Category")->SelectPairs("`Id`", "`Name`", "TRUE ORDER BY  `ParentId` ASC");
         return $std;
     },
-    "Name" =>"string",
+    "Name" =>"text",
     "Image" =>"Image" ,
-    "Title" =>"string",
-    "Description" =>"strings",
+    "Title" =>"text",
+    "Description" =>"texts",
     "Access" =>function(){
         $std = new stdClass();
         $std->Type="number";

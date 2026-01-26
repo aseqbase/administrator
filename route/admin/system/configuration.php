@@ -4,7 +4,7 @@
     ->Get(function () {
         view("part", [
             "Name" => "admin/system/configuration",
-            "Image" => "puzzle-piece",
+            "Image" => "cog",
             "Title" => "Configuration"
         ]);
     })

@@ -7,7 +7,7 @@ module("Table");
 $module = new Table(\_::$User->GroupDataTable);
 $module->SelectCondition = "Access<=".\_::$User->GetAccess();
 $module->KeyColumns = ["Title" ];
-$module->ExcludeColumns = ["Id" , "Name" , "MetaData" ];
+$module->ExcludeColumns = ["MetaData" ];
 $module->Updatable = true;
 $module->AllowServerSide = true;
 $module->UpdateAccess = \_::$User->AdminAccess;
@@ -17,17 +17,17 @@ $module->CekkValue = [
 ];
 $module->CellsTypes = [
     "Id" =>"number",
-    "Name" =>"string",
-    "Title" =>"string",
+    "Name" =>"text",
+    "Title" =>"text",
     "Image" =>"Image" ,
-    "Description" =>"strings",
+    "Description" =>"texts",
     "Access" =>function(){
         $std = new stdClass();
         $std->Type="number";
         $std->Attributes=["min"=>\_::$User->BanAccess,"max"=>\_::$User->GetAccess()];
         return $std;
     },
-    "Status" =>[-1=>"Blocked",0=>"Undifined",1=>"Activated"],
+    "Status" =>[1=>"Activated",0=>"Undifined",-1=>"Blocked"],
     "MetaData" => "json"
 ];
 pod($module, $data);

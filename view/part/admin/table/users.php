@@ -27,21 +27,21 @@ $module->CellsTypes = [
         $std->Options = table("UserGroup")->SelectPairs("Id" , "Title", "Access<=".\_::$User->GetAccess());
         return $std;
     },
-    "Name" =>"string",
+    "Name" =>"text",
     "Image" =>"image" ,
-    "Bio" =>"strings",
+    "Bio" =>"texts",
     "Email"=>"email",
-    "Signature" =>"string",
+    "Signature" =>"text",
     "Password" =>"password",
-    "FirstName"=>"string",
-    "MiddleName"=>"string",
-    "LastName"=>"string",
+    "FirstName"=>"text",
+    "MiddleName"=>"text",
+    "LastName"=>"text",
     "Gender" =>"enum",
     "Contact"=>"tel",
-    "Organization"=>"string",
-    "Address" =>"string",
-    "Path" =>"string",
-    "Status" =>[-1=>"Blocked",0=>"Deactivated",1=>"Activated"],
+    "Organization"=>"text",
+    "Address" =>"text",
+    "Path" =>"text",
+    "Status" =>[0=>"Deactivated",1=>"Activated",-1=>"Blocked"],
     "UpdateTime" =>function($t, $v){
         $std = new stdClass();
         $std->Type = \_::$User->HasAccess(\_::$User->SuperAccess)?"calendar":"hidden";

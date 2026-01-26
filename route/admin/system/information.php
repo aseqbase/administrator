@@ -4,7 +4,7 @@
     ->Get(function () {
         view("part", [
             "Name" => "admin/system/information",
-            "Image" => "quote-left",
+            "Image" => "palette",
             "Title" => "Information"
         ]);
     })

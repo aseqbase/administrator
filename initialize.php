@@ -6,7 +6,7 @@
 \_::$Back->DataBaseError = \_::$Back->DataBaseError ?: 1;
 \_::$Back->AdminOrigin = array_key_first(\_::$Sequence) === __DIR__ . DIRECTORY_SEPARATOR ? 0 : 1;
 $name = \_::$Address->Name ?? "qb";
-\_::$Address->Name = (isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : $GLOBALS["BASE"])?:\_::$Address->Name;
+\_::$Address->Name = (isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : $GLOBALS["BASE"]) ?: \_::$Address->Name;
 if (\_::$Back->AdminOrigin === 0) { // Change public access directories to the Root sequence
     $root = array_keys(\_::$Sequence)[\_::$Back->AdminOrigin + 1];
     \_::$Address->PublicAddress = $root . ltrim(\_::$Address->PublicDirectory, DIRECTORY_SEPARATOR);
@@ -47,38 +47,30 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
                 array("Name" => "SESSIONS", "Path" => "/admin/user/sessions", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'sessions'", "Image" => "clock")
             )
         ),
-        // "Admin-Plugin" => array(
-        //     "Name" => "PLUGINS",
-        //     "Path" => "/admin/plugin/plugins",
-        //     "Access" => \_::$User->AdminAccess,
-        //     "Description" => "To manage modules and components of the website",
-        //     "Image" => "puzzle-piece",
-        //     "Items" => array(
-        //         array("Name" => "PLUGINS", "Path" => "/admin/plugin/plugins", "Access" => \_::$User->AdminAccess, "Image" => "puzzle-piece"),
-        //         array("Name" => "MARKET", "Path" => "http://github.com/aseqbase", "Access" => \_::$User->AdminAccess, "Image" => "shopping-bag")
-        //     )
-        // ),
-        // "Admin-Front" => array(
-        //     "Name" => "APPEARANCES",
-        //     "Path" => "/admin/system/template",
-        //     "Access" => \_::$User->AdminAccess,
-        //     "Description" => "To manage the fornt-end website (template and appearances)",
-        //     "Image" => "th",
-        //     "Items" => array(
-        //         array("Name" => "TEMPLATES", "Path" => "/admin/system/templates", "Access" => \_::$User->AdminAccess, "Image" => "eye"),
-        //         array("Name" => "EDIT", "Path" => "/admin/system/template", "Access" => \_::$User->AdminAccess, "Image" => "edit")
-        //     )
-        // ),
+        "Admin-Front" => array(
+            "Name" => "APPEARANCES",
+            "Path" => "/admin/system/information",
+            "Access" => \_::$User->AdminAccess,
+            "Description" => "To manage the fornt-end website (template and appearances)",
+            "Image" => "th",
+            "Items" => array(
+                array("Name" => "TRANSLATIONS", "Path" => "/admin/system/translation", "Access" => \_::$User->AdminAccess, "Image" => "language"),
+                array("Name" => "TEMPLATE", "Path" => "/admin/system/template", "Access" => \_::$User->AdminAccess, "Image" => "eye"),
+                array("Name" => "INFORMATION", "Path" => "/admin/system/information", "Access" => \_::$User->AdminAccess, "Image" => "palette"),
+                //array("Name" => "TEMPLATES", "Path" => "/admin/system/templates", "Access" => \_::$User->AdminAccess, "Image" => "th")
+            )
+        ),
         "Admin-Back" => array(
             "Name" => "SYSTEMS",
-            "Path" => "/admin/system/information",
+            "Path" => "/admin/system/configuration",
             "Access" => \_::$User->AdminAccess,
             "Description" => "To manage the back-end website settings",
             "Image" => "cog",
             "Items" => array(
-                //array("Name" => "INFORMATIONS", "Path" => "/admin/system/information", "Access" => \_::$User->AdminAccess, "Image" => "info"),
-                array("Name" => "TRANSLATIONS", "Path" => "/admin/system/translation", "Access" => \_::$User->AdminAccess, "Image" => "language"),
-                //array("Name" => "CONFIGURATIONS", "Path" => "/admin/system/configuration", "Access" => \_::$User->AdminAccess, "Image" => "cog")
+                //array("Name" => "PLUGINS", "Path" => "/admin/system/plugins", "Access" => \_::$User->AdminAccess, "Image" => "puzzle-piece"),
+                array("Name" => "MARKET", "Path" => "http://github.com/aseqbase", "Access" => \_::$User->AdminAccess, "Image" => "shopping-bag"),
+                //array("Name" => "ASSETS", "Path" => "/admin/system/assets", "Access" => \_::$User->AdminAccess, "Image" => "file"),
+                array("Name" => "CONFIGURATION", "Path" => "/admin/system/configuration", "Access" => \_::$User->SuperAccess, "Image" => "cog")
             )
         ),
         "User-0" => array(
@@ -98,7 +90,6 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
         "Admin-4" => array("Name" => "SYSTEMS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog"),
     );
 }
-
 
 \_::$Router
     ->On()->Reset()

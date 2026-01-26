@@ -18,9 +18,9 @@ $module->CellsValues = [
 ];
 $module->CellsTypes = [
     "Id" =>"number",
-    "Name" =>"string",
-    "Title" =>"string",
-    "Description" =>"strings",
+    "Name" =>"text",
+    "Title" =>"text",
+    "Description" =>"texts",
     "UpdateTime" =>function($t, $v){
         $std = new stdClass();
         $std->Type = \_::$User->HasAccess(\_::$User->SuperAccess)?"calendar":"hidden";

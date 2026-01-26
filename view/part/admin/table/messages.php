@@ -123,13 +123,13 @@ $module->CellsTypes = [
     },
     "Name" => function ($t, $v, $k, $r) {
         $std = new stdClass();
-        $std->Type = "string";
+        $std->Type = "text";
         if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$User->Name;
         return $std;
     },
     "Subject" => function ($t, $v, $k, $r) {
         $std = new stdClass();
-        $std->Type = "string";
+        $std->Type = "text";
         if(!$r["Subject"] && !$r["Content"]) $std->Value = $v ? $v : \_::$Front->FullName;
         return $std;
     },
@@ -141,7 +141,7 @@ $module->CellsTypes = [
     },
     "To" => function () {
         $std = new stdClass();
-        $std->Type = "string";
+        $std->Type = "text";
         $std->Description = "Your message recipient(s), separate each emails by a comma for a bulk sending...";
         return $std;
     },
@@ -153,7 +153,7 @@ $module->CellsTypes = [
         return $std;
     },
     "Attach" => "json",
-    "Relation" => "string",
+    "Relation" => "text",
     "Status" => function () {
         $std = new stdClass();
         $std->Title = "Replyed Times";
