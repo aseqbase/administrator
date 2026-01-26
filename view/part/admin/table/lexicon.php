@@ -9,13 +9,14 @@ $module = new \MiMFa\Module\Table($table);
 $module->SelectQuery = $table->SelectQuery(join(",",["Id","KeyCode", ...loop($langs, fn($v, $k)=>"ValueOptions AS '".strtoupper($k)."'")]));
 $module->ExcludeColumns = ["Id"];
 $module->AllowLabelTranslation = false;
-$module->AllowServerSide = true;
 $module->Controlable = true;
 $module->AddAccess = 
 $module->RemoveAccess = 
 $module->ModifyAccess = 
 $module->DuplicateAccess = 
 $module->UpdateAccess = \_::$User->AdminAccess;
+$module->ImportAccess = 
+$module->ExportAccess = false;
 
 foreach ($langs as $k=>$value)
     $module->CellsValues[$k] = function ($v) use ($k) {

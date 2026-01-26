@@ -25,7 +25,7 @@ $module->CellsValues = [
     },
     "Category"=>function($v, $k, $r){
         $val = trim(\_::$Back->Query->GetCategoryRoute(first(Convert::FromJson($v)))??"", "/\\");
-        if(isValid($val)) return \MiMFa\Library\Struct::Link($val,\_::$Address->CategoryRoot.$val, ["target"=>"blank"]);
+        if(isValid($val)) return \MiMFa\Library\Struct::Link("\${{$val}}",\_::$Address->CategoryRoot.$val, ["target"=>"blank"]);
         return $v;
     },
     "Lang"=>function($v) use($langs){

@@ -50,7 +50,7 @@ use MiMFa\Library\Script;
                 Struct::Container([
                     [
                         Struct::Slot(
-                            Struct::Division("Root Language", ["class"=>"be end align", "style"=>"padding: calc(var(--size-0) / 2) var(--size-0);"]) .
+                            Struct::Division(__("Root Language"), ["class"=>"be end align", "style"=>"padding: calc(var(--size-0) / 2) var(--size-0);"]) .
                             Struct::TextsInput(
                                 "Sample text",
                                 "A ``sample` `text``",
@@ -93,4 +93,3 @@ use MiMFa\Library\Script;
         part("admin/table/lexicon");
     })
     ->Handle();
-?>
