@@ -16,8 +16,8 @@ use MiMFa\Library\Script;
         \MiMFa\Library\Local::Load(Convert::FromCells(Convert::FieldsToCells(\_::$Front->Translate->GetAll("ORDER BY `KeyCode` ASC"))), "Lexicon.csv");
     })
     ->else()
-    ->Post(function () {//Imports
-        $dic = Convert::ToFields(urldecode(first(receivePost())));
+    ->File(function () {//Imports
+        $dic = Convert::ToFields(Script::Download(receiveFile(), binary: false));
         $c = count($dic);
         if ($c > 0 && \_::$Front->Translate->SetAll($dic))
             deliverBreaker(Struct::Success("$c key values setted successfuly in lexicon!"));
@@ -33,6 +33,14 @@ use MiMFa\Library\Script;
     ->Get(function () {//Shows
         $upd = received("update");
         $id = "_" . getId();
+        $moduleTranslator = new (module("Translator"))();
+        $moduleTranslator->Items = \_::$Front->Translate->GetLanguages();
+        $moduleTranslator->AllowDefault = true;
+        $moduleTranslator->AllowLabel = true;
+        $moduleTranslator->AllowImage = false;
+        $moduleTranslator->Style = new MiMFa\Library\Style();
+        $moduleTranslator->Style->Padding = "0px";
+        $moduleTranslator["class"] = "be start flex";
         view("part", [
             "Name" => "admin/table/lexicon",
             "Title" => "Translation",
@@ -41,21 +49,27 @@ use MiMFa\Library\Script;
             "Content" => Struct::Center(
                 Struct::Container([
                     [
-                        Struct::TextsInput(
-                            "Sample text",
-                            "A ''sample' 'text''",
-                            attributes: [
-                                "class" => "be wide ltr",
-                                "oninput" => \_::$Front->MakeFillScript(
-                                    "#$id",
-                                    function ($text) {
-                                        return __($text);
-                                    },
-                                    ["\${this.value}"]
-                                )
-                            ]
+                        Struct::Slot(
+                            Struct::Division("Root Language", ["class"=>"be end align", "style"=>"padding: calc(var(--size-0) / 2) var(--size-0);"]) .
+                            Struct::TextsInput(
+                                "Sample text",
+                                "A ``sample` `text``",
+                                attributes: [
+                                    "class" => "be wide ltr",
+                                    "oninput" => \_::$Front->MakeFillScript(
+                                        "#$id",
+                                        function ($text) {
+                                            return __($text);
+                                        },
+                                        ["\${this.value}"]
+                                    )
+                                ]
+                            )
                         ),
-                        Struct::Division("A ''sample' 'text''", ["id" => $id]),
+                        Struct::Slot(
+                            $moduleTranslator->ToString() .
+                            Struct::Division(__("A ``sample` `text``"), ["id" => $id, "class"=>"be align start", "style"=>"padding: calc(var(--size-0) / 2);"])
+                        ),
                     ]
                 ]) .
                 Struct::$BreakLine .
@@ -65,7 +79,7 @@ use MiMFa\Library\Script;
                     Struct::Button("Edit Lexicon", "/" . \_::$User->Direction . "?update=true")
                 ) .
                 Struct::Button("Export Lexicon", "/" . \_::$User->Direction . "?export=true", ["target" => "blank"]) .
-                Struct::Button("Import Lexicon", Script::ImportFile([".csv"], timeout: 300000)) .
+                Struct::Button("Import Lexicon", Script::Upload([".csv"], timeout: 300000)) .
                 Struct::Button("Clear Lexicon", "
                         if(confirm('Are you sure to clear all lexicon records?'))
                             sendDeleteRequest(null, {'truncate':true}, '.content');

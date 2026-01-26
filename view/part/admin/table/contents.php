@@ -39,11 +39,11 @@ $module->CellsValues = [
 ];
 $module->CellsTypes = [
     "Id" =>\_::$User->HasAccess(\_::$User->SuperAccess)?"disabled":false,
-    "Name" =>"string",
+    "Name" =>"text",
     "Type" =>"enum",
-    "Title" =>"string",
+    "Title" =>"text",
     "Image" =>"image" ,
-    "Description" =>"strings",
+    "Description" =>"texts",
     "Content" =>"content" ,
     "CategoryIds" => function(){
         $std = new stdClass();
@@ -75,7 +75,7 @@ $module->CellsTypes = [
         return $std;
     },
     "Attach" =>"json",
-    "Path" =>"string",
+    "Path" =>"text",
     "Priority" =>"number",
     "AuthorId" =>function($t, $v) use($users){
         $std = new stdClass();

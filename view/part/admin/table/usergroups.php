@@ -17,10 +17,10 @@ $module->CekkValue = [
 ];
 $module->CellsTypes = [
     "Id" =>"number",
-    "Name" =>"string",
-    "Title" =>"string",
+    "Name" =>"text",
+    "Title" =>"text",
     "Image" =>"Image" ,
-    "Description" =>"strings",
+    "Description" =>"texts",
     "Access" =>function(){
         $std = new stdClass();
         $std->Type="number";

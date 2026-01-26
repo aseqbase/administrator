@@ -27,10 +27,10 @@ $module->CellsValues = [
 ];
 $module->CellsTypes = [
     "Id" =>\_::$User->HasAccess(\_::$User->SuperAccess)?"disabled":false,
-    "Relation" =>"string",
+    "Relation" =>"text",
     "UserId" =>"number",
-    "Name" =>"string",
-    "Subject" =>"string",
+    "Name" =>"text",
+    "Subject" =>"text",
     "Content" =>"Content" ,
     "Contact"=>"Email",
     "Attach" =>"json",

@@ -3,13 +3,13 @@
 ->if(\_::$User->HasAccess(\_::$User->AdminAccess))
     ->Get(function () {
         view("part", [
-            "Name" => "admin/system/template",
-            "Image" => "eye",
-            "Title" => "Template"
+            "Name" => "admin/system/assets",
+            "Image" => "file",
+            "Title" => "Assets Management"
         ]);
     })
     ->Default(function () {
-        part("admin/system/template");
+        part("admin/system/assets");
     })
     ->Handle();
 ?>
