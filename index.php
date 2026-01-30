@@ -17,7 +17,7 @@ if (isset($_GET["BASE"]) || isset($_POST["BASE"])) {
  */
 $directories = preg_split("/[\/\\\]/", trim(__DIR__, "/\\"));
 $GLOBALS["ASEQ"] = end($directories);/* Change it to null if the file is in the root directory */
-$GLOBALS["BASE"] = $resetBase ?? $_COOKIE["BASE"] ?? ".aseq";/* Change it to the parent directory if deferents */
+$GLOBALS["BASE"] = $resetBase ?? $_COOKIE["BASE"] ?? "aseq";/* Change it to the parent directory if deferents */
 
 /*
     Change \_::$Sequence
