@@ -8,9 +8,9 @@
 $name = \_::$Address->Name ?? "qb";
 \_::$Address->Name = (isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : $GLOBALS["BASE"]) ?: \_::$Address->Name;
 if (\_::$Back->AdminOrigin === 0) { // Change public access directories to the Root sequence
-    $root = array_keys(\_::$Sequence)[\_::$Back->AdminOrigin + 1];
-    \_::$Address->PublicAddress = $root . ltrim(\_::$Address->PublicDirectory, DIRECTORY_SEPARATOR);
-    \_::$Address->AssetAddress = $root . ltrim(\_::$Address->AssetAddress, DIRECTORY_SEPARATOR);
+    $rootPath = array_keys(\_::$Sequence)[\_::$Back->AdminOrigin + 1];
+    \_::$Address->PublicAddress = $rootPath . ltrim(\_::$Address->PublicDirectory, DIRECTORY_SEPARATOR);
+    \_::$Address->AssetAddress = $rootPath . ltrim(\_::$Address->AssetDirectory, DIRECTORY_SEPARATOR);
 }
 
 if (\_::$Back->DataBaseAddNameToPrefix)
@@ -30,7 +30,9 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
             "Items" => array(
                 array("Name" => "CONTENTS", "Path" => "/admin/content/contents", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's posts and pages", "Image" => "file"),
                 array("Name" => "TAGS", "Path" => "/admin/content/tags", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's tags", "Image" => "tags"),
-                array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's categories", "Image" => "code-fork")
+                array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's categories", "Image" => "code-fork"),
+                array("Name" => "'DYNAMIC' 'ASSETS'", "Path" => "/admin/content/assets", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'assets'", "Image" => "folder"),
+                array("Name" => "'STATIC' 'ASSETS'", "Path" => "/admin/content/uploads", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'uploads'", "Image" => "upload")
             )
         ),
         "Admin-User" => array(
@@ -69,7 +71,6 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
             "Items" => array(
                 //array("Name" => "PLUGINS", "Path" => "/admin/system/plugins", "Access" => \_::$User->AdminAccess, "Image" => "puzzle-piece"),
                 array("Name" => "MARKET", "Path" => "http://github.com/aseqbase", "Access" => \_::$User->AdminAccess, "Image" => "shopping-bag"),
-                //array("Name" => "ASSETS", "Path" => "/admin/system/assets", "Access" => \_::$User->AdminAccess, "Image" => "file"),
                 array("Name" => "CONFIGURATION", "Path" => "/admin/system/configuration", "Access" => \_::$User->SuperAccess, "Image" => "cog")
             )
         ),

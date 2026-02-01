@@ -4,8 +4,8 @@
     ->Get(function () {
         view("part", [
             "Name" => "admin/system/assets",
-            "Image" => "file",
-            "Title" => "Assets Management"
+            "Image" => "folder",
+            "Title" => "'Static' 'Assets' 'Management'"
         ]);
     })
     ->Default(function () {

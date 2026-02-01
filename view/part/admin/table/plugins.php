@@ -4,7 +4,7 @@ use MiMFa\Library\Struct;
 auth(\_::$User->AdminAccess);
 
 if($file = receiveFile()) try{
-    $path = Script::Download($file, false, true);
+    $path = Script::Download($file, binary:true);
     $file = new ZipArchive();
     $file->open($path);
     //$file->deleteName("composer.json");
