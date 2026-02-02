@@ -31,8 +31,8 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
                 array("Name" => "CONTENTS", "Path" => "/admin/content/contents", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's posts and pages", "Image" => "file"),
                 array("Name" => "TAGS", "Path" => "/admin/content/tags", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's tags", "Image" => "tags"),
                 array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's categories", "Image" => "code-fork"),
+                array("Name" => "'DYNAMIC' 'ASSETS'", "Path" => "/admin/content/uploads", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'uploads'", "Image" => "download"),
                 array("Name" => "'STATIC' 'ASSETS'", "Path" => "/admin/content/assets", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'assets'", "Image" => "folder"),
-                array("Name" => "'DYNAMIC' 'ASSETS'", "Path" => "/admin/content/uploads", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'uploads'", "Image" => "download")
             )
         ),
         "Admin-User" => array(
@@ -51,7 +51,7 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
         ),
         "Admin-System" => array(
             "Name" => "SYSTEMS",
-            "Path" => "/admin/system/configuration",
+            "Path" => "/admin/system/information",
             "Access" => \_::$User->AdminAccess,
             "Description" => "To manage the back-end website settings",
             "Image" => "cog",
@@ -60,7 +60,7 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
                 array("Name" => "TRANSLATION", "Path" => "/admin/system/translation", "Access" => \_::$User->AdminAccess, "Image" => "language"),
                 array("Name" => "APPEARANCE", "Path" => "/admin/system/template", "Access" => \_::$User->AdminAccess, "Image" => "eye"),
                 //array("Name" => "TEMPLATE", "Path" => "/admin/system/templates", "Access" => \_::$User->AdminAccess, "Image" => "th"),
-                //array("Name" => "PLUGINS", "Path" => "/admin/system/plugins", "Access" => \_::$User->AdminAccess, "Image" => "puzzle-piece"),
+                array("Name" => "PLUGINS", "Path" => "/admin/system/plugins", "Access" => \_::$User->AdminAccess, "Image" => "puzzle-piece"),
                 array("Name" => "MARKET", "Path" => "http://github.com/aseqbase", "Access" => \_::$User->AdminAccess, "Image" => "shopping-bag"),
                 array("Name" => "CONFIGURATION", "Path" => "/admin/system/configuration", "Access" => \_::$User->SuperAccess, "Image" => "cog")
             )

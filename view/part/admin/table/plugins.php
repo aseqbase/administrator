@@ -1,19 +1,18 @@
 <?php
+
+use MiMFa\Library\Convert;
 use MiMFa\Library\Script;
 use MiMFa\Library\Struct;
 auth(\_::$User->AdminAccess);
 
 if($file = receiveFile()) try{
     $path = Script::Download($file, binary:true);
-    $file = new ZipArchive();
-    $file->open($path);
-    //$file->deleteName("composer.json");
-    if($file->extractTo(\_::$Address->Address)){
-        // table("Package")->Insert([
-        //     "Paths"=>Convert::ToJson($file)
-        // ]);
+    if($files = Convert::FromZipFile($path, \_::$Address->Address)){
+        table("Package")->Insert([
+            "Name"=>basename($file),
+            "Paths"=>Convert::ToJson($files)
+        ]);
     }
-    $file->close();
     return;
 }catch(\Exception $ex){deliverError($ex);}
 

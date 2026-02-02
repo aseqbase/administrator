@@ -15,26 +15,27 @@ use MiMFa\Library\Struct;
  */
 class Storage extends Module
 {
-    public \MiMFa\Library\Storage $Driver;
     public string|null $View = "table";
     public string|null $Method = "Storage";
     public array|null $AcceptedFormats = null;
-    public string $RootAddress;
-    public string $RootUrl;
+    public readonly string $RootAddress;
+    public readonly string $RootUrl;
+    public readonly string $CurrentAddress;
+    public readonly string $CurrentUrl;
 
     public function __construct($rootAddress, $rootUrl)
     {
         parent::__construct();
-        $this->RootAddress = $rootAddress;
-        $this->RootUrl = $rootUrl;
+        $this->RootAddress = Local::GetAbsoluteAddress($rootAddress);
+        $this->RootUrl = Local::GetAbsoluteUrl($rootUrl);
         $this->View = receiveGet("View") ?? $this->View;
         $p = receiveGet("Path");
-        if ($p && startsWith($p, $rootAddress))
-            $this->Driver = new (library("Storage"))($p, Local::GetUrl($rootUrl . substr($p, strlen($rootAddress))));
-        else {
-            $this->Driver = new (library("Storage"))($rootAddress, $rootUrl);
-            $this->RootAddress = $this->Driver->RootAddress;
-            $this->RootUrl = $this->Driver->RootUrl;
+        if ($p && startsWith($p = Local::GetAbsoluteAddress($p), $rootAddress)) {
+            $this->CurrentAddress = $p;
+            $this->CurrentUrl = Local::GetUrl($rootUrl . substr($p, strlen($rootAddress)));
+        } else {
+            $this->CurrentAddress = $this->RootAddress;
+            $this->CurrentUrl = $this->RootUrl;
         }
         $this->Router->Set($this->Method, fn() => $this->Exclusive());
     }
@@ -96,12 +97,12 @@ class Storage extends Module
         return parent::Get() .
             Struct::Frame([
                 Struct::Division([
-                    ...($this->Driver->RootAddress !== $this->RootAddress ? [
+                    ...($this->CurrentAddress !== $this->RootAddress ? [
                         Struct::Action(
                             Struct::Icon("folder-open", null, ["class" => "be fore green"]) .
-                            (trim(preg_find("/[^\/\\\]+[\/\\\]$/u", $this->Driver->RootAddress) ?? "", DIRECTORY_SEPARATOR)) .
+                            (trim(preg_find("/[^\/\\\]+[\/\\\]$/u", $this->CurrentAddress) ?? "", DIRECTORY_SEPARATOR)) .
                             Struct::Icon("arrow-left"),
-                            $this->GoScript(dirname(rtrim($this->Driver->RootAddress, DIRECTORY_SEPARATOR)) . DIRECTORY_SEPARATOR)
+                            $this->GoScript(dirname(rtrim($this->CurrentAddress, DIRECTORY_SEPARATOR)) . DIRECTORY_SEPARATOR)
                             ,
                             ["class" => "be flex middle center parent"]
                         ) . " "
@@ -114,14 +115,14 @@ class Storage extends Module
                     Struct::Icon("refresh", $this->GoScript(), ["tooltip" => "Reload the page"]),
                     Struct::Icon("table", Script::Send(
                         $this->Method,
-                        "?path=" . urlencode($this->Driver->RootAddress) . "&view=table",
+                        "?path=" . urlencode($this->CurrentAddress) . "&view=table",
                         null,
                         ".{$this->Name}",
                         "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}",
                     ), $this->View === "table" ? ["class" => "hidden"] : []),
                     Struct::Icon("list", Script::Send(
                         $this->Method,
-                        "?path=" . urlencode($this->Driver->RootAddress) . "&view=items",
+                        "?path=" . urlencode($this->CurrentAddress) . "&view=items",
                         null,
                         ".{$this->Name}",
                         "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}",
@@ -134,8 +135,8 @@ class Storage extends Module
     {
         return Struct::Table([
             ["Name", "Size", "URL", "Type", "UpdateTime"],
-            ...loop($this->Driver->GetItems(), function ($it, $k, $i) {
-                $aurl = $this->Driver->GetAbsoluteUrl($it["Path"]);
+            ...loop(Local::GetDirectoryItems($this->CurrentAddress), function ($it, $k, $i) {
+                $aurl = $this->GetAbsoluteUrl($it["Path"]);
                 $url = getRequest($aurl);
                 return Struct::Row([
                     Struct::CheckInput("Selected", $it["Path"], ["class" => "hidden"]) .
@@ -156,13 +157,13 @@ class Storage extends Module
     public function GetItemsView()
     {
         return Struct::Division(loop(
-            $this->Driver->GetItems(),
+            Local::GetDirectoryItems($this->CurrentAddress),
             function ($it, $k, $i) {
                 return Struct::Division(
                     Struct::Span(
                         $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow fa-2x"]) : Struct::Icon("file", null, ["class" => "be fore blue fa-2x"]),
                         null,
-                        ["class" => "item-icon", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($this->Driver->GetAbsoluteUrl($it["Path"]), true)]
+                        ["class" => "item-icon", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($this->GetAbsoluteUrl($it["Path"]), true)]
                     ) .
                     Struct::Span(
                         "\${" . $it["Name"] . "}",
@@ -182,16 +183,27 @@ class Storage extends Module
         ), ["class" => "items"]);
     }
 
+    public function GetAbsoluteUrl(string $path): string
+    {
+        return Local::GetAbsoluteUrl($this->RootUrl . normalizeUrl(substr($path, strlen($this->RootAddress))));
+    }
+    public function GetRelativeUrl(string $path): string
+    {
+        return getRequest($this->GetAbsoluteUrl($path));
+    }
+
     public function CreateFolderScript($path = null)
     {
-        return "if(name = " . Script::Prompt('Input the new folder`s name:', 'New Folder') . ") " . self::GoScript(
+        return "if(name = " . Script::Prompt('Input the new folder`s name:', 'New Folder') . ") " .
+        self::GoScript(
             $path,
             ["name" => "\${encodeURIComponent(name)}", "action" => "new-folder"]
         );
     }
     public function CreateFileScript($path = null)
     {
-        return "if(name = " . Script::Prompt('Input the new file`s name:', 'New File.txt') . ") " . self::GoScript(
+        return "if(name = " . Script::Prompt('Input the new file`s name:', 'New File.txt') . ") " .
+        self::GoScript(
             $path,
             ["name" => "\${encodeURIComponent(name)}", "action" => "new-file"]
         );
@@ -200,7 +212,7 @@ class Storage extends Module
     {
         return Script::Send(
             $this->Method,
-            "?path=" . urlencode($path ?? $this->Driver->RootAddress) . "&view={$this->View}",
+            "?path=" . urlencode($path ?? $this->CurrentAddress) . "&view={$this->View}",
             $data,
             ".{$this->Name}",
             "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}",
@@ -210,7 +222,7 @@ class Storage extends Module
     {
         return Script::Upload(
             $this->AcceptedFormats,
-            "?path=" . urlencode($path ?? $this->Driver->RootAddress) . "&view={$this->View}",
+            "?path=" . urlencode($path ?? $this->CurrentAddress) . "&view={$this->View}",
             "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}",
             method: $this->Method,
             binary: true
@@ -224,12 +236,16 @@ class Storage extends Module
         if ($act) {
             switch (strtolower($act)) {
                 case "new-folder":
-                    $this->Driver->CreateFolder(urldecode(get($received, "name")));
-                    success("The folder created successfully!");
+                    if (Local::CreateDirectory($this->CurrentAddress . Local::SanitizeName(urldecode(get($received, "name")))))
+                        success("The folder created successfully!");
+                    else
+                        error("Could not to create the folder!");
                     break;
                 case "new-file":
-                    $this->Driver->CreateFile(urldecode(get($received, "name")));
-                    success("The file created successfully!");
+                    if (Local::CreateFile($this->CurrentAddress . Local::SanitizeName(urldecode(get($received, "name")))))
+                        success("The file created successfully!");
+                    else
+                        error("Could not to create the file!");
                     break;
             }
         }
@@ -238,7 +254,7 @@ class Storage extends Module
                 if (
                     Script::Download(
                         $file,
-                        $this->Driver->RootAddress . get($received, "name"),
+                        $this->CurrentAddress . get($received, "name"),
                         method: $this->Method,
                         binary: true
                     )
