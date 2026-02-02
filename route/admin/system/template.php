@@ -5,7 +5,7 @@
         view("part", [
             "Name" => "admin/system/template",
             "Image" => "eye",
-            "Title" => "Template"
+            "Title" => "Appearance"
         ]);
     })
     ->Default(function () {

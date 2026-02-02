@@ -1,6 +1,6 @@
 <?php
 $module = new (module("Storage"))(
     \_::$Address->AssetAddress,
-    \_::$Address->AssetRoot
+    rtrim(array_values(\_::$Sequence)[\_::$Back->AdminOrigin?:1], "\\\/").\_::$Address->AssetRoot
 );
 $module->Render();

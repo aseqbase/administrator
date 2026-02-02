@@ -19,16 +19,23 @@ class Storage extends Module
     public string|null $View = "table";
     public string|null $Method = "Storage";
     public array|null $AcceptedFormats = null;
+    public string $RootAddress;
+    public string $RootUrl;
 
-    public function __construct($rootDirectory, $rootUrl)
+    public function __construct($rootAddress, $rootUrl)
     {
         parent::__construct();
+        $this->RootAddress = $rootAddress;
+        $this->RootUrl = $rootUrl;
         $this->View = receiveGet("View") ?? $this->View;
         $p = receiveGet("Path");
-        if ($p && startsWith($p, $rootDirectory))
-            $this->Driver = new (library("Storage"))($p, Local::GetUrl($p));
-        else
-            $this->Driver = new (library("Storage"))($rootDirectory, $rootUrl);
+        if ($p && startsWith($p, $rootAddress))
+            $this->Driver = new (library("Storage"))($p, Local::GetUrl($rootUrl . substr($p, strlen($rootAddress))));
+        else {
+            $this->Driver = new (library("Storage"))($rootAddress, $rootUrl);
+            $this->RootAddress = $this->Driver->RootAddress;
+            $this->RootUrl = $this->Driver->RootUrl;
+        }
         $this->Router->Set($this->Method, fn() => $this->Exclusive());
     }
 
@@ -37,6 +44,14 @@ class Storage extends Module
         return parent::GetStyle() . Struct::Style("
             .{$this->Name} .toolbar .icon{
                 padding: calc(var(--size-0) / 2);
+            }
+            .{$this->Name} .toolbar .parent{
+                padding: calc(var(--size-0) / 2);
+            }
+            .{$this->Name} .toolbar .parent:hover{
+                padding: calc(var(--size-0) / 2);
+                cursor:pointer;
+                background-color: #8882;
             }
             .{$this->Name} .items .item{
                 display: inline-flex;
@@ -81,14 +96,16 @@ class Storage extends Module
         return parent::Get() .
             Struct::Frame([
                 Struct::Division([
-                    Struct::Action(
-                        (trim(preg_find("/[^\/\\\]+[\/\\\]$/u", $this->Driver->RootAddress) ?? "", DIRECTORY_SEPARATOR)) .
-                        Struct::Icon("arrow-left"),
-                        $this->GoScript(dirname(rtrim($this->Driver->RootAddress, DIRECTORY_SEPARATOR)))
-                        ,
-                        ["class" => "be flex middle center"]
-                    ),
-                    " ",
+                    ...($this->Driver->RootAddress !== $this->RootAddress ? [
+                        Struct::Action(
+                            Struct::Icon("folder-open", null, ["class" => "be fore green"]) .
+                            (trim(preg_find("/[^\/\\\]+[\/\\\]$/u", $this->Driver->RootAddress) ?? "", DIRECTORY_SEPARATOR)) .
+                            Struct::Icon("arrow-left"),
+                            $this->GoScript(dirname(rtrim($this->Driver->RootAddress, DIRECTORY_SEPARATOR)) . DIRECTORY_SEPARATOR)
+                            ,
+                            ["class" => "be flex middle center parent"]
+                        ) . " "
+                    ] : []),
                     Struct::Icon("download", $this->UploadFileScript(), ["tooltip" => "Upload a new file"]),
                     Struct::Icon("folder", $this->CreatefolderScript(), ["tooltip" => "Create a new folder"]),
                     Struct::Icon("file", $this->CreateFileScript(), ["tooltip" => "Create a new file"]),
@@ -118,20 +135,21 @@ class Storage extends Module
         return Struct::Table([
             ["Name", "Size", "URL", "Type", "UpdateTime"],
             ...loop($this->Driver->GetItems(), function ($it, $k, $i) {
-                $url = $this->Driver->GetRelativeUrl($it["Path"]);
+                $aurl = $this->Driver->GetAbsoluteUrl($it["Path"]);
+                $url = getRequest($aurl);
                 return Struct::Row([
-                    Struct::CheckInput("Selected", $it["Path"], ["class"=>"hidden"]).
+                    Struct::CheckInput("Selected", $it["Path"], ["class" => "hidden"]) .
                     Struct::Span(
                         $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow"]) : Struct::Icon("file", null, ["class" => "be fore blue"]),
                         null,
-                        ["class" => "item-icon", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($url, true)]
+                        ["class" => "item-icon", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($aurl, true)]
                     ) .
-                    htmlspecialchars(Convert::ToExcerpt($it["Name"], 0, 20, reverse: true)),
+                    Convert::ToExcerpt($it["Name"], 0, 20, reverse: true),
                     $it["Size"] ? Struct::Number(content: $it["Size"]) . "B" : null,
-                    Struct::Icon("copy", Script::Copy($url)) . Struct::Link("\${".Convert::ToExcerpt($url, 0, 50, reverse: true)."}", $url),
+                    $it["IsDirectory"] ? Struct::Icon("folder-open", $this->GoScript($it["Path"])) : Struct::Icon("copy", Script::Copy($url)) . Struct::Link("\${" . Convert::ToExcerpt($url, 0, 50, reverse: true) . "}", $aurl, ["target" => "_blank"]),
                     $it["MimeType"],
                     Convert::ToShownDateTimeString($it["UpdateTime"])
-                ], ["class"=>"item", "onclick"=>"_(this).select('input[name=\"Path\"]').addAttr('checked', 'checked')"]);
+                ], ["class" => "item", "onclick" => "_(this).select('input[name=\"Path\"]').addAttr('checked', 'checked')"]);
             })
         ]);
     }
@@ -144,10 +162,10 @@ class Storage extends Module
                     Struct::Span(
                         $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow fa-2x"]) : Struct::Icon("file", null, ["class" => "be fore blue fa-2x"]),
                         null,
-                        ["class" => "item-icon", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($this->Driver->GetRelativeUrl($it["Path"]), true)]
+                        ["class" => "item-icon", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($this->Driver->GetAbsoluteUrl($it["Path"]), true)]
                     ) .
                     Struct::Span(
-                        "\${" . htmlspecialchars($it["Name"]) . "}",
+                        "\${" . $it["Name"] . "}",
                         [
                             "tooltip" => Struct::Paragraph([
                                 "Size: " . ($it["Size"] ? Struct::Number($it["Size"]) . "B" : null),
@@ -155,8 +173,8 @@ class Storage extends Module
                                 "Time: " . Convert::ToShownDateTimeString($it["UpdateTime"])
                             ])
                         ]
-                    ).
-                    Struct::CheckInput("Path", $it["Path"], ["class"=>"hidden"])
+                    ) .
+                    Struct::CheckInput("Path", $it["Path"], ["class" => "hidden"])
                     ,
                     ["class" => "item"]
                 );
@@ -164,16 +182,6 @@ class Storage extends Module
         ), ["class" => "items"]);
     }
 
-    public function UploadFileScript($path = null)
-    {
-        return Script::Upload(
-            $this->AcceptedFormats,
-            "?path=" . urlencode($path ?? $this->Driver->RootAddress) . "&view={$this->View}",
-            "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}",
-            method: $this->Method,
-            binary: true
-        );
-    }
     public function CreateFolderScript($path = null)
     {
         return "if(name = " . Script::Prompt('Input the new folder`s name:', 'New Folder') . ") " . self::GoScript(
@@ -198,6 +206,16 @@ class Storage extends Module
             "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}",
         );
     }
+    public function UploadFileScript($path = null)
+    {
+        return Script::Upload(
+            $this->AcceptedFormats,
+            "?path=" . urlencode($path ?? $this->Driver->RootAddress) . "&view={$this->View}",
+            "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}",
+            method: $this->Method,
+            binary: true
+        );
+    }
 
     public function Exclusive()
     {
@@ -215,10 +233,22 @@ class Storage extends Module
                     break;
             }
         }
-        if ($file = get($received, "Data")) {
-            Script::Download($file, $this->Driver->RootAddress.get($received, "Name"), true);
-            success("The file uploaded successfully!");
-        }
+        if ($file = get($received, "data"))
+            try {
+                if (
+                    Script::Download(
+                        $file,
+                        $this->Driver->RootAddress . get($received, "name"),
+                        method: $this->Method,
+                        binary: true
+                    )
+                )
+                    success("The file uploaded successfully!");
+                else
+                    error("Could not to upload the file!");
+            } catch (\Exception $ex) {
+                error($ex);
+            }
         $this->Router->Get()->Switch();
         return $this->ToString();
     }

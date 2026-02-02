@@ -4,7 +4,7 @@
     ->Get(function () {
         view("part", [
             "Name" => "admin/system/uploads",
-            "Image" => "upload",
+            "Image" => "download",
             "Title" => "'Dynamic' 'Assets' 'Management'"
         ]);
     })

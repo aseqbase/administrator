@@ -10,10 +10,10 @@ class Storage {
     }
 
     public function GetAbsoluteUrl(string $path): string {
-        return Local::GetAbsoluteUrl($this->GetRelativeUrl( $path));
+        return Local::GetAbsoluteUrl($this->RootUrl.normalizeUrl(substr($path, strlen($this->RootAddress))));
     }
     public function GetRelativeUrl(string $path): string {
-        return Local::GetRelativeUrl($this->RootUrl.normalizeUrl(substr($path, strlen($this->RootAddress))));
+        return getRequest($this->GetAbsoluteUrl( $path));
     }
 
     public function GetItems() {
