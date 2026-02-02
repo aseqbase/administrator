@@ -147,7 +147,7 @@ class Storage extends Module
                     ) .
                     Convert::ToExcerpt($it["Name"], 0, 20, reverse: true),
                     $it["Size"] ? Struct::Number(content: $it["Size"]) . "B" : null,
-                    $it["IsDirectory"] ? Struct::Icon("folder-open", $this->GoScript($it["Path"])) : Struct::Icon("copy", Script::Copy($url)) . Struct::Link("\${" . Convert::ToExcerpt($url, 0, 50, reverse: true) . "}", $aurl, ["target" => "_blank"]),
+                    $it["IsDirectory"] ? Struct::Icon("folder-open", $this->GoScript($it["Path"])) : Struct::Icon("copy", Script::Copy($aurl)) . Struct::Link("\${" . Convert::ToExcerpt($url, 0, 50, reverse: true) . "}", $aurl, ["target" => "_blank"]),
                     $it["MimeType"],
                     Convert::ToShownDateTimeString($it["UpdateTime"])
                 ], ["class" => "item", "onclick" => "_(this).select('input[name=\"Path\"]').addAttr('checked', 'checked')"]);
