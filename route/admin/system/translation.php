@@ -86,7 +86,7 @@ use MiMFa\Library\Script;
                                     Struct::Button("Edit Lexicon", "/" . \_::$User->Direction . "?update=true")
                                 ) .
                                 Struct::Button("Export Lexicon", "/" . \_::$User->Direction . "?export=true", ["target" => "blank"]) .
-                                Struct::Button("Import Lexicon", Script::Upload([".csv"], timeout: 300000)) .
+                                Struct::Button("Import Lexicon", Script::UploadDialog([".csv"], timeout: 300000)) .
                                 Struct::Button(
                                     "Clear Lexicon",
                                     "if(confirm('Are you sure to clear all lexicon records?')) sendDeleteRequest(null, {'truncate':true}, '.content');",

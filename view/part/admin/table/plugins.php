@@ -31,7 +31,7 @@ $module->PrependControlsCreator = function($id, $row) {
 };
 pod($module, $data);
 response(Struct::Center([
-    Struct::Button(__("Upload a package").Struct::Icon("plus"), Script::Upload([".zip"], binary:true))
+    Struct::Button(__("Upload a package").Struct::Icon("plus"), Script::UploadDialog([".zip"], binary:true))
 ]));
 $module->Render();
 ?>

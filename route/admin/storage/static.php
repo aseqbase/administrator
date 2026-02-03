@@ -3,13 +3,13 @@
 ->if(\_::$User->HasAccess(\_::$User->AdminAccess))
     ->Get(function () {
         view("part", [
-            "Name" => "admin/system/uploads",
-            "Image" => "download",
-            "Title" => "'Dynamic' 'Assets' 'Management'"
+            "Name" => "admin/storage/static",
+            "Image" => "folder",
+            "Title" => "'Organized' 'Files' 'Management'"
         ]);
     })
     ->Default(function () {
-        part("admin/system/uploads");
+        part("admin/storage/static");
     })
     ->Handle();
 ?>
