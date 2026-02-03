@@ -135,22 +135,49 @@ class Storage extends Module
                 ], ["class" => "be align start flex col-sm"]) .
                 Struct::Division([
                     Struct::Icon("refresh", $this->GoScript(), ["tooltip" => "Reload the page"]),
-                    Struct::Icon("table", Script::Send(
-                        $this->Method,
-                        "?path=" . urlencode($this->CurrentAddress) . "&arrange=table",
-                        null,
-                        ".{$this->Name}",
-                        "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}",
-                    ), $this->Arrange === "table" ? ["class" => "hidden"] : []),
-                    Struct::Icon("list", Script::Send(
-                        $this->Method,
-                        "?path=" . urlencode($this->CurrentAddress) . "&arrange=items",
-                        null,
-                        ".{$this->Name}",
-                        "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}",
-                    ), $this->Arrange === "items" ? ["class" => "hidden"] : [])
+                    Struct::Icon("list", $this->GoScript("?path=" . urlencode($this->CurrentAddress) . "&arrange=table"), $this->Arrange === "table" ? ["class" => "hidden"] : []),
+                    Struct::Icon("th", $this->GoScript("?path=" . urlencode($this->CurrentAddress) . "&arrange=items"), $this->Arrange === "items" ? ["class" => "hidden"] : [])
                 ], ["class" => "be align end col-sm col-sm-2"])
             ], ["class" => "toolbar"]) . $items;
+    }
+
+    public function GetScript()
+    {
+        $url = "?path=" . urlencode($this->CurrentAddress) . "&arrange={$this->Arrange}";
+        $successScript = "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}";
+        return parent::GetScript() . Struct::Script("
+            function {$this->MainName}_Reload(path = null, data = null){
+                " . Script::Send(
+                    $this->Method,
+                    "\${path ? '? path=' + encodeURIComponent(path) + '&arrange={$this->Arrange}' : " . Script::Convert($url) . "}",
+                    "\${data}",
+                    ".{$this->Name}",
+                    $successScript,
+                ) . "
+            }
+
+            function {$this->MainName}_UploadFile(){
+            " . Script::UploadDialog(
+                    $this->AcceptedFormats,
+                    $url,
+                    $successScript,
+                    method: $this->Method,
+                    binary: true
+                ) . "
+            }
+
+            function {$this->MainName}_CreateFolder(name){
+                if(name || (name = " . Script::Prompt('Input the new folder`s name:', 'New Folder') . ")) {
+                    {$this->MainName}_Reload(null, " . Script::Convert(["name" => "\${encodeURIComponent(name)}", "action" => "new-folder"]) . ");
+                }
+            }
+
+            function {$this->MainName}_CreateFile(name){
+                if(name || (name = " . Script::Prompt('Input the new file`s name:', 'New File') . ")) {
+                    {$this->MainName}_Reload(null, " . Script::Convert(["name" => "\${encodeURIComponent(name)}", "action" => "new-file"]) . ");
+                }
+            }
+        ");
     }
 
     public function GetTableArrange()
@@ -210,14 +237,13 @@ class Storage extends Module
             $this->GetContextMenu()
         ], ["class" => "items"]);
     }
-
     public function GetContextMenu()
     {
         return Struct::ContextMenu([
-            Struct::Action(Struct::Icon("upload").Struct::Span("Upload a new file"), $this->UploadFileScript($this->CurrentAddress)),
-            Struct::Action(Struct::Icon("folder").Struct::Span("Create a new folder"), $this->CreatefolderScript($this->CurrentAddress)),
-            Struct::Action(Struct::Icon("file").Struct::Span("Create a new file"), $this->CreateFileScript($this->CurrentAddress)),
-            Struct::Action(Struct::Icon("refresh").Struct::Span("Refresh"), $this->GoScript($this->CurrentAddress)),
+            Struct::Action(Struct::Icon("upload") . Struct::Span("Upload a new file"), $this->UploadFileScript()),
+            Struct::Action(Struct::Icon("folder") . Struct::Span("Create a new folder"), $this->CreatefolderScript()),
+            Struct::Action(Struct::Icon("file") . Struct::Span("Create a new file"), $this->CreateFileScript()),
+            Struct::Action(Struct::Icon("refresh") . Struct::Span("Refresh"), $this->GoScript()),
         ]);
     }
 
@@ -230,41 +256,21 @@ class Storage extends Module
         return getRequest($this->GetAbsoluteUrl($path));
     }
 
-    public function CreateFolderScript($path = null)
+    public function CreateFolderScript($name = null)
     {
-        return "if(name = " . Script::Prompt('Input the new folder`s name:', 'New Folder') . ") " .
-            self::GoScript(
-                $path,
-                ["name" => "\${encodeURIComponent(name)}", "action" => "new-folder"]
-            );
+        return "{$this->MainName}_CreateFolder(" . Script::Convert($name) . ")";
     }
-    public function CreateFileScript($path = null)
+    public function CreateFileScript($name = null)
     {
-        return "if(name = " . Script::Prompt('Input the new file`s name:', 'New File.txt') . ") " .
-            self::GoScript(
-                $path,
-                ["name" => "\${encodeURIComponent(name)}", "action" => "new-file"]
-            );
+        return "{$this->MainName}_CreateFile(" . Script::Convert($name) . ")";
     }
     public function GoScript($path = null, $data = null)
     {
-        return Script::Send(
-            $this->Method,
-            "?path=" . urlencode($path ?? $this->CurrentAddress) . "&arrange={$this->Arrange}",
-            $data,
-            ".{$this->Name}",
-            "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}",
-        );
+        return "{$this->MainName}_Reload(" . Script::Convert($path) . "," . Script::Convert($data) . ")";
     }
-    public function UploadFileScript($path = null)
+    public function UploadFileScript()
     {
-        return Script::UploadDialog(
-            $this->AcceptedFormats,
-            "?path=" . urlencode($path ?? $this->CurrentAddress) . "&arrange={$this->Arrange}",
-            "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}",
-            method: $this->Method,
-            binary: true
-        );
+        return "{$this->MainName}_UploadFile()";
     }
 
     public function Exclusive()
