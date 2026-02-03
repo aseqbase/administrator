@@ -31,8 +31,8 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
                 array("Name" => "CONTENTS", "Path" => "/admin/content/contents", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's posts and pages", "Image" => "file"),
                 array("Name" => "TAGS", "Path" => "/admin/content/tags", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's tags", "Image" => "tags"),
                 array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's categories", "Image" => "code-fork"),
-                array("Name" => "FILES", "Path" => "/admin/storage/dynamic", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'uploads'", "Image" => "download"),
-                array("Name" => "'ORGANIZED' 'STORAGE'", "Path" => "/admin/storage/static", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'assets'", "Image" => "folder"),
+                array("Name" => "FILES", "Path" => "/admin/storage/dynamic", "Access" => \_::$User->AdminAccess, "Description" => "'Uploaded' 'files' 'management'", "Image" => "download"),
+                array("Name" => "'ORGANIZED' 'STORAGE'", "Path" => "/admin/storage/static", "Access" => \_::$User->AdminAccess, "Description" => "'Organized' 'files' 'management'", "Image" => "folder"),
             )
         ),
         "Admin-User" => array(
