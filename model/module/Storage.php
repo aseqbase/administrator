@@ -44,6 +44,7 @@ class Storage extends Module
     {
         return parent::GetStyle() . Struct::Style("
             .{$this->Name} .toolbar{
+                direction: ltr;
                 border-bottom: var(--border-1);
                 margin-bottom: var(--size-0);
             }
@@ -58,7 +59,7 @@ class Storage extends Module
                 cursor:pointer;
                 background-color: #8882;
             }
-            .{$this->Name} .items .item{
+            .{$this->Name} .items-arrange .item{
                 display: inline-flex;
                 align-content: center;
                 justify-content: center;
@@ -69,10 +70,10 @@ class Storage extends Module
                 padding: calc(var(--size-0) / 2) calc(var(--size-0) / 4);
                 width: calc(var(--size-max) * 2);
             }
-            .{$this->Name} .items .item:hover{
+            .{$this->Name} .items-arrange .item:hover{
                 background-color: #8882;
             }
-            .{$this->Name} .items .item .title{
+            .{$this->Name} .items-arrange .item .title{
                 text-align: center;
                 font-size: var(--size-1);
                 line-height: 1.2em;
@@ -80,22 +81,25 @@ class Storage extends Module
                 overflow: hidden;
                 overflow-wrap: anywhere;
             }
-            .{$this->Name} .table .item td>*{
+            .{$this->Name} .table-arrange{
+                direction: ltr;
+            }
+            .{$this->Name} .table-arrange .item td>*{
                 max-width: 100%;
                 overflow: hidden;
                 line-height: 1.2em;
                 overflow-wrap: anywhere;
             }
-            .{$this->Name} .table .item .title{
+            .{$this->Name} .table-arrange .item .title{
                 text-align: center;
             }
-            .{$this->Name} .table .item-icon{
+            .{$this->Name} .table-arrange .item-icon{
                 padding: calc(var(--size-0) / 4) calc(var(--size-0) / 2);
                 aspect-ratio: 1;
                 margin-inline-end: var(--size-0);
                 border-radius: var(--radius-max);
             }
-            .{$this->Name} .table tr:hover .item-icon{
+            .{$this->Name} .table-arrange tr:hover .item-icon{
                 background-color: #8882;
             }
             .{$this->Name} .item:has(.checkinput:checked){
@@ -187,27 +191,32 @@ class Storage extends Module
 
     public function GetTableArrange()
     {
-        return Struct::Table([
-            ["Name", "Size", "URL", "Type", "UpdateTime"],
-            ...loop(Local::GetDirectoryItems($this->CurrentAddress), function ($it, $k, $i) {
-                $aurl = $this->GetAbsoluteUrl($it["Path"]);
-                $url = getRequest($aurl);
-                return Struct::Row([
-                    Struct::CheckInput("Selected", $it["Path"], ["class" => "hidden"]) .
-                    Struct::Span(
-                        $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow"]) : Struct::Icon("file", null, ["class" => "be fore blue"]),
-                        null,
-                        ["class" => "item-icon", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($aurl, true)]
-                    ) .
-                    Struct::Span("\${{$it["Name"]}}", null, ["class" => "title"]),
-                    $it["Size"] ? Struct::Number(content: $it["Size"]) . "B" : null,
-                    $it["IsDirectory"] ? Struct::Icon("folder-open", $this->GoScript($it["Path"])) : Struct::Icon("copy", Script::Copy($aurl)) . Struct::Link("\${{$url}}", $aurl, ["class" => "view md-hide", "target" => "_blank"]),
-                    $it["MimeType"],
-                    Convert::ToShownDateTimeString($it["UpdateTime"])
-                ], ["class" => "item", "onclick" => "_(this).select('input[name=\"Path\"]').addAttr('checked', 'checked')"]);
-            }),
+        return Struct::Division(
+            Struct::Table([
+                ["Name", "Size", "URL", "Type", "UpdateTime"],
+                ...loop(Local::GetDirectoryItems($this->CurrentAddress), function ($it, $k, $i) {
+                    $aurl = $this->GetAbsoluteUrl($it["Path"]);
+                    $url = getRequest($aurl);
+                    return Struct::Row([
+                        "\${" .
+                        Struct::CheckInput("Selected", $it["Path"], ["class" => "hidden"]) .
+                        Struct::Span(
+                            $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow"]) : Struct::Icon("file", null, ["class" => "be fore blue"]),
+                            null,
+                            ["class" => "item-icon", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($aurl, true)]
+                        ) .
+                        Struct::Span("\${{$it["Name"]}}", null, ["class" => "title"]) .
+                        "}",
+                        $it["Size"] ? Struct::Number(content: $it["Size"]) . "B" : null,
+                        $it["IsDirectory"] ? Struct::Icon("folder-open", $this->GoScript($it["Path"])) : ("\${" . Struct::Icon("copy", Script::Copy($aurl)) . Struct::Link("\${" . Convert::ToExcerpt($url, 0, 50) . "}", $aurl, ["class" => "view md-hide", "target" => "_blank"]) . "}"),
+                        $it["MimeType"],
+                        Convert::ToShownDateTimeString($it["UpdateTime"])
+                    ], ["class" => "item", "onclick" => "_(this).select('input[name=\"Path\"]').addAttr('checked', 'checked')"]);
+                })
+            ]) .
             $this->GetContextMenu(),
-        ]);
+            ["class" => "table-arrange"]
+        );
     }
     public function GetItemsArrange()
     {
@@ -215,6 +224,7 @@ class Storage extends Module
             ...loop(
                 Local::GetDirectoryItems($this->CurrentAddress),
                 function ($it, $k, $i) {
+                    $aurl = $this->GetAbsoluteUrl($it["Path"]);
                     return Struct::Division(
                         Struct::Span(
                             $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow fa-2x"]) : Struct::Icon("file", null, ["class" => "be fore blue fa-2x"]),
@@ -226,7 +236,7 @@ class Storage extends Module
                             [
                                 "class" => "title",
                                 "tooltip" => Struct::Part([
-                                    "Name: " . $it["Name"],
+                                    "Address: " . $it["Name"] . " " . Struct::Icon("copy", Script::Copy($aurl)),
                                     "Size: " . ($it["Size"] ? Struct::Number($it["Size"]) . "B" : null),
                                     "Type: " . $it["MimeType"],
                                     "Modified: " . Convert::ToShownDateTimeString($it["UpdateTime"]),
@@ -235,13 +245,14 @@ class Storage extends Module
                             ]
                         ) .
                         Struct::CheckInput("Path", $it["Path"], ["class" => "hidden"]),
-                        ["class" => "item", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($this->GetAbsoluteUrl($it["Path"]), true)]
+                        ["class" => "item", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($aurl, true)]
                     );
                 }
             ),
             $this->GetContextMenu()
-        ], ["class" => "items"]);
+        ], ["class" => "items-arrange"]);
     }
+
     public function GetContextMenu()
     {
         return Struct::ContextMenu([
