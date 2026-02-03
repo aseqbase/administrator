@@ -135,8 +135,8 @@ class Storage extends Module
                 ], ["class" => "be align start flex col-sm"]) .
                 Struct::Division([
                     Struct::Icon("refresh", $this->GoScript(), ["tooltip" => "Reload the page"]),
-                    Struct::Icon("list", $this->GoScript("?path=" . urlencode($this->CurrentAddress) . "&arrange=table"), $this->Arrange === "table" ? ["class" => "hidden"] : []),
-                    Struct::Icon("th", $this->GoScript("?path=" . urlencode($this->CurrentAddress) . "&arrange=items"), $this->Arrange === "items" ? ["class" => "hidden"] : [])
+                    Struct::Icon("list", $this->SendScript("?path=" . urlencode($this->CurrentAddress) . "&arrange=table"), $this->Arrange === "table" ? ["class" => "hidden"] : []),
+                    Struct::Icon("th", $this->SendScript("?path=" . urlencode($this->CurrentAddress) . "&arrange=items"), $this->Arrange === "items" ? ["class" => "hidden"] : [])
                 ], ["class" => "be align end col-sm col-sm-2"])
             ], ["class" => "toolbar"]) . $items;
     }
@@ -146,14 +146,19 @@ class Storage extends Module
         $url = "?path=" . urlencode($this->CurrentAddress) . "&arrange={$this->Arrange}";
         $successScript = "(d,e)=>{if(d) _('.{$this->Name}').replace(d); else alert(e);}";
         return parent::GetScript() . Struct::Script("
-            function {$this->MainName}_Reload(path = null, data = null){
+
+            function {$this->MainName}_Send(path = null, data = null){
                 " . Script::Send(
                     $this->Method,
-                    "\${path ? '? path=' + encodeURIComponent(path) + '&arrange={$this->Arrange}' : " . Script::Convert($url) . "}",
+                    "\${path ?? " . Script::Convert($url) . "}",
                     "\${data}",
                     ".{$this->Name}",
                     $successScript,
                 ) . "
+            }
+
+            function {$this->MainName}_Go(path = null, data = null){
+                {$this->MainName}_Send(path ? '? path=' + encodeURIComponent(path) + '&arrange={$this->Arrange}' : " . Script::Convert($url) . ", data);
             }
 
             function {$this->MainName}_UploadFile(){
@@ -168,13 +173,13 @@ class Storage extends Module
 
             function {$this->MainName}_CreateFolder(name){
                 if(name || (name = " . Script::Prompt('Input the new folder`s name:', 'New Folder') . ")) {
-                    {$this->MainName}_Reload(null, " . Script::Convert(["name" => "\${encodeURIComponent(name)}", "action" => "new-folder"]) . ");
+                    {$this->MainName}_Go(null, " . Script::Convert(["name" => "\${encodeURIComponent(name)}", "action" => "new-folder"]) . ");
                 }
             }
 
             function {$this->MainName}_CreateFile(name){
                 if(name || (name = " . Script::Prompt('Input the new file`s name:', 'New File') . ")) {
-                    {$this->MainName}_Reload(null, " . Script::Convert(["name" => "\${encodeURIComponent(name)}", "action" => "new-file"]) . ");
+                    {$this->MainName}_Go(null, " . Script::Convert(["name" => "\${encodeURIComponent(name)}", "action" => "new-file"]) . ");
                 }
             }
         ");
@@ -256,6 +261,18 @@ class Storage extends Module
         return getRequest($this->GetAbsoluteUrl($path));
     }
 
+    public function SendScript($path = null, $data = null)
+    {
+        return "{$this->MainName}_Send(" . Script::Convert($path) . "," . Script::Convert($data) . ")";
+    }
+    public function GoScript($path = null, $data = null)
+    {
+        return "{$this->MainName}_Go(" . Script::Convert($path) . "," . Script::Convert($data) . ")";
+    }
+    public function UploadFileScript()
+    {
+        return "{$this->MainName}_UploadFile()";
+    }
     public function CreateFolderScript($name = null)
     {
         return "{$this->MainName}_CreateFolder(" . Script::Convert($name) . ")";
@@ -263,14 +280,6 @@ class Storage extends Module
     public function CreateFileScript($name = null)
     {
         return "{$this->MainName}_CreateFile(" . Script::Convert($name) . ")";
-    }
-    public function GoScript($path = null, $data = null)
-    {
-        return "{$this->MainName}_Reload(" . Script::Convert($path) . "," . Script::Convert($data) . ")";
-    }
-    public function UploadFileScript()
-    {
-        return "{$this->MainName}_UploadFile()";
     }
 
     public function Exclusive()
