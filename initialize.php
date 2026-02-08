@@ -4,11 +4,13 @@
 \_::$Back->DisplayError = \_::$Back->DisplayError ?: 1;
 \_::$Back->DisplayStartupError = \_::$Back->DisplayStartupError ?: 1;
 \_::$Back->DataBaseError = \_::$Back->DataBaseError ?: 1;
-\_::$Back->AdminOrigin = array_key_first(\_::$Sequence) === __DIR__ . DIRECTORY_SEPARATOR ? 0 : 1;
+$dirs = array_keys(\_::$Sequence);
+find($dirs, __DIR__ . DIRECTORY_SEPARATOR, index: $index);
+\_::$Back->AdminOrigin = $index?: 0;
 $name = \_::$Address->Name ?? "qb";
 \_::$Address->Name = (isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : $GLOBALS["BASE"]) ?: \_::$Address->Name;
 if (\_::$Back->AdminOrigin === 0) { // Change public access directories to the Root sequence
-    $rootPath = array_keys(\_::$Sequence)[\_::$Back->AdminOrigin + 1];
+    $rootPath = $dirs[\_::$Back->AdminOrigin + 1];
     \_::$Address->PublicAddress = $rootPath . ltrim(\_::$Address->PublicDirectory, DIRECTORY_SEPARATOR);
     \_::$Address->AssetAddress = $rootPath . ltrim(\_::$Address->AssetDirectory, DIRECTORY_SEPARATOR);
 }

@@ -3,6 +3,7 @@ auth(\_::$User->AdminAccess);
 
 use \MiMFa\Library\Struct;
 use \MiMFa\Library\Convert;
+use MiMFa\Library\Local;
 use MiMFa\Library\Script;
 
 (new Router())
@@ -13,16 +14,20 @@ use MiMFa\Library\Script;
     ->else()
     ->if(receiveGet("export") ?? false)
     ->Get(function () {//Exports
-        \MiMFa\Library\Local::Load(Convert::FromCells(Convert::FieldsToCells(\_::$Front->Translate->GetAll("ORDER BY `KeyCode` ASC"))), "Lexicon.csv");
+        Local::Load(Convert::FromCells(Convert::FieldsToCells(\_::$Front->Translate->GetAll("ORDER BY `KeyCode` ASC"))), "Lexicon.csv");
     })
     ->else()
-    ->File(function () {//Imports
-        $dic = Convert::ToFields(Script::Download());
-        $c = count($dic);
-        if ($c > 0 && \_::$Front->Translate->SetAll($dic))
-            deliverBreaker(Struct::Success("$c key values setted successfuly in lexicon!"));
-        else
-            error("There occurred a problem!");
+    ->Stream(function () {//Imports
+        if ($file = downloadStream()) 
+            if (is_string($file)){
+                $dic = Convert::ToFields($file);
+                $c = count($dic);
+                if ($c > 0 && \_::$Front->Translate->SetAll($dic))
+                    deliverBreaker(Struct::Success("$c key values setted successfuly in lexicon!"));
+                else
+                    error("There occurred a problem!");
+            } elseif($file === false) return error("There occurred a problem in uploading the file!");
+            else return deliverProgress($file);
     })
     ->Delete(function () {//Deletes
         if (\_::$Front->Translate->ClearAll())
@@ -76,24 +81,24 @@ use MiMFa\Library\Script;
                                 ),
                             ]
                         ]) .
-                        Struct::$Break . 
-                        Struct::$BreakLine . 
-                        Struct::$Break . 
+                        Struct::$Break .
+                        Struct::$BreakLine .
+                        Struct::$Break .
                         Struct::Division(
-                                (
-                                    $upd ?
-                                    Struct::Button("View Lexicon", "/" . \_::$User->Direction) :
-                                    Struct::Button("Edit Lexicon", "/" . \_::$User->Direction . "?update=true")
-                                ) .
-                                Struct::Button("Export Lexicon", "/" . \_::$User->Direction . "?export=true", ["target" => "blank"]) .
-                                Struct::Button("Import Lexicon", Script::UploadDialog([".csv"], timeout: 300000)) .
-                                Struct::Button(
-                                    "Clear Lexicon",
-                                    "if(confirm('Are you sure to clear all lexicon records?')) sendDeleteRequest(null, {'truncate':true}, '.content');",
-                                    ["class" => "error"]
-                                ),
-                                ["class" => "be flex middle center", "style"=>"gap:var(--size-0);"]
-                            )
+                            (
+                                $upd ?
+                                Struct::Button("View Lexicon", "/" . \_::$User->Direction) :
+                                Struct::Button("Edit Lexicon", "/" . \_::$User->Direction . "?update=true")
+                            ) .
+                            Struct::Button("Export Lexicon", "/" . \_::$User->Direction . "?export=true", ["target" => "blank"]) .
+                            Struct::Button("Import Lexicon", Script::UploadStream(extensions: [".csv"], timeout: 300000)) .
+                            Struct::Button(
+                                "Clear Lexicon",
+                                "if(confirm('Are you sure to clear all lexicon records?')) sendDeleteRequest(null, {'truncate':true}, '.content');",
+                                ["class" => "error"]
+                            ),
+                            ["class" => "be flex middle center", "style" => "gap:var(--size-0);"]
+                        )
                         ,
                         ["class" => "content"]
                     )

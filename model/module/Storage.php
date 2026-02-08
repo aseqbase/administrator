@@ -16,8 +16,16 @@ use MiMFa\Library\Struct;
 class Storage extends Module
 {
     public string|null $Arrange = null;
+    public string $ArrangeRequest = "arrange";
     public string|null $Method = "Storage";
-    public array|null $AcceptedFormats = null;
+    public array|null $AcceptableFormats = null;
+    public int|null $MinFileSize = null;
+    public int|null $MaxFileSize = null;
+    /**
+     * The upload speed in Byte Per Second
+     * @var int|null
+     */
+    public int|null $Speed = null;
     public readonly string $RootAddress;
     public readonly string $RootUrl;
     public readonly string $CurrentAddress;
@@ -30,7 +38,10 @@ class Storage extends Module
         parent::__construct();
         $this->RootAddress = Local::GetAbsoluteAddress($rootAddress);
         $this->RootUrl = Local::GetAbsoluteUrl($rootUrl);
-        setMemo("Arrange", $this->Arrange = receiveGet("Arrange") ?? $this->Arrange ?? getMemo("Arrange"));
+        if ($this->Arrange = receiveGet($this->ArrangeRequest) ?? $this->Arrange)
+            setMemo($this->ArrangeRequest, $this->Arrange);
+        else
+            $this->Arrange = getMemo($this->ArrangeRequest);
         $this->Name = receiveGet("Class") ?? $this->Name;
         $p = receiveGet("Path");
         if ($p && startsWith($p = Local::GetAbsoluteAddress($p), $rootAddress)) {
@@ -47,21 +58,21 @@ class Storage extends Module
     {
         return parent::GetStyle() . Struct::Style("
             .{$this->Name} .toolbar{
-                direction: ltr;
                 border-bottom: var(--border-1);
                 margin-bottom: var(--size-0);
             }
-            .{$this->Name} .toolbar .icon{
-                padding: calc(var(--size-0) / 2);
-            }
-            .{$this->Name} .toolbar .parent{
-                padding: calc(var(--size-0) / 2);
+            .{$this->Name} .toolbar>*>*{
+                padding: calc(var(--size-0) / 2) var(--size-0);
+                display: inline-block;
             }
             .{$this->Name} .toolbar .parent:hover{
-                padding: calc(var(--size-0) / 2);
                 cursor:pointer;
                 background-color: #8882;
             }
+            .{$this->Name} .item.cutted{
+                opacity: 0.5;
+            }
+
             .{$this->Name} .items-arrange .item{
                 display: inline-flex;
                 align-content: center;
@@ -82,8 +93,8 @@ class Storage extends Module
                 line-height: 1.2em;
                 overflow-wrap: anywhere;
             }
-            .{$this->Name} .table-arrange{
-                direction: ltr;
+            .{$this->Name} .items-arrange .item:has(input[name=\"Path\"]:checked){
+                background-color: rgba(121, 159, 241, 0.2);
             }
             .{$this->Name} .table-arrange tr td>*{
                 max-width: 100%;
@@ -91,8 +102,11 @@ class Storage extends Module
                 line-height: 1.2em;
                 overflow-wrap: anywhere;
             }
+            .{$this->Name} .table-arrange :is(tr, tr td){
+                padding: 0px;
+            }
             .{$this->Name} .table-arrange .item{
-                padding: calc(var(--size-0) / 4) calc(var(--size-0) / 2);
+                padding: calc(var(--size-0) / 2) calc(var(--size-0) / 2);
             }
             .{$this->Name} .table-arrange .item .title{
                 text-align: center;
@@ -106,7 +120,10 @@ class Storage extends Module
             .{$this->Name} .table-arrange tr:hover .item-icon{
                 background-color: #8882;
             }
-            .{$this->Name} .item:has(.checkinput:checked){
+            .{$this->Name} .table-arrange tr:has(.item:hover){
+                background-color: #8882;
+            }
+            .{$this->Name} .table-arrange tr:has(input[name=\"Path\"]:checked){
                 background-color: rgba(121, 159, 241, 0.2);
             }
         ");
@@ -125,59 +142,115 @@ class Storage extends Module
                 break;
         }
         return parent::Get() .
-            Struct::SmallFrame([
+            Struct::Division(
                 Struct::Division([
                     ...($this->CurrentAddress !== $this->RootAddress ? [
                         Struct::Action(
-                            Struct::Icon("folder-open", null, ["class" => "be fore green"]) .
+                            Struct::Icon("folder-open", null, ["class" => "be fore green"]) . " " .
                             (trim(preg_find("/[^\/\\\]+[\/\\\]$/u", $this->CurrentAddress) ?? "", DIRECTORY_SEPARATOR)) .
-                            Struct::Icon("arrow-left"),
+                            " " . Struct::Icon("arrow-left"),
                             $this->GoBackScript(),
                             ["class" => "be flex middle center parent"]
                         ) . " "
                     ] : []),
-                    Struct::Icon("download", $this->UploadScript(), ["tooltip" => "Upload a new file"]),
-                    Struct::Icon("folder", $this->CreatefolderScript(), ["tooltip" => "Create a new folder"]),
-                    Struct::Icon("file", $this->CreateFileScript(), ["tooltip" => "Create a new file"]),
-                    Struct::Icon("check-circle", $this->SelectAllScript(), ["tooltip" => "Select all"]),
-                    Struct::Icon("circle", $this->DeselectAllScript(), ["tooltip" => "Deselect all"]),
-                ], ["class" => "be align start flex col-sm"]) .
+                    ...(\_::$User->HasAccess($this->ModifyAccess) ? [
+                        Struct::Icon("download", $this->UploadScript(), ["tooltip" => "Upload a new file"]),
+                        Struct::Icon("folder", $this->CreatefolderScript(), ["tooltip" => "Create a new folder"]),
+                        Struct::Icon("file", $this->CreateFileScript(), ["tooltip" => "Create a new file"]),
+                        Struct::Division("", ["class" => "selected-details multi-selected", "style" => "margin:0px; padding: calc(var(--size-0) / 2) var(--size-0); color: var(--color-gray);"]),
+                        Struct::Icon("copy", $this->CopyScript(), ["tooltip" => "Copy selected items", "class" => "selected"]),
+                        Struct::Icon("cut", $this->CutScript(), ["tooltip" => "Cut selected items", "class" => "selected"]),
+                        Struct::Icon("paste", $this->PasteScript(), ["tooltip" => "Paste items here", "class" => "clipboard", "hidden" => "hidden"]),
+                        Struct::Icon("edit", $this->RenameScript(), ["tooltip" => "Rename selected itema", "class" => "selected"]),
+                        Struct::Icon("trash", $this->DeleteScript(), ["tooltip" => "Delete selected itema", "class" => "selected", "style" => "color: var(--color-red);"]),
+                        Struct::Icon("archive", $this->CompressScript(), ["tooltip" => "Compress selected items", "class" => "selected"]),
+                        Struct::Icon("folder-open", $this->ExtractScript(), ["tooltip" => "Extract selected items", "class" => "selected"]),
+                        Struct::Icon("upload", $this->DownloadScript(), ["tooltip" => "Download selected items", "class" => "selected"]),
+                        Struct::Icon("link", $this->CopyAbsoluteUrlScript(), ["tooltip" => "Copy absolute URL of selected items", "class" => "selected"]),
+                        //Struct::Icon("info", $this->PropertiesScript(), ["tooltip" => "View properties of selected items", "class" => "selected"])
+                    ] : []),
+                ], ["class" => "be align start"]) .
                 Struct::Division([
+                    ...($this->MultiSelect ? [
+                        //Struct::Icon("close", $this->DeselectAllScript(), ["tooltip" => "Deselect all", "class" => "multi-selected"]),
+                        Struct::Icon("check-circle", $this->SelectAllScript(), ["tooltip" => "Select all"]),
+                    ] : []),
                     Struct::Icon("refresh", $this->GoScript(), ["tooltip" => "Reload the page"]),
-                    Struct::Icon("list", $this->SendScript("?path=" . urlencode($this->CurrentAddress) . "&arrange=table"), $this->Arrange === "table" ? ["class" => "hidden"] : []),
-                    Struct::Icon("th", $this->SendScript("?path=" . urlencode($this->CurrentAddress) . "&arrange=items"), $this->Arrange === "items" ? ["class" => "hidden"] : [])
-                ], ["class" => "be align end col-sm col-sm-2"])
-            ], ["class" => "toolbar"]) . $items . Struct::Script(
-                    "
-            function {$this->MainName}_Select(e, item) {" . ($this->MultiSelect ? "
-                if(e.shiftKey) {
-                    isch = false;
-                    _('.{$this->Name} .item').each(function(it){
-                        if(isch === null) return;
-                        else if(it === item) {
-                            if(isch) isch = null;
-                            //_(item).matches('[name=\"Path\"]').toggleAttr('checked');
-                        }
-                        else if(_(it).matches('[name=\"Path\"]').checked) isch = true;
-                        else if(isch) _(it).matches('[name=\"Path\"]').toggleAttr('checked');
-                    });
-                    _(item).matches('[name=\"Path\"]').toggleAttr('checked');
-                } else if(e.ctrlKey) {
-                    _(item).matches('[name=\"Path\"]').toggleAttr('checked');
-                } else {
+                    Struct::Icon("list", Script::SetMemo($this->ArrangeRequest, "table") . ";" . $this->GoScript(), $this->Arrange === "table" ? ["class" => "hidden"] : []),
+                    Struct::Icon("th", Script::SetMemo($this->ArrangeRequest, "items") . ";" . $this->GoScript(), $this->Arrange === "items" ? ["class" => "hidden"] : [])
+                ], ["class" => "be align end"])
+                ,
+                ["class" => "toolbar be flex justify"]
+            ) . $items .
+            $this->GetContextMenu(".{$this->Name}") .
+            Struct::Script(
+                "
+                function {$this->MainName}_SelectedChanged(){
+                    var selectedCount = _('.{$this->Name} .item [name=\"Path\"]:checked').length;
+                    
+                    if(typeof InternalClipboard !== 'undefined' && InternalClipboard.length > 0)
+                        _('.{$this->Name} .clipboard').removeAttr('hidden');
+                    else _('.{$this->Name} .clipboard').addAttr('hidden');
+                    
+                    if(selectedCount > 0) _('.{$this->Name} .selected').removeClass('hidden');
+                    else _('.{$this->Name} .selected').addClass('hidden');
+
+                    if(selectedCount > 0) _('.{$this->Name} .not-selected').addClass('hidden');
+                    else _('.{$this->Name} .not-selected').removeClass('hidden');
+
+                    if(selectedCount > 1) _('.{$this->Name} .multi-selected').removeClass('hidden');
+                    else _('.{$this->Name} .multi-selected').addClass('hidden');
+
+                    if(selectedCount === 1) _('.{$this->Name} .single-selected').removeClass('hidden');
+                    else _('.{$this->Name} .single-selected').addClass('hidden');
+
+                    if(selectedCount > 1) _('.{$this->Name} .selected-details').text(selectedCount + ' items');
+                    else _('.{$this->Name} .selected-details').text('');
+                }
+                
+                _('.{$this->Name} .item').on('click', function (e, item) {" . ($this->MultiSelect ? "
+                    if(e.shiftKey) {
+                        isch = false;
+                        _('.{$this->Name} .item').each(function(it){
+                            if(isch === null) return;
+                            else if(it === item) {
+                                if(isch) isch = null;
+                                //_(item).matches('[name=\"Path\"]').toggleAttr('checked');
+                            }
+                            else if(_(it).matches('[name=\"Path\"]').checked) isch = true;
+                            else if(isch) _(it).matches('[name=\"Path\"]').toggleAttr('checked');
+                        });
+                        _(item).matches('[name=\"Path\"]').toggleAttr('checked');
+                    } else if(e.ctrlKey) {
+                        _(item).matches('[name=\"Path\"]').toggleAttr('checked');
+                    } else {
+                        _('.{$this->Name} .item [name=\"Path\"]').removeAttr('checked');
+                        _(item).matches('[name=\"Path\"]').addAttr('checked');
+                    }
+                " : "
                     _('.{$this->Name} .item [name=\"Path\"]').removeAttr('checked');
                     _(item).matches('[name=\"Path\"]').addAttr('checked');
-                }
-            " : "
-                _('.{$this->Name} .item [name=\"Path\"]').removeAttr('checked');
-                _(item).matches('[name=\"Path\"]').addAttr('checked');
-            ") . "}
-            _('.{$this->Name} .item').on('click', {$this->MainName}_Select);
-            _('.{$this->Name} .item').on('contextmenu', {$this->MainName}_Select);
+                ") . "
+                    {$this->MainName}_SelectedChanged();
+                });
 
-            {$this->MainName}_CurrentAddress = " . Script::Convert(urlencode($this->CurrentAddress)) . ";
-        "
-                );
+                _('.{$this->Name} .item').on('contextmenu', function (e, item) {" . ($this->MultiSelect ? "
+                    if(_('.{$this->Name} .item [name=\"Path\"]:checked').length <= 1) {
+                        _('.{$this->Name} .item [name=\"Path\"]').removeAttr('checked');
+                        _(item).matches('[name=\"Path\"]').addAttr('checked');
+                    }
+                " : "
+                    _('.{$this->Name} .item [name=\"Path\"]').removeAttr('checked');
+                    _(item).matches('[name=\"Path\"]').addAttr('checked');
+                ") . "
+                    {$this->MainName}_SelectedChanged();
+                });
+
+                {$this->MainName}_CurrentAddress = " . Script::Convert(urlencode($this->CurrentAddress)) . ";
+                
+                {$this->MainName}_SelectedChanged();
+            "
+            );
     }
 
     public function GetScript()
@@ -197,7 +270,7 @@ class Storage extends Module
                             e.preventDefault();
                             break;
                         case 'f6':
-                            reload();
+                            " . Script::Reload() . ";
                             e.preventDefault();
                             break;
                         case 'f7':
@@ -216,7 +289,7 @@ class Storage extends Module
                             " . $this->GoBackScript() . ";
                             e.preventDefault();
                             break;
-                        case 'a':
+                        " . ($this->MultiSelect ? "case 'a':
                             if(e.ctrlKey && e.shiftKey) {
                                 " . $this->DeselectAllScript() . ";
                                 e.preventDefault();
@@ -225,7 +298,7 @@ class Storage extends Module
                                 " . $this->SelectAllScript() . ";
                                 e.preventDefault();
                             }
-                            break;
+                            break;" : "") . "
                         case 'd':
                             if(e.ctrlKey) {
                                 " . $this->DownloadScript() . ";
@@ -257,7 +330,11 @@ class Storage extends Module
                             }
                             break;
                         case 'n':
-                            if(e.ctrlKey) {
+                            if(e.ctrlKey && e.shiftKey) {
+                                " . $this->CreateFileScript() . ";
+                                e.preventDefault();
+                            }
+                            else if(e.ctrlKey) {
                                 " . $this->CreateFolderScript() . ";
                                 e.preventDefault();
                             }
@@ -283,12 +360,18 @@ class Storage extends Module
                     }
                 }
             });
+            _(document).on('click', function(e){
+                if(_(e.target).matches(' .item').length > 0){
+                    _('.{$this->Name} .item [name=\"Path\"]').removeAttr('checked');
+                    {$this->MainName}_SelectedChanged();
+                }
+            });
 
             InternalClipboard = [];
             InternalClipboardMode = 'copy';
 
             function {$this->MainName}_CurrentUrl(){
-                return '?path='+{$this->MainName}_CurrentAddress+'&arrange={$this->Arrange}';
+                return '?path='+{$this->MainName}_CurrentAddress;
             }
             function {$this->MainName}_Send(path = null, data = null){
                 " . Script::Send(
@@ -301,17 +384,19 @@ class Storage extends Module
             }
 
             function {$this->MainName}_Go(path = null, data = null){
-                {$this->MainName}_Send(path ? '? path=' + encodeURIComponent(path) + '&arrange={$this->Arrange}' : {$this->MainName}_CurrentUrl(), data);
+                {$this->MainName}_Send(path ? '? path=' + encodeURIComponent(path) : {$this->MainName}_CurrentUrl(), data);
             }
 
             function {$this->MainName}_SelectAll(){
                 _('.{$this->Name} .item [name=\"Path\"]').each(function(it){
                     _(it).addAttr('checked');
+                    {$this->MainName}_SelectedChanged();
                 });
             }
             function {$this->MainName}_DeselectAll(){
                 _('.{$this->Name} .item [name=\"Path\"]').each(function(it){
                     _(it).removeAttr('checked');
+                    {$this->MainName}_SelectedChanged();
                 });
             }
 
@@ -320,9 +405,9 @@ class Storage extends Module
                 return _(tag).matches('input[name=\"Path\"]:checked').val();
             }
             function {$this->MainName}_SelectedPaths(sourceSelector = null){
-                sourceSelector = sourceSelector ? sourceSelector : '.{$this->Name}';
+                sourceSelector = sourceSelector ? sourceSelector : '.{$this->Name} .item';
                 let paths = [];
-                for(const item of _(sourceSelector+' .item input[name=\"Path\"]:checked'))
+                for(const item of _(sourceSelector+' input[name=\"Path\"]:checked'))
                     paths.push(item.value);
                 return paths;
             }
@@ -381,12 +466,13 @@ class Storage extends Module
             }
         " . (\_::$User->HasAccess($this->ModifyAccess) ? "
             function {$this->MainName}_UploadFile(){
-            " . Script::UploadDialog(
-                        $this->AcceptedFormats,
-                        "\${{$this->MainName}_CurrentUrl()+'&class={$this->Name}'}",
-                        $successScript,
-                        method: $this->Method,
-                        binary: true
+            " . Script::UploadStream(
+                        target: "\${{$this->MainName}_CurrentUrl()+'&class={$this->Name}'}",
+                        extensions: $this->AcceptableFormats,
+                        minSize: $this->MinFileSize,
+                        maxSize: $this->MaxFileSize,
+                        speed: $this->Speed,
+                        success: $successScript
                     ) . "
             }
 
@@ -397,32 +483,39 @@ class Storage extends Module
             }
 
             function {$this->MainName}_CreateFile(name){
-                if(name || (name = " . Script::Prompt('Input the new file`s name:', 'New File') . ")) {
+                if(name || (name = " . Script::Prompt('Input the new file`s name:', 'New File.txt') . ")) {
                     {$this->MainName}_Go(null, " . Script::Convert(["name" => "\${encodeURIComponent(name)}", "action" => "new-file"]) . ");
                 }
             }
 
             function {$this->MainName}_Copy(sourceSelector = null){
+                sourceSelector = sourceSelector ? sourceSelector : '.{$this->Name} .item';
+                _(sourceSelector).removeClass('cutted');
                 InternalClipboard = {$this->MainName}_SelectedPaths(sourceSelector);
                 InternalClipboardMode = 'copy';
             }
             
             function {$this->MainName}_Cut(sourceSelector = null){
+                sourceSelector = sourceSelector ? sourceSelector : '.{$this->Name} .item';
+                _(sourceSelector).removeClass('cutted');
                 InternalClipboard = {$this->MainName}_SelectedPaths(sourceSelector);
                 InternalClipboardMode = 'cut';
+                _(sourceSelector+':has(input[name=\"Path\"]:checked)').addClass('cutted');
             }
             
             function {$this->MainName}_Paste(sourceSelector = null){
                 if(InternalClipboardMode == 'cut'){
                     {$this->MainName}_Go(null, " . Script::Convert(["paths" => "\${InternalClipboard}", "action" => "move"]) . ");
-                } else {
+                    InternalClipboard = [];
+                    InternalClipboardMode = null;
+                } else if(InternalClipboardMode == 'copy') {
                     {$this->MainName}_Go(null, " . Script::Convert(["paths" => "\${InternalClipboard}", "action" => "copy"]) . ");
                 }
             }
             function {$this->MainName}_Rename(sourceSelector = null){
                 paths = {$this->MainName}_SelectedPaths(sourceSelector);
                 if(!paths.length){
-                    alert('Please select at leaset a single item to rename.');
+                    alert('Please select at leaset a single item.');
                     return;
                 }
                 name = " . Script::Prompt('Input the new name:', '${(paths[0].match(/[^\/\\\]+[\/\\\]?$/)??["New Name"])[0].replace(/[\/\\\]+$/giu, "")}') . ";
@@ -432,22 +525,36 @@ class Storage extends Module
             function {$this->MainName}_Delete(sourceSelector = null){
                 if(confirm('Are you sure to delete the selected items?')){
                     paths = {$this->MainName}_SelectedPaths(sourceSelector);
+                    if(!paths.length){
+                        alert('Please select at leaset a single item.');
+                        return;
+                    }
                     {$this->MainName}_Go(null, " . Script::Convert(["paths" => "\${paths}", "action" => "delete"]) . ");
                 }
             }
 
             function {$this->MainName}_Compress(sourceSelector = null){
                 paths = {$this->MainName}_SelectedPaths(sourceSelector);
-                {$this->MainName}_Go(null, " . Script::Convert(["paths" => "\${paths}", "action" => "compress"]) . ");
+                if(!paths.length){
+                    alert('Please select at leaset a single item.');
+                    return;
+                }
+                name = " . Script::Prompt('Input the compresseed file name:', '${(paths[0].match(/[^\/\\\]+[\/\\\]?$/)??["New Name"])[0].replace(/[\/\\\]+$/giu, "")+".zip"}') . ";
+                if(name) {$this->MainName}_Go(null, " . Script::Convert(["paths" => "\${paths}", "name" => "\${encodeURIComponent(name)}", "action" => "compress"]) . ");
             }
             
             function {$this->MainName}_Extract(sourceSelector = null){
                 paths = {$this->MainName}_SelectedPaths(sourceSelector);
+                if(!paths.length){
+                    alert('Please select at leaset a single item.');
+                    return;
+                }
                 {$this->MainName}_Go(null, " . Script::Convert(["paths" => "\${paths}", "action" => "extract"]) . ");
             }
         " : "")
         );
     }
+
     public function GetTableArrange()
     {
         return Struct::Division(
@@ -463,100 +570,100 @@ class Storage extends Module
                             Struct::Span(
                                 $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow"]) : Struct::Icon("file", null, ["class" => "be fore blue"]),
                                 null,
-                                ["class" => "item-icon", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($aurl, true)]
+                                ["class" => "item-icon"]
                             ) .
                             Struct::Span("\${{$it["Name"]}}", null, [
                                 //"ondblclick" => $this->RenameScript(),
                                 "class" => "title"
                             ]),
-                            ["class" => "item"]
+                            ["class" => "item", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($aurl, true)]
                         ) .
                         "}",
-                        $it["Size"] ? Struct::Number(content: $it["Size"]) . "B" : null,
+                        $it["Size"] ? Convert::ToCompactNumber($it["Size"] ?? 0) . "B" : null,
                         $it["IsDirectory"] ? Struct::Icon("folder-open", $this->GoScript($it["Path"])) : ("\${" . Struct::Icon("copy", Script::Copy($aurl)) . Struct::Link("\${" . Convert::ToExcerpt($url, 0, 50) . "}", $aurl, ["class" => "view md-hide", "target" => "_blank"]) . "}"),
                         $it["MimeType"],
                         Convert::ToShownDateTimeString($it["UpdateTime"])
                     ]);
                 })
-            ]) .
-            $this->GetContextMenu(".table-arrange") .
-            $this->GetItemsContextMenu(".table-arrange"),
+            ]),
             ["class" => "table-arrange"]
         );
     }
     public function GetItemsArrange()
     {
-        return Struct::Division([
-            ...loop(
-                Local::GetDirectoryItems($this->CurrentAddress),
-                function ($it, $k, $i) {
-                    $aurl = $this->GetAbsoluteUrl($it["Path"]);
-                    return Struct::Division(
-                        Struct::Span(
-                            $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow fa-2x"]) : Struct::Icon("file", null, ["class" => "be fore blue fa-2x"]),
-                            null,
-                            ["class" => "item-icon"]
-                        ) .
-                        Struct::Span(
-                            "\${{$it["Name"]}}",
-                            [
-                                "class" => "title",
-                                //"ondblclick" => $this->RenameScript(),
-                                "tooltip" => Struct::Part([
-                                    "Address: " . $it["Name"] . " " . Struct::Icon("copy", Script::Copy($aurl)),
-                                    "Size: " . ($it["Size"] ? Struct::Number($it["Size"]) . "B" : null),
-                                    "Type: " . $it["MimeType"],
-                                    "Modified: " . Convert::ToShownDateTimeString($it["UpdateTime"]),
-                                    "Created: " . Convert::ToShownDateTimeString($it["CreateTime"])
-                                ], ["class" => "be align start"])
-                            ]
-                        ) .
-                        Struct::CheckInput("Path", $it["Path"], ["class" => "hidden"]),
-                        ["class" => "item", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($aurl, true)]
-                    );
-                }
-            ),
-            $this->GetContextMenu(".items-arrange") .
-            $this->GetItemsContextMenu(".items-arrange"),
-        ], ["class" => "items-arrange"]);
+        return Struct::Division(loop(
+            Local::GetDirectoryItems($this->CurrentAddress),
+            function ($it, $k, $i) {
+                $aurl = $this->GetAbsoluteUrl($it["Path"]);
+                return Struct::Division(
+                    Struct::Span(
+                        $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow fa-2x"]) : Struct::Icon("file", null, ["class" => "be fore blue fa-2x"]),
+                        null,
+                        ["class" => "item-icon"]
+                    ) .
+                    Struct::Span(
+                        "\${{$it["Name"]}}",
+                        [
+                            "class" => "title",
+                            //"ondblclick" => $this->RenameScript(),
+                            "tooltip" => Struct::Part([
+                                "Size: " . ($it["Size"] ? Convert::ToCompactNumber($it["Size"]) . "B" : null),
+                                "Type: " . $it["MimeType"],
+                                "Modified: " . Convert::ToShownDateTimeString($it["UpdateTime"]),
+                            ], ["class" => "be align start"])
+                        ]
+                    ) .
+                    Struct::CheckInput("Path", $it["Path"], ["class" => "hidden"]),
+                    ["class" => "item", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($aurl, true)]
+                );
+            }
+        ), ["class" => "items-arrange"]);
     }
 
     public function GetContextMenu($selector = null)
     {
+        $itemSelector = $selector ? "$selector .item" : ".{$this->Name} .item";
         return Struct::ContextMenu([
+            Struct::Action(Struct::Division(Struct::Icon("eye") . Struct::Span("Open")) . Struct::Division("Enter", ["class" => "shortcut-key"]), $this->OpenScript($itemSelector), ["class" => "selected"]),
             ...(\_::$User->HasAccess($this->ModifyAccess) ? [
-                Struct::Action(Struct::Division(Struct::Icon("paste") . Struct::Span("Paste")) . Struct::Division("Ctrl+V", ["class" => "shortcut-key"]), $this->PasteScript($selector)),
-                Struct::$BreakLine,
-                Struct::Action(Struct::Icon("upload") . Struct::Span("Upload a new file"), $this->UploadScript()),
-                Struct::Action(Struct::Icon("folder") . Struct::Span("Create a new folder"), $this->CreatefolderScript()),
-                Struct::Action(Struct::Icon("file") . Struct::Span("Create a new file"), $this->CreateFileScript()),
-                Struct::$BreakLine,
+                Struct::Action(Struct::Division(Struct::Icon("copy") . Struct::Span("Copy")) . Struct::Division("Ctrl+C", ["class" => "shortcut-key"]), $this->CopyScript($itemSelector), ["class" => "selected"]),
+                Struct::Action(Struct::Division(Struct::Icon("cut") . Struct::Span("Cut")) . Struct::Division("Ctrl+X", ["class" => "shortcut-key"]), $this->CutScript($itemSelector), ["class" => "selected"]),
+                Struct::Action(Struct::Division(Struct::Icon("paste") . Struct::Span("Paste")) . Struct::Division("Ctrl+V", ["class" => "shortcut-key"]), $this->PasteScript($selector), ["class" => "clipboard"]),
+                Struct::Action(Struct::Division(Struct::Icon("edit") . Struct::Span("Rename")) . Struct::Division("F2", ["class" => "shortcut-key"]), $this->RenameScript($itemSelector), ["class" => "selected"]),
+                Struct::Action(Struct::Division(Struct::Icon("trash") . Struct::Span("Delete")) . Struct::Division("Del", ["class" => "shortcut-key"]), $this->DeleteScript($itemSelector), ["class" => "selected"]),
+                Struct::Element(null, "hr", ["class" => "selected"]),
             ] : []),
-            Struct::Action(Struct::Icon("check-circle") . Struct::Span("Select All"), $this->SelectAllScript()),
-            Struct::Action(Struct::Icon("circle") . Struct::Span("Deselect All"), $this->DeselectAllScript()),
-            Struct::Action(Struct::Icon("refresh") . Struct::Span("Refresh"), $this->GoScript()),
+            Struct::Action(Struct::Division(Struct::Icon("plus") . Struct::Span("Upload a new file")) . Struct::Division("Ctrl+U", ["class" => "shortcut-key"]), $this->UploadScript(), ["class" => "not-selected"]),
+            Struct::Action(Struct::Division(Struct::Icon("folder") . Struct::Span("Create a new folder")) . Struct::Division("Ctrl+N", ["class" => "shortcut-key"]), $this->CreatefolderScript(), ["class" => "not-selected"]),
+            Struct::Action(Struct::Division(Struct::Icon("file") . Struct::Span("Create a new file")) . Struct::Division("Ctrl+Shift+N", ["class" => "shortcut-key"]), $this->CreateFileScript(), ["class" => "not-selected"]),
+            Struct::Action(
+                Struct::Division(Struct::Icon("link") . Struct::Span("Share")) . Struct::Division(Struct::Icon("chevron-right"), ["class" => "shortcut-key"]) . Struct::ContextMenu([
+                    Struct::Action(Struct::Division(Struct::Icon("upload") . Struct::Span("Download")) . Struct::Division("Ctrl+D", ["class" => "shortcut-key"]), $this->DownloadScript($itemSelector)),
+                    Struct::Action(Struct::Division(Struct::Icon("link-slash") . Struct::Span("Copy Relative URL")) . Struct::Division("F7", ["class" => "shortcut-key"]), $this->CopyRelativeUrlScript($itemSelector)),
+                    Struct::Action(Struct::Division(Struct::Icon("link") . Struct::Span("Copy Absolute URL")) . Struct::Division("F8", ["class" => "shortcut-key"]), $this->CopyAbsoluteUrlScript($itemSelector)),
+                ]),
+                null,
+                ["class" => "selected"]
+            ),
+            Struct::Element(null, "hr", ["class" => "selected"]),
+            Struct::Action(Struct::Division(Struct::Icon("archive") . Struct::Span("Compress")) . Struct::Division("Ctrl+Shift+C", ["class" => "shortcut-key"]), $this->CompressScript($itemSelector), ["class" => "selected"]),
+            Struct::Action(Struct::Division(Struct::Icon("folder-open") . Struct::Span("Extract")) . Struct::Division("Ctrl+Shift+E", ["class" => "shortcut-key"]), $this->ExtractScript($itemSelector), ["class" => "selected"]),
+            Struct::Element(null, "hr", ["class" => "selected"]),
+            ...($this->MultiSelect ? [
+                Struct::Action(Struct::Division(Struct::Icon("check-circle") . Struct::Span("Select All")) . Struct::Division("Ctrl+A", ["class" => "shortcut-key"]), $this->SelectAllScript()),
+                Struct::Action(Struct::Division(Struct::Icon("close") . Struct::Span("Deselect All")) . Struct::Division("Ctrl+Shift+A", ["class" => "shortcut-key"]), $this->DeselectAllScript(), ["class" => "multi-selected"]),
+            ] : []),
+            Struct::Action(
+                Struct::Division(Struct::Icon("th-list") . Struct::Span("Arrange")) . Struct::Division(Struct::Icon("chevron-right"), ["class" => "shortcut-key"]) . Struct::ContextMenu([
+                    Struct::Action(Struct::Division(Struct::Icon($this->Arrange === "table" ? "check" : "list") . Struct::Span("Table")) . Struct::Division("", ["class" => "shortcut-key"]), Script::SetMemo($this->ArrangeRequest, "table") . ";" . $this->GoScript()),
+                    Struct::Action(Struct::Division(Struct::Icon($this->Arrange === "items" ? "check" : "th") . Struct::Span("Items")) . Struct::Division("", ["class" => "shortcut-key"]), Script::SetMemo($this->ArrangeRequest, "items") . ";" . $this->GoScript()),
+                ]),
+                null,
+                ["class" => "not-selected"]
+            ),
+            Struct::Action(Struct::Division(Struct::Icon("refresh") . Struct::Span("Refresh")) . Struct::Division("F5", ["class" => "shortcut-key"]), $this->GoScript(), ["class" => "not-selected"]),
+            //Struct::Action(Struct::Division(Struct::Icon("info-circle") . Struct::Span("Properties")) . Struct::Division("F4", ["class" => "shortcut-key"]), $this->PropertiesScript(), ["class" => "single-selected"]),
         ], $selector);
-    }
-    public function GetItemsContextMenu($selector = null)
-    {
-        return Struct::ContextMenu([
-            Struct::Action(Struct::Division(Struct::Icon("eye") . Struct::Span("Open")) . Struct::Division("Enter", ["class" => "shortcut-key"]), $this->OpenScript($selector)),
-            ...(\_::$User->HasAccess($this->ModifyAccess) ? [
-                Struct::Action(Struct::Division(Struct::Icon("copy") . Struct::Span("Copy")) . Struct::Division("Ctrl+C", ["class" => "shortcut-key"]), $this->CopyScript($selector)),
-                Struct::Action(Struct::Division(Struct::Icon("cut") . Struct::Span("Cut")) . Struct::Division("Ctrl+X", ["class" => "shortcut-key"]), $this->CutScript($selector)),
-                Struct::Action(Struct::Division(Struct::Icon("paste") . Struct::Span("Paste")) . Struct::Division("Ctrl+V", ["class" => "shortcut-key"]), $this->PasteScript($selector)),
-                Struct::Action(Struct::Division(Struct::Icon("edit") . Struct::Span("Rename")) . Struct::Division("F2", ["class" => "shortcut-key"]), $this->RenameScript($selector)),
-                Struct::Action(Struct::Division(Struct::Icon("trash") . Struct::Span("Delete")) . Struct::Division("Del", ["class" => "shortcut-key"]), $this->DeleteScript($selector)),
-                Struct::$BreakLine,
-                Struct::Action(Struct::Division(Struct::Icon("compress") . Struct::Span("Compress")) . Struct::Division("Ctrl+Shift+C", ["class" => "shortcut-key"]), $this->CompressScript()),
-                Struct::Action(Struct::Division(Struct::Icon("expand") . Struct::Span("Extract")) . Struct::Division("Ctrl+Shift+E", ["class" => "shortcut-key"]), $this->ExtractScript()),
-                Struct::Action(Struct::Division(Struct::Icon("upload") . Struct::Span("Download")) . Struct::Division("Ctrl+D", ["class" => "shortcut-key"]), $this->DownloadScript()),
-                Struct::$BreakLine
-            ] : []),
-            Struct::Action(Struct::Division(Struct::Icon("link") . Struct::Span("Copy Relative URL")) . Struct::Division("F7", ["class" => "shortcut-key"]), $this->CopyRelativeUrlScript()),
-            Struct::Action(Struct::Division(Struct::Icon("link") . Struct::Span("Copy Absolute URL")) . Struct::Division("F8", ["class" => "shortcut-key"]), $this->CopyAbsoluteUrlScript()),
-            //Struct::Action(Struct::Division(Struct::Icon("info-circle") . Struct::Span("Properties")) . Struct::Division("F4", ["class" => "shortcut-key"]), $this->PropertiesScript()),
-        ], $selector . " .item");
     }
 
     public function GetAbsoluteUrl(string $path): string
@@ -653,103 +760,120 @@ class Storage extends Module
     public function Exclusive()
     {
         $received = receive($this->Method);
-        if (\_::$User->HasAccess($this->ModifyAccess)) {
-            $act = get($received, "action");
-            if ($act) {
-                switch (strtolower($act)) {
-                    case "new-folder":
-                        if (Local::CreateDirectory($this->CurrentAddress . Local::SanitizeName(urldecode(get($received, "name")))))
-                            success("The folder created successfully!");
-                        else
-                            return error("Could not to create the folder!");
-                        break;
-                    case "new-file":
-                        if (Local::CreateFile($this->CurrentAddress . Local::SanitizeName(urldecode(get($received, "name")))))
-                            success("The file created successfully!");
-                        else
-                            return error("Could not to create the file!");
-                        break;
-                    case "rename":
-                        $name = Local::SanitizeName(urldecode(get($received, "name")));
-                        $extension = preg_find("/((\.[^.]*)|[\\/\\\])$/u", $name) ?? "";
-                        $nameWOE = $extension ? substr($name, 0, -strlen($extension)) : $name;
-                        $paths = get($received, "paths");
-                        foreach ($paths as $path) {
-                            if (!Local::Move($path, Local::GenerateAddress($nameWOE, $extension, dirname(rtrim($path, DIRECTORY_SEPARATOR)) . DIRECTORY_SEPARATOR, false)))
-                                return error("Could not to rename the '$name' item!");
-                        }
-                        break;
-                    case "delete":
-                        $paths = get($received, "paths");
-                        foreach ($paths as $path) {
-                            if (!Local::Delete($path))
-                                return error("Could not to delete the '$path' item!");
-                        }
-                        break;
-                    case "copy":
-                        $paths = get($received, "paths");
-                        foreach ($paths as $path) {
-                            $name = basename($path);
-                            if (!Local::Copy($path, $this->CurrentAddress . $name))
-                                return error("Could not to copy the '$name' item!");
-                        }
-                        break;
-                    case "move":
-                        $paths = get($received, "paths");
-                        foreach ($paths as $path) {
-                            $name = basename($path);
-                            if (!Local::Move($path, $this->CurrentAddress . $name))
-                                return error("Could not to move the '$name' item!");
-                        }
-                        break;
-                    case "compress":
-                        $paths = get($received, "paths");
-                        if (
-                            Convert::ToZipFile(
-                                $paths,
-                                $this->CurrentAddress . ($name = "Archive_" . date("Ymd_His") . ".zip")
-                            )
-                        )
-                            success("The '$name' compressed file is ready!");
-                        else
-                            return error("Could not to compress the selected items!");
-                        break;
-                    case "extract":
-                        $paths = get($received, "paths");
-                        foreach ($paths as $path)
-                            if (
-                                $arr = Convert::FromZipFile(
-                                    $path,
-                                    $this->CurrentAddress
-                                )
-                            )
-                                success("All " . count($arr) . " files extracted successfully!");
+        if (\_::$User->HasAccess($this->ModifyAccess))
+            try {
+                $act = get($received, "action");
+                if ($act) {
+                    switch (strtolower($act)) {
+                        case "new-folder":
+                            if (Local::CreateDirectory($this->CurrentAddress . Local::SanitizeName(urldecode(get($received, "name")))))
+                                success("The folder created successfully!");
                             else
-                                return error("Could not to extracted the selected files!");
-                        break;
+                                return error("Could not to create the folder!");
+                            break;
+                        case "new-file":
+                            if (Local::CreateFile($this->CurrentAddress . Local::SanitizeName(urldecode(get($received, "name")))))
+                                success("The file created successfully!");
+                            else
+                                return error("Could not to create the file!");
+                            break;
+                        case "rename":
+                            $name = urldecode(get($received, "name"));
+                            $paths = get($received, "paths");
+                            foreach ($paths as $path) {
+                                if (!Local::Rename($path, $name))
+                                    error("Could not to rename the '$name' item!");
+                            }
+                            break;
+                        case "delete":
+                            $paths = get($received, "paths");
+                            foreach ($paths as $path) {
+                                if (!Local::Delete($path))
+                                    error("Could not to delete the '$path' item!");
+                            }
+                            break;
+                        case "copy":
+                            $paths = get($received, "paths");
+                            foreach ($paths as $path) {
+                                if (startsWith($this->CurrentAddress, $path))
+                                    return error("You can not copy a directory in itself!");
+                                $name = basename(rtrim($path, "\\\/"));
+                                if (!Local::Copy($path, $this->CurrentAddress . $name))
+                                    error("Could not to copy the '$name' item!");
+                            }
+                            break;
+                        case "move":
+                            $paths = get($received, "paths");
+                            foreach ($paths as $path) {
+                                if (startsWith($this->CurrentAddress, $path))
+                                    return error("You can not copy a directory in itself!");
+                                $name = basename(rtrim($path, "\\\/"));
+                                if (!Local::Move($path, $this->CurrentAddress . $name))
+                                    error("Could not to move the '$name' item!");
+                            }
+                            break;
+                        case "compress":
+                            $name = urldecode(get($received, "name"));
+                            $paths = get($received, "paths");
+                            if (
+                                $paths &&
+                                ($arr = Convert::ToZipFile(
+                                    $this->CurrentAddress . ($name = $name ?? ("archive-" . date("Y-m-d-H-i-s") . ".zip")),
+                                    ...$paths
+                                ))
+                            )
+                                success("There are " . count($arr) . " items compressed successfully in the '$name' file!");
+                            else
+                                return error("Could not to compress the selected items!");
+                            break;
+                        case "extract":
+                            $paths = get($received, "paths");
+                            foreach ($paths as $path)
+                                if (
+                                    $arr = Convert::FromZipFile(
+                                        $path,
+                                        $this->CurrentAddress
+                                    )
+                                )
+                                    success("All " . count($arr) . " files extracted successfully!");
+                                else
+                                    return error("Could not to extracted the selected files!");
+                            break;
+                    }
                 }
+            } catch (\Exception $ex) {
+                error($ex);
             }
-            if ($file = get($received, "data"))
-                try {
-                    if (
-                        Script::Download(
-                            $file,
-                            $this->CurrentAddress . get($received, "name"),
-                            method: $this->Method,
-                            binary: true
-                        )
-                    )
-                        success("The file uploaded successfully!");
-                    else
-                        return error("Could not to upload the file!");
-                } catch (\Exception $ex) {
-                    error($ex);
-                }
-        }
         //$this->Router->Get()->Switch();
         //return $this->ToString();
+        responseStatus(200);
         return $this->GetOpenTag() .
             $this->Get() .
             $this->GetCloseTag();
+    }
+
+    public function Stream()
+    {
+        try {
+            if ($progress = downloadStream(
+                        target: $this->CurrentAddress,
+                        extensions: $this->AcceptableFormats,
+                        minSize: $this->MinFileSize,
+                        maxSize: $this->MaxFileSize,
+                    )) {
+                if (is_string($progress)) {
+                    success("The file uploaded successfully!");
+                    return $this->GetOpenTag() .
+                        $this->Get() .
+                        $this->GetCloseTag();
+                } elseif ($progress === false)
+                    return error("Could not to upload the file!");
+                else
+                    return deliverProgress($progress);
+            }
+            return parent::Stream();
+        } catch (\Exception $ex) {
+            return error($ex);
+        }
     }
 }
