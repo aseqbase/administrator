@@ -50,9 +50,11 @@ $routeHandler = function () use ($data) {
             $remain = (receiveStream("total") ?? 0) - (receiveStream("chunk") ?? 0) - 1;
             if (is_string($file)) {
                 procedure("_('.content .progressbar').val(0.1).removeClass('invisible');");
-                $c = count(preg_find_all("/\r\n|\n|\r/", $file))+1;
+                $dic = Convert::ToFields($file);
+                procedure("_('.content .progressbar').val(0.3).removeClass('invisible');");
+                $c = count($dic);
                 procedure("_('.content .progressbar').val(0.5).removeClass('invisible');");
-                if (\_::$Front->Translate->SetLexicon(Convert::ToFieldsIterator($file))){
+                if ($c && \_::$Front->Translate->SetLexicon($dic)){
                     procedure("_('.content .progressbar').val(0.9).addClass('invisible');");
                     return redirect(Struct::Success("$c key values setted successfuly in lexicon!"));
                 } else
