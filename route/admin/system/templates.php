@@ -1,15 +1,16 @@
 <?php
+$data = $data??[];
+$routeHandler = function () use($data) {
+    return $data;
+};
+
 (new Router())
 ->if(\_::$User->HasAccess(\_::$User->AdminAccess))
-    ->Get(function () {
-        view("part", [
-            "Name" => "admin/table/templates",
+    ->Get(function () use($routeHandler) {
+        (\_::$Front->AdministratorView)($routeHandler, [
             "Image" => "th",
             "Title" => "Templates"
         ]);
     })
-    ->Default(function () {
-        part("admin/table/templates");
-    })
+    ->Default(fn()=>response($routeHandler()))
     ->Handle();
-?>

@@ -1,15 +1,26 @@
 <?php
+use MiMFa\Module\Table;
+$data = $data ?? [];
+$routeHandler = function () use ($data) {
+    module("Table");
+    $module = new Table(table("Session"));
+    $module->KeyColumns = ["Ip"];
+    $module->IncludeColumns = ["Ip", "Key"];
+    $module->AllowServerSide = true;
+    $module->Updatable = true;
+    $module->UpdateAccess = \_::$User->AdminAccess;
+    $module->ModifyAccess = \_::$User->SuperAccess;
+    pod($module, $data);
+    return $module->ToString();
+};
+
 (new Router())
-->if(\_::$User->HasAccess(\_::$User->AdminAccess))
-    ->Get(function () {
-        view("part", [
-            "Name" => "admin/table/sessions",
+    ->if(\_::$User->HasAccess(\_::$User->AdminAccess))
+    ->Get(function () use ($routeHandler) {
+        (\_::$Front->AdministratorView)($routeHandler, [
             "Image" => "clock",
             "Title" => "'Sessions' Management"
         ]);
     })
-    ->Default(function () {
-        part("admin/table/sessions");
-    })
+    ->Default(fn() => response($routeHandler()))
     ->Handle();
-?>

@@ -1,15 +1,77 @@
 <?php
+use MiMFa\Library\Convert;
+use MiMFa\Library\Struct;
+use MiMFa\Module\Table;
+$data = $data ?? [];
+$routeHandler = function () use ($data) {
+    module("Table");
+    $module = new Table(table("Comment"));
+    $contentT = table("Content")->Name;
+    $module->SelectQuery = "
+    SELECT A.{$module->KeyColumn}, C.Title AS 'Title' , C.Id AS 'Post', A.Subject AS 'Subject', A.Content AS 'Content', A.Name AS 'Author', A.Status, A.Access, A.CreateTime, A.UpdateTime
+    FROM {$module->DataTable->Name} AS A
+    LEFT OUTER JOIN $contentT AS C ON A.Relation=C.Id
+    ORDER BY A.`UpdateTime` DESC
+";
+    $module->KeyColumns = ["Subject"];
+    $module->IncludeColumns = ['Title', 'Author', 'Subject', 'Content', 'Status', 'Access', 'CreateTime', 'UpdateTime'];
+    $module->AllowServerSide = true;
+    $module->Updatable = true;
+    $module->UpdateAccess = \_::$User->AdminAccess;
+    $module->CellsValues = [
+        "Title" => function ($v, $k, $r) {
+            return $r["Post"] ? Struct::Link($v, \_::$Address->ContentRootPath . $r["Post"], ["target" => "_blank"]) : null;
+        },
+        "Contact" => fn($v) => Struct::Link($v, "mailto:$v"),
+        "CreateTime" => fn($v) => Convert::ToShownDateTimeString($v),
+        "UpdateTime" => fn($v) => Convert::ToShownDateTimeString($v)
+    ];
+    $module->CellsTypes = [
+        "Id" => \_::$User->HasAccess(\_::$User->SuperAccess) ? "disabled" : false,
+        "Relation" => "text",
+        "UserId" => "number",
+        "Name" => "text",
+        "Subject" => "text",
+        "Content" => "Content",
+        "Contact" => "Email",
+        "Attach" => "json",
+        "Status" => [-1 => "Unpublished", 0 => "Drafted", 1 => "Published"],
+        "GroupId" => function () {
+            $std = new stdClass();
+            $std->Title = "User Group Access";
+            $std->Type = "select";
+            $std->Options = table("UserGroup")->SelectPairs("Id", "Title");
+            return $std;
+        },
+        "Access" => function () {
+            $std = new stdClass();
+            $std->Title = "Minimum Access";
+            $std->Type = "number";
+            $std->Attributes = ["min" => \_::$User->BanAccess, "max" => \_::$User->SuperAccess];
+            return $std;
+        },
+        "UpdateTime" => function ($t, $v) {
+            $std = new stdClass();
+            $std->Type = \_::$User->HasAccess(\_::$User->SuperAccess) ? "calendar" : "hidden";
+            $std->Value = Convert::ToDateTimeString();
+            return $std;
+        },
+        "CreateTime" => function ($t, $v) {
+            return \_::$User->HasAccess(\_::$User->SuperAccess) ? "calendar" : (isValid($v) ? "hidden" : false);
+        },
+        "MetaData" => "json"
+    ];
+    pod($module, $data);
+    return $module->ToString();
+};
+
 (new Router())
-->if(\_::$User->HasAccess(\_::$User->AdminAccess))
-    ->Get(function () {
-        view("part", [
-            "Name" => "admin/table/comments",
+    ->if(\_::$User->HasAccess(\_::$User->AdminAccess))
+    ->Get(function () use ($routeHandler) {
+        (\_::$Front->AdministratorView)($routeHandler, [
             "Image" => "comment",
             "Title" => "Comments Management"
         ]);
     })
-    ->Default(function () {
-        part("admin/table/comments");
-    })
+    ->Default(fn() => response($routeHandler()))
     ->Handle();
-?>

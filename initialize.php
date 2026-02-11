@@ -11,16 +11,16 @@ $name = \_::$Address->Name ?? "qb";
 \_::$Address->Name = (isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : $GLOBALS["BASE"]) ?: \_::$Address->Name;
 if (\_::$Back->AdminOrigin === 0) { // Change public access directories to the Root sequence
     $rootPath = $dirs[\_::$Back->AdminOrigin + 1];
-    \_::$Address->PublicAddress = $rootPath . ltrim(\_::$Address->PublicDirectory, DIRECTORY_SEPARATOR);
-    \_::$Address->AssetAddress = $rootPath . ltrim(\_::$Address->AssetDirectory, DIRECTORY_SEPARATOR);
+    \_::$Address->PublicDirectory = $rootPath . ltrim(\_::$Address->GlobalPublicDirectory, DIRECTORY_SEPARATOR);
+    \_::$Address->AssetDirectory = $rootPath . ltrim(\_::$Address->GlobalAssetDirectory, DIRECTORY_SEPARATOR);
 }
 
 if (\_::$Back->DataBaseAddNameToPrefix)
     \_::$Back->DataBasePrefix = str_replace("{$name}_", (\_::$Address->Name ?? "qb") . "_", \_::$Back->DataBasePrefix);
 
 if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
-    \_::$Front->SenderEmail = "do-not-reply@" . getDomain(\_::$Address->Root);
-    \_::$Front->ReceiverEmail = "info@" . getDomain(\_::$Address->Root);
+    \_::$Front->SenderEmail = "do-not-reply@" . getUrlDomain(\_::$Address->RootPath);
+    \_::$Front->ReceiverEmail = "info@" . getUrlDomain(\_::$Address->RootPath);
     \_::$Front->MainMenus = \_::$Front->SideMenus = array(
         "Admin-Main" => array("Name" => "DASHBOARD", "Path" => "/sign/dashboard", "Access" => \_::$User->AdminAccess, "Image" => "home"),
         "Admin-Content" => array(
@@ -33,8 +33,9 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
                 array("Name" => "CONTENTS", "Path" => "/admin/content/contents", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's posts and pages", "Image" => "file"),
                 array("Name" => "TAGS", "Path" => "/admin/content/tags", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's tags", "Image" => "tags"),
                 array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's categories", "Image" => "code-fork"),
-                array("Name" => "FILES", "Path" => "/admin/storage/dynamic", "Access" => \_::$User->AdminAccess, "Description" => "'Uploaded' 'files' 'management'", "Image" => "download"),
-                array("Name" => "'ORGANIZED' 'STORAGE'", "Path" => "/admin/storage/static", "Access" => \_::$User->AdminAccess, "Description" => "'Organized' 'files' 'management'", "Image" => "folder"),
+                array("Name" => "'UPLOADED' 'STORAGE'", "Path" => "/admin/storage/dynamic", "Access" => \_::$User->AdminAccess, "Description" => "'Uploaded' 'files' 'management'", "Image" => "download"),
+                array("Name" => "'ORGANIZED' 'STORAGE'", "Path" => "/admin/storage/static", "Access" => \_::$User->AdminAccess, "Description" => "'Organized' 'files' 'management'", "Image" => "folder-tree"),
+                array("Name" => "'ROOT' 'STORAGE'", "Path" => "/admin/storage/root", "Access" => \_::$User->SuperAccess, "Description" => "'Root' 'files' 'management'", "Image" => "folder"),
             )
         ),
         "Admin-User" => array(
@@ -48,7 +49,8 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
                 array("Name" => "GROUPS", "Path" => "/admin/user/groups", "Access" => \_::$User->AdminAccess, "Description" => "To manage all the user groups of the website", "Image" => "user-group"),
                 array("Name" => "COMMENTS", "Path" => "/admin/user/comments", "Access" => \_::$User->AdminAccess, "Description" => "To manage all received comments", "Image" => "comment"),
                 array("Name" => "MESSAGES", "Path" => "/admin/user/messages", "Access" => \_::$User->AdminAccess, "Description" => "To manage all received emails and messages", "Image" => "envelope"),
-                array("Name" => "SESSIONS", "Path" => "/admin/user/sessions", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'sessions'", "Image" => "clock")
+                array("Name" => "SESSIONS", "Path" => "/admin/user/sessions", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'sessions'", "Image" => "clock"),
+                array("Name" => "MANAGEMENT", "Path" => "/admin/user/management", "Access" => \_::$User->SuperAccess, "Description" => "To config 'users'", "Image" => "user-cog")
             )
         ),
         "Admin-System" => array(
@@ -120,6 +122,26 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
     })
     ->if(!\_::$User->HasAccess(\_::$User->AdminAccess))
     ->On("$|admin")->Default(fn() => view("part", ["Name" => \_::$User->InHandlerPath]))
-    ->On()->Default(\_::$Router->DefaultRouteName)
+    ->On()->Default(\_::$Front->DefaultRouteName)
     ->else()
-    ->On("admin")->Reset()->Default(\_::$User->Direction, alternative: \_::$Router->DefaultRouteName);
+    ->On("admin")->Reset()->Default(\_::$Address->UrlRoute, alternative: \_::$Front->DefaultRouteName);
+
+    
+ \_::$Front->AdministratorView = function($handler, $data = []){
+    if($data){
+        $templ = \_::$Front->CreateTemplate("Administrator");
+        $templ->WindowTitle = pop($data, "WindowTitle")??get($data, 'Title' )??get($data, 'Name' );
+        module("PrePage");
+        $module = new MiMFa\Module\PrePage();
+        $module->Title = pop($data, 'Title');
+        $module->Path = pop($data, 'Path');
+        $module->Description = pop($data, 'Description');
+        $module->Content = pop($data, 'Content');
+        $module->Image = pop($data, 'Image');
+        $alternative = pop($data, "Alternative")??404;
+        if ($handler) $templ->Content = fn()=>view(\_::$Front->DefaultViewName, ["Content"=>fn()=>\MiMFa\Library\Struct::Page(($module->Title || $module->Description || $module->Content || $module->Image?$module->ToString():"").$handler())], print: false);
+        else $templ->Content = $module->Handle().view($alternative, data: $data, print: false);
+        $templ->Render();
+    }
+    else $handler();
+};

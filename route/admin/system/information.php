@@ -1,15 +1,16 @@
 <?php
+$data = $data??[];
+$routeHandler = function () use($data) {
+    return \MiMFa\Library\Revise::ToString(\_::$Front);
+};
+
 (new Router())
 ->if(\_::$User->HasAccess(\_::$User->AdminAccess))
-    ->Get(function () {
-        view("part", [
-            "Name" => "admin/system/information",
+    ->Get(function () use($routeHandler) {
+        (\_::$Front->AdministratorView)($routeHandler, [
             "Image" => "palette",
             "Title" => "Information"
         ]);
     })
-    ->Default(function () {
-        part("admin/system/information");
-    })
+    ->Default(fn()=>response($routeHandler()))
     ->Handle();
-?>
