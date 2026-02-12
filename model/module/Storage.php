@@ -39,7 +39,7 @@ class Storage extends Module
     public function __construct($rootDirectory, $rootAddress)
     {
         parent::__construct();
-        $this->RootDirectory = \MiMFa\Library\Storage::GetAbsoluteAddress($rootDirectory);
+        $this->RootDirectory = \MiMFa\Library\Storage::GetAbsolutePath($rootDirectory);
         $this->RootAddress = \MiMFa\Library\Storage::GetAbsoluteUrl($rootAddress);
 
         $this->Arrange = receiveGet($this->ArrangeRequest) ?? getMemo($this->ArrangeRequest) ?? $this->Arrange;
@@ -47,7 +47,7 @@ class Storage extends Module
 
         $this->Name = receiveGet("Class") ?? $this->Name;
         $p = receiveGet("Path");
-        if ($p && startsWith($p = \MiMFa\Library\Storage::GetAbsoluteAddress($p), $rootDirectory)) {
+        if ($p && startsWith($p = \MiMFa\Library\Storage::GetAbsolutePath($p), $rootDirectory)) {
             $this->CurrentDirectory = $p;
             $this->CurrentAddress = \MiMFa\Library\Storage::GetUrl($rootAddress . substr($p, strlen($rootDirectory)));
         } else {
@@ -849,7 +849,7 @@ class Storage extends Module
                                 $name = basename(rtrim($path, "\\\/"));
                                 $nPath = null;
                                 if (($this->CurrentDirectory . $name) === $path)
-                                    $nPath = \MiMFa\Library\Storage::GenerateAddress("Copy", "-" . $name, $this->CurrentDirectory, false);
+                                    $nPath = \MiMFa\Library\Storage::GenerateUniquePath($this->CurrentDirectory, "Copy", "-" . $name);
                                 elseif (startsWith($this->CurrentDirectory, $path))
                                     return error("You can not copy an item in itself!");
                                 else

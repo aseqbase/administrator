@@ -51,10 +51,11 @@ $routeHandler = function () use ($data) {
             if (is_string($file)) {
                 procedure("_('.content .progressbar').val(0.1).removeClass('invisible');");
                 $dic = Convert::ToFields($file);
+                unset($file);
                 procedure("_('.content .progressbar').val(0.3).removeClass('invisible');");
                 $c = count($dic);
                 procedure("_('.content .progressbar').val(0.5).removeClass('invisible');");
-                if ($c && \_::$Front->Translate->SetLexicon($dic)){
+                if ($c > 0 && \_::$Front->Translate->SetLexicon($dic)){
                     procedure("_('.content .progressbar').val(0.9).addClass('invisible');");
                     return redirect(Struct::Success("$c key values setted successfuly in lexicon!"));
                 } else
