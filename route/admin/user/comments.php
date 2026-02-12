@@ -20,7 +20,7 @@ $routeHandler = function () use ($data) {
     $module->UpdateAccess = \_::$User->AdminAccess;
     $module->CellsValues = [
         "Title" => function ($v, $k, $r) {
-            return $r["Post"] ? Struct::Link($v, \_::$Address->ContentRootPath . $r["Post"], ["target" => "_blank"]) : null;
+            return $r["Post"] ? Struct::Link($v, \_::$Address->ContentRootUrlPath . $r["Post"], ["target" => "_blank"]) : null;
         },
         "Contact" => fn($v) => Struct::Link($v, "mailto:$v"),
         "CreateTime" => fn($v) => Convert::ToShownDateTimeString($v),

@@ -13,7 +13,7 @@ $routeHandler = function () use ($data) {
     $module->UpdateAccess = \_::$User->AdminAccess;
     $module->CellsValues = [
         "Name" => function ($v, $k, $r) {
-            return \MiMFa\Library\Struct::Link("\${{$v}}", \_::$Address->TagRootPath . $r["Id"], ["target" => "blank"]);
+            return \MiMFa\Library\Struct::Link("\${{$v}}", \_::$Address->TagRootUrlPath . $r["Id"], ["target" => "blank"]);
         },
         "CreateTime" => fn($v) => Convert::ToShownDateTimeString($v),
         "UpdateTime" => fn($v) => Convert::ToShownDateTimeString($v)

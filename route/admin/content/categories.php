@@ -18,7 +18,7 @@ $routeHandler = function () use($data) {
     $module->UpdateAccess = \_::$User->AdminAccess;
     $module->CellsValues = [
         "Name" => function ($v, $k, $r) {
-            return \MiMFa\Library\Struct::Link("\${{$v}}", \_::$Address->CategoryRootPath . $r["Id"], ["target" => "blank"]);
+            return \MiMFa\Library\Struct::Link("\${{$v}}", \_::$Address->CategoryRootUrlPath . $r["Id"], ["target" => "blank"]);
         },
         "UpdateTime" => fn($v) => Convert::ToShownDateTimeString($v)
     ];

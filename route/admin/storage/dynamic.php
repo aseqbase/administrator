@@ -2,7 +2,7 @@
  $routeHandler = function(){
     $module = new (module("Storage"))(
         \_::$Address->PublicDirectory,
-        rtrim(array_values(\_::$Sequence)[\_::$Back->AdminOrigin==0?1:0], "\\\/").\_::$Address->PublicRootPath
+        rtrim(array_values(\_::$Sequence)[\_::$Back->AdminOrigin==0?1:0], "\\\/").\_::$Address->PublicRootUrlPath
     );
     $module->ModifyAccess = \_::$User->AdminAccess;
     return $module->ToString();

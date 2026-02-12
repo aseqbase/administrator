@@ -19,8 +19,8 @@ if (\_::$Back->DataBaseAddNameToPrefix)
     \_::$Back->DataBasePrefix = str_replace("{$name}_", (\_::$Address->Name ?? "qb") . "_", \_::$Back->DataBasePrefix);
 
 if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
-    \_::$Front->SenderEmail = "do-not-reply@" . getUrlDomain(\_::$Address->RootPath);
-    \_::$Front->ReceiverEmail = "info@" . getUrlDomain(\_::$Address->RootPath);
+    \_::$Front->SenderEmail = "do-not-reply@" . getUrlDomain(\_::$Address->RootUrlPath);
+    \_::$Front->ReceiverEmail = "info@" . getUrlDomain(\_::$Address->RootUrlPath);
     \_::$Front->MainMenus = \_::$Front->SideMenus = array(
         "Admin-Main" => array("Name" => "DASHBOARD", "Path" => "/sign/dashboard", "Access" => \_::$User->AdminAccess, "Image" => "home"),
         "Admin-Content" => array(

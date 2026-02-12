@@ -22,12 +22,12 @@ $routeHandler = function () use ($data) {
     $langs = \_::$Front->Translate->GetLanguages();
     $module->CellsValues = [
         "Title" => function ($v, $k, $r) {
-            return \MiMFa\Library\Struct::Link($v, \_::$Address->ContentRootPath . $r["Id"], ["target" => "blank"]);
+            return \MiMFa\Library\Struct::Link($v, \_::$Address->ContentRootUrlPath . $r["Id"], ["target" => "blank"]);
         },
         "Category" => function ($v, $k, $r) {
             $val = trim(\_::$Back->Query->GetCategoryRoute(first(Convert::FromJson($v))) ?? "", "/\\");
             if (isValid($val))
-                return \MiMFa\Library\Struct::Link("\${{$val}}", \_::$Address->CategoryRootPath . $val, ["target" => "blank"]);
+                return \MiMFa\Library\Struct::Link("\${{$val}}", \_::$Address->CategoryRootUrlPath . $val, ["target" => "blank"]);
             return $v;
         },
         "Lang" => function ($v) use ($langs) {
