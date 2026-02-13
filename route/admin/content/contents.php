@@ -8,13 +8,13 @@ $routeHandler = function () use ($data) {
     $module = new Table("Content");
     $table1 = \_::$User->DataTable->Name;
     $module->SelectQuery = "
-    SELECT A.{$module->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIds AS 'Category', A.Priority, A.Status, A.MetaData AS 'Lang', A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
+    SELECT A.{$module->KeyColumn}, A.Type, A.Image, A.Title, A.CategoryIds AS 'Route', A.Name, A.Priority, A.Status, A.MetaData AS 'Lang', A.Access, B.Name AS 'Author', C.Name AS 'Editor', A.CreateTime, A.UpdateTime
     FROM {$module->DataTable->Name} AS A
     LEFT OUTER JOIN $table1 AS B ON A.AuthorId=B.Id
     LEFT OUTER JOIN $table1 AS C ON A.EditorId=C.Id
-    ORDER BY A.Name ASC, A.Priority DESC, A.UpdateTime DESC, A.CreateTime DESC";
+    ORDER BY A.Name ASC, A.Priority DESC, A.CreateTime DESC, A.UpdateTime DESC";
     $module->KeyColumns = ["Image", "Title"];
-    $module->IncludeColumns = ['Type', 'Image', 'Title', 'Category', 'Priority', 'Status', 'Lang', 'Access', 'Author', 'Editor', 'CreateTime', 'UpdateTime'];
+    $module->IncludeColumns = ['Type', 'Image', 'Title', 'Route', 'Priority', 'Status', 'Lang', 'Access', 'Author', 'Editor', 'CreateTime', 'UpdateTime'];
     $module->AllowServerSide = true;
     $module->Updatable = true;
     $module->UpdateAccess = \_::$User->AdminAccess;
@@ -24,10 +24,10 @@ $routeHandler = function () use ($data) {
         "Title" => function ($v, $k, $r) {
             return \MiMFa\Library\Struct::Link($v, \_::$Address->ContentRootUrlPath . $r["Id"], ["target" => "blank"]);
         },
-        "Category" => function ($v, $k, $r) {
+        "Route" => function ($v, $k, $r) {
             $val = trim(\_::$Back->Query->GetCategoryRoute(first(Convert::FromJson($v))) ?? "", "/\\");
             if (isValid($val))
-                return \MiMFa\Library\Struct::Link("\${{$val}}", \_::$Address->CategoryRootUrlPath . $val, ["target" => "blank"]);
+                return \MiMFa\Library\Struct::Link("\${{$val}/{$r['Name']}}", \_::$Address->ContentRootUrlPath . "{$val}/{$r['Name']}", ["target" => "blank"]);
             return $v;
         },
         "Lang" => function ($v) use ($langs) {
