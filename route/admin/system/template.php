@@ -1,7 +1,7 @@
 <?php
 $data = $data??[];
 $routeHandler = function () use($data) {
-    \MiMFa\Library\Revise::Render(\_::$Front->CreateTemplate());
+    return \MiMFa\Library\Revise::ToString(\_::$Front->CreateTemplate());
 };
 
 (new Router())

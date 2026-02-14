@@ -90,7 +90,7 @@ $routeHandler = function () use ($data) {
             "Image" => "language",
             "Updatable" => $upd,
             "Content" => Struct::Style("
-                .{$moduleTranslator->Name} .button {
+                .{$moduleTranslator->MainClass} .button {
                     border: none !important;
                 }
             ") . Struct::Center(

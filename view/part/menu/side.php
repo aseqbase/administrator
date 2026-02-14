@@ -10,6 +10,6 @@ $module->Render();
 ?>
 <script type="text/javascript">
 	function viewSideMenu(show){
-		<?php echo $module->Name."_ViewSideMenu(show);"; ?>
+		<?php echo $module->MainClass."_ViewSideMenu(show);"; ?>
 	}
 </script>
