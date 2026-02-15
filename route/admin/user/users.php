@@ -13,6 +13,7 @@ $routeHandler = function () use ($data) {
     WHERE B.Access<=" . \_::$User->GetAccess();
     $module->KeyColumns = ["Name", "Signature"];
     $module->ExcludeColumns = ["MetaData"];
+    $module->AllowDataTranslation = false;
     $module->Updatable = true;
     $module->AllowServerSide = true;
     $module->UpdateAccess = \_::$User->AdminAccess;

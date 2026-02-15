@@ -8,6 +8,7 @@ $routeHandler = function () use ($data) {
     $module->SelectCondition = "Access<=" . \_::$User->GetAccess();
     $module->KeyColumns = ["Title"];
     $module->ExcludeColumns = ["MetaData"];
+    $module->AllowDataTranslation = false;
     $module->Updatable = true;
     $module->AllowServerSide = true;
     $module->UpdateAccess = \_::$User->AdminAccess;

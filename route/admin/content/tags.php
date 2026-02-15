@@ -8,6 +8,7 @@ $routeHandler = function () use ($data) {
     $module = new Table(table("Tag"));
     $module->KeyColumns = ["Name", "Title"];
     $module->ExcludeColumns = ["MetaData"];
+    $module->AllowDataTranslation = false;
     $module->AllowServerSide = true;
     $module->Updatable = true;
     $module->UpdateAccess = \_::$User->AdminAccess;

@@ -74,6 +74,7 @@ $routeHandler = function () use ($data) {
 ";
     $module->KeyColumns = ["Subject"];
     $module->IncludeColumns = ["ReplyTo", "Name", "Subject", "Content", "From", "To", "Relation", "CreateTime"];
+    $module->AllowDataTranslation = false;
     $module->AllowServerSide = true;
     $module->Updatable = true;
     $module->ModifyAccess = \_::$User->SuperAccess;

@@ -15,6 +15,7 @@ $routeHandler = function () use ($data) {
 ";
     $module->KeyColumns = ["Subject"];
     $module->IncludeColumns = ['Title', 'Author', 'Subject', 'Content', 'Status', 'Access', 'CreateTime', 'UpdateTime'];
+    $module->AllowDataTranslation = false;
     $module->AllowServerSide = true;
     $module->Updatable = true;
     $module->UpdateAccess = \_::$User->AdminAccess;

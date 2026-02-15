@@ -14,6 +14,7 @@ $routeHandler = function () use($data) {
     $module->KeyColumns = ["Name", "Title"];
     $module->ExcludeColumns = ["Content", "Access", "MetaData", "CreateTime"];
     $module->AllowServerSide = true;
+    $module->AllowDataTranslation = false;
     $module->Updatable = true;
     $module->UpdateAccess = \_::$User->AdminAccess;
     $module->CellsValues = [

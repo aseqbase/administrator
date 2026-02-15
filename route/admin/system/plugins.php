@@ -24,6 +24,7 @@ $routeHandler = function () use ($data) {
     module("Table");
     $module = new Table(table("Package"));
     $module->AllowServerSide = true;
+    $module->AllowDataTranslation = false;
     $module->Updatable = true;
     $module->AddAccess =
         $module->ImportAccess =

@@ -15,6 +15,7 @@ $routeHandler = function () use ($data) {
     ORDER BY A.Name ASC, A.Priority DESC, A.CreateTime DESC, A.UpdateTime DESC";
     $module->KeyColumns = ["Image", "Title"];
     $module->IncludeColumns = ['Type', 'Image', 'Title', 'Route', 'Priority', 'Status', 'Lang', 'Access', 'Author', 'Editor', 'CreateTime', 'UpdateTime'];
+    $module->AllowDataTranslation = false;
     $module->AllowServerSide = true;
     $module->Updatable = true;
     $module->UpdateAccess = \_::$User->AdminAccess;
