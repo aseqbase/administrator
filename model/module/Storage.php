@@ -933,7 +933,7 @@ class Storage extends Module
                         return deliverProcedure("
                             _('#{$this->MainClass}_progress').addClass('invisible');
                             _('#$id').remove();
-                        ");
+                        ", 211);
                     else
                         return deliverProcedure("
                         _('#{$this->MainClass}_progress').val($progress).removeClass('invisible');
@@ -941,7 +941,7 @@ class Storage extends Module
                         _('#$id .progressbar').val($progress);
                         ");
                 } else if ($remain <= 1)
-                    return deliverProcedure("_('#{$this->MainClass}_progress').addClass('invisible');");
+                    return deliverProcedure("_('#{$this->MainClass}_progress').addClass('invisible');", 211);
                 else
                     return deliverProcedure("_('#{$this->MainClass}_progress').val($progress).removeClass('invisible');");
             }
