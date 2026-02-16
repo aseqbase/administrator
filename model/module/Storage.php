@@ -199,9 +199,9 @@ class Storage extends Module
                     Struct::Icon("th", Script::SetMemo($this->ArrangeRequest, "items") . ";" . $this->GoScript(), $this->Arrange === "items" ? ["class" => "hidden"] : []),
                     ...(
                         \_::$User->HasAccess($this->ModifyAccess) ? ($this->Lock ? [
-                            Struct::Icon("lock", Script::SetMemo($this->LockRequest, "0") . ";" . $this->GoScript())
+                            Struct::Icon("lock", Script::SetMemo($this->LockRequest, "0", path:\_::$Address->UrlPath) . ";" . $this->GoScript())
                         ] : [
-                            Struct::Icon("lock-open", Script::SetMemo($this->LockRequest, "1") . ";" . $this->GoScript())
+                            Struct::Icon("lock-open", Script::SetMemo($this->LockRequest, "1", path:\_::$Address->UrlPath) . ";" . $this->GoScript())
                         ]) : [])
                 ], ["class" => "be align end"])
                 ,

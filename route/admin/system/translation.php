@@ -49,23 +49,36 @@ $routeHandler = function () use ($data) {
         if ($file = downloadStream()) {
             $remain = (receiveStream("total") ?? 0) - (receiveStream("chunk") ?? 0) - 1;
             if (is_string($file)) {
-                procedure("_('.content .progressbar').val(0.1).removeClass('invisible');");
-                $dic = Convert::ToFields($file);
+                procedure("_('.content .progressbar').val(0.0).removeClass('invisible');");
+                $c = floatval(count(preg_find_all("/\n/", $file)));
+                $n = 0;
+                $speed = 1000;
+                $pack = [];
+                foreach (Convert::ToFieldsIterator($file) as $k => $v) {
+                    $pack[] = $v;
+                    if (((++$n % $speed) === 0) && \_::$Front->Translate->SetLexicon($pack)) {
+                        $pack = [];
+                        procedure("_('.content .progressbar').val(" . round($n / $c, 3) . ").removeClass('invisible');");
+                    }
+                }
                 unset($file);
-                procedure("_('.content .progressbar').val(0.3).removeClass('invisible');");
-                $c = count($dic);
-                procedure("_('.content .progressbar').val(0.5).removeClass('invisible');");
-                if ($c > 0 && \_::$Front->Translate->SetLexicon($dic)){
-                    procedure("_('.content .progressbar').val(0.9).addClass('invisible');");
-                    return redirect(Struct::Success("$c key values setted successfuly in lexicon!"));
+
+                if ($pack && \_::$Front->Translate->SetLexicon($pack)) {
+                    $pack = [];
+                    procedure("_('.content .progressbar').val(" . round($n / $c, 3) . ").removeClass('invisible');");
+                }
+
+                if ($n > 0) {
+                    procedure("_('.content .progressbar').val(1).addClass('invisible');");
+                    return redirect(Struct::Success("$n key values setted successfuly in lexicon!"));
                 } else
-                    error("There occurred a problem!");
+                    return error("There occurred a problem!");
             } elseif ($file === false)
                 return error("There occurred a problem in uploading the file!");
             else if ($remain <= 1)
-                return deliverProcedure("_('.content .progressbar').addClass('invisible');");
+                return procedure("_('.content .progressbar').val(1).addClass('invisible');");
             else
-                return deliverProcedure("_('.content .progressbar').val($file).removeClass('invisible');");
+                return procedure("_('.content .progressbar').val($file).removeClass('invisible');");
         }
     })
     ->Delete(function () {//Deletes
