@@ -2,11 +2,12 @@
 $data = $data??[];
 $routeHandler = function () use($data) {
     $module = new (module("Storage"))(
-        \_::$Address->Directory,
+        dirname(\_::$Address->Directory).DIRECTORY_SEPARATOR,
         rtrim(array_values(\_::$Sequence)[\_::$Back->AdminOrigin==0?1:0], "\\\/").\_::$Address->RootUrlPath
     );
     $module->ModifyAccess = \_::$User->SuperAccess;
     $module->LockSwitch = true;
+    $module->AcceptableFormats = [];
     return $module->ToString();
 };
 

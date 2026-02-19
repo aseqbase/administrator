@@ -5,6 +5,7 @@
         rtrim(array_values(\_::$Sequence)[\_::$Back->AdminOrigin==0?1:0], "\\\/").\_::$Address->PublicRootUrlPath
     );
     $module->ModifyAccess = \_::$User->AdminAccess;
+    $module->AcceptableFormats = [];
     return $module->ToString();
 };
 

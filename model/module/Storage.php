@@ -506,7 +506,7 @@ class Storage extends Module
                 .replace(/\\+/g,'%2B')
                 .replace(/ /g,'%20');
             }
-        " . ($modifyAccess ? "
+                
             function {$this->Name}_UploadFile(){
             " . Script::UploadStream(
                         target: "\${{$this->Name}_CurrentAddress()+'&class={$this->MainClass}'}",
@@ -594,7 +594,7 @@ class Storage extends Module
                 }
                 {$this->Name}_Go(null, " . Script::Convert(["paths" => "\${paths}", "action" => "extract"]) . ");
             }
-        " : "")
+        "
         );
     }
 
