@@ -3,7 +3,7 @@ $data = $data??[];
 $routeHandler = function () use($data) {
     $module = new (module("Storage"))(
         dirname(\_::$Address->Directory).DIRECTORY_SEPARATOR,
-        rtrim(array_values(\_::$Sequence)[\_::$Back->AdminOrigin==0?1:0], "\\\/").\_::$Address->RootUrlPath
+        rtrim(array_values(\_::$Sequence)[\_::$Back->AdminOrigin==0?1:0], "\\\/")."/"
     );
     $module->ModifyAccess = \_::$User->SuperAccess;
     $module->LockSwitch = true;

@@ -50,38 +50,39 @@ $routeHandler = function () use ($data) {
             $remain = (receiveStream("total") ?? 0) - (receiveStream("chunk") ?? 0) - 1;
             if (is_string($file)) {
                 procedure("_('.content .progressbar').val(0.0).removeClass('invisible');");
-                // $c = floatval(count(preg_find_all("/\n/", $file))) + 2;
-                // $n = 0;
-                // $speed = 1000;
-                // $pack = [];
-                // foreach (Convert::ToFieldsIterator($file) as $k => $v) {
-                //     $pack[] = $v;
-                //     if (((++$n % $speed) === 0) && \_::$Front->Translate->SetLexicon($pack)) {
-                //         $pack = [];
-                //         procedure("_('.content .progressbar').val(" . round($n / $c, 3) . ").removeClass('invisible');");
-                //     }
-                // }
-                // unset($file);
-
-                // if ($pack && \_::$Front->Translate->SetLexicon($pack)) {
-                //     $pack = [];
-                //     procedure("_('.content .progressbar').val(" . round($n / $c, 3) . ").removeClass('invisible');");
-                // }
-
-                $file = Convert::ToFields($file);
-                $c = count($file);
-                $n = \_::$Front->Translate->SetLexicon($file);
-                procedure("_('.content .progressbar').val(0.5).removeClass('invisible');");
+                $c = floatval(count(preg_find_all("/\n/", $file)));
+                $n = 0;
+                $speed = 1000;
+                $pack = [];
+                foreach (Convert::ToFieldsIterator($file) as $k => $v) {
+                    $pack[] = $v;
+                    if (((++$n % $speed) === 0) && \_::$Front->Translate->SetLexicon($pack)) {
+                        $pack = [];
+                        procedure("_('.content .progressbar').val(" . round($n / $c, 3) . ").removeClass('invisible');");
+                    }
+                }
                 unset($file);
+
+                if ($pack && \_::$Front->Translate->SetLexicon($pack)) {
+                    $pack = [];
+                    procedure("_('.content .progressbar').val(" . round($n / $c, 3) . ").removeClass('invisible');");
+                }
+
+                // $file = Convert::ToFields($file);
+                // $c = count($file);
+                // $n = \_::$Front->Translate->SetLexicon($file);
+                // procedure("_('.content .progressbar').val(0.5).removeClass('invisible');");
+                // unset($file);
 
                 if ($n) {
                     procedure("_('.content .progressbar').val(1).addClass('invisible');");
                     return redirect(Struct::Success("$n of $c key values setted successfuly in lexicon!"), delay: 2000);
                 } else
                     return error("There occurred a problem!");
-            } elseif ($file === false)
+            }
+            elseif ($file === false)
                 return error("There occurred a problem in uploading the file!");
-            else if ($remain <= 1)
+            elseif ($remain <= 1)
                 return procedure("_('.content .progressbar').val(1).addClass('invisible');");
             else
                 return procedure("_('.content .progressbar').val($file).removeClass('invisible');");
