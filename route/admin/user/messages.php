@@ -109,8 +109,8 @@ $routeHandler = function () use ($data) {
     };
     $module->CellsValues = [
         "ReplyTo" => fn($v) => $v ? Struct::Icon("eye", "{$module->Modal->MainClass}_View('$v');") : "",
-        "From" => fn($v) => $v ? Struct::Button($v, "{$module->Modal->MainClass}_Create({Name:'" . \_::$User->Name . "', From:'" . \_::$User->Email . "', To:'$v'});") : "",
-        "To" => fn($v) => $v ? Struct::Button($v, "{$module->Modal->MainClass}_Create({Name:'" . \_::$User->Name . "', From:'" . \_::$User->Email . "', To:'$v'});") : "",
+        "From" => fn($v) => $v ? Struct::Action($v, "{$module->Modal->MainClass}_Create({Name:'" . \_::$User->Name . "', From:'" . \_::$User->Email . "', To:'$v'});") : "",
+        "To" => fn($v) => $v ? Struct::Action($v, "{$module->Modal->MainClass}_Create({Name:'" . \_::$User->Name . "', From:'" . \_::$User->Email . "', To:'$v'});") : "",
         "CreateTime" => fn($v) => Convert::ToShownDateTimeString($v)
     ];
     $issuper = \_::$User->HasAccess(\_::$User->SuperAccess);
