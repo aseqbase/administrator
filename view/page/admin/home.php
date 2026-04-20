@@ -6,12 +6,12 @@ module("RingTabs");
 $module = new \MiMFa\Module\RingTabs();
 $module->Image = \_::$Front->LogoPath;
 $module->Items = array(
-	"Admin-1" => array("Name" => "USERS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/user/users", "Image" => "user"),
-	"Admin-2" => array("Name" => "CONTENTS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/content/contents", "Image" => "th-large"),
-	"Admin-3" => array("Name" => "TAGS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/content/tags", "Image" => "tags"),
-	"Admin-4" => array("Name" => "TEMPLATE", "Access" => \_::$User->AdminAccess, "Path" => "/admin/system/template", "Image" => "quote-left"),
-	"Admin-5" => array("Name" => "TRANSLATIONS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/system/translation", "Image" => "language"),
-	"Admin-6" => array("Name" => "SYSTEMS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog")
+	array("Name" => "USERS", "Access" => \_::$User->AdminAccess, "Path" => "/administrator/user/users", "Image" => "user"),
+	array("Name" => "CONTENTS", "Access" => \_::$User->AdminAccess, "Path" => "/administrator/content/contents", "Image" => "th-large"),
+	array("Name" => "TAGS", "Access" => \_::$User->AdminAccess, "Path" => "/administrator/content/tags", "Image" => "tags"),
+	array("Name" => "TEMPLATE", "Access" => \_::$User->AdminAccess, "Path" => "/administrator/system/template", "Image" => "quote-left"),
+	array("Name" => "TRANSLATIONS", "Access" => \_::$User->AdminAccess, "Path" => "/administrator/system/translation", "Image" => "language"),
+	array("Name" => "SYSTEMS", "Access" => \_::$User->AdminAccess, "Path" => "/administrator/system/information", "Image" => "cog")
 );
 pod($module, $data);
 response(

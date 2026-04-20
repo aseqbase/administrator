@@ -1,7 +1,7 @@
 <?php
 use MiMFa\Module\Table;
-$data = $data ?? [];
-$routeHandler = function () use ($data) {
+$data = $data??[];
+$routeHandler = function ($data) {
     module("Table");
     $module = new Table(table("Session"));
     $module->KeyColumns = ["Ip"];
@@ -9,6 +9,7 @@ $routeHandler = function () use ($data) {
     $module->AllowDataTranslation = false;
     $module->AllowServerSide = true;
     $module->Updatable = true;
+    $module->ClearAccess = \_::$User->AdminAccess;
     $module->UpdateAccess = \_::$User->AdminAccess;
     $module->ModifyAccess = \_::$User->SuperAccess;
     pod($module, $data);
@@ -18,10 +19,10 @@ $routeHandler = function () use ($data) {
 (new Router())
     ->if(\_::$User->HasAccess(\_::$User->AdminAccess))
     ->Get(function () use ($routeHandler) {
-        (\_::$Front->AdministratorView)($routeHandler, [
+        (\_::$Front->AdminView)($routeHandler, [
             "Image" => "clock",
             "Title" => "'Sessions' Management"
         ]);
     })
-    ->Default(fn() => response($routeHandler()))
+    ->Default(fn() => response($routeHandler($data)))
     ->Handle();

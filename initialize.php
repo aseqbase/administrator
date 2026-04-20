@@ -1,19 +1,23 @@
 <?php
+
+use MiMFa\Library\Revise;
+
 \_::$User->AllowSigning = true;
+\_::$Front->AllowTranslate = true;
 \_::$Back->ReportError = \_::$Back->ReportError ?: E_ALL;
 \_::$Back->DisplayError = \_::$Back->DisplayError ?: 1;
 \_::$Back->DisplayStartupError = \_::$Back->DisplayStartupError ?: 1;
 \_::$Back->DataBaseError = \_::$Back->DataBaseError ?: 1;
 $dirs = array_keys(\_::$Sequence);
 find($dirs, __DIR__ . DIRECTORY_SEPARATOR, index: $index);
-\_::$Back->AdminOrigin = $index?: 0;
+\_::$Back->AdminOrigin = $index ?: 0;
 $name = \_::$Address->Name ?? "qb";
 \_::$Address->Name = (isset($_COOKIE["BASE"]) ? $_COOKIE["BASE"] : $GLOBALS["BASE"]) ?: \_::$Address->Name;
-if (\_::$Back->AdminOrigin === 0) { // Change public access directories to the Root sequence
-    $rootPath = $dirs[\_::$Back->AdminOrigin + 1];
-    \_::$Address->PublicDirectory = $rootPath . ltrim(\_::$Address->GlobalPublicDirectory, DIRECTORY_SEPARATOR);
-    \_::$Address->AssetDirectory = $rootPath . ltrim(\_::$Address->GlobalAssetDirectory, DIRECTORY_SEPARATOR);
-}
+if (\_::$Back->AdminOrigin === 0) // Change temp directories to the Root sequence
+    \_::$Address->TempDirectory = $dirs[1] . ltrim(\_::$Address->TempRootDirectory, DIRECTORY_SEPARATOR);
+$rootPath = $dirs[\_::$Back->AdminOrigin + 1];
+\_::$Address->PublicDirectory = $dirs[\_::$Back->AdminOrigin + 1] . ltrim(\_::$Address->PublicRootDirectory, DIRECTORY_SEPARATOR);
+\_::$Address->AssetDirectory = $rootPath . ltrim(\_::$Address->AssetRootDirectory, DIRECTORY_SEPARATOR);
 
 if (\_::$Back->DataBaseAddNameToPrefix)
     \_::$Back->DataBasePrefix = str_replace("{$name}_", (\_::$Address->Name ?? "qb") . "_", \_::$Back->DataBasePrefix);
@@ -21,69 +25,94 @@ if (\_::$Back->DataBaseAddNameToPrefix)
 if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
     \_::$Front->SenderEmail = "do-not-reply@" . getUrlDomain(\_::$Address->RootUrlPath);
     \_::$Front->ReceiverEmail = "info@" . getUrlDomain(\_::$Address->RootUrlPath);
-    \_::$Front->MainMenus = \_::$Front->SideMenus = array(
-        "Admin-Main" => array("Name" => "DASHBOARD", "Path" => "/sign/dashboard", "Access" => \_::$User->AdminAccess, "Image" => "home"),
-        "Admin-Content" => array(
+    \_::$Front->AdminMenus = array(
+        "Administrator" => array("Name" => "DASHBOARD", "Path" => "/sign/dashboard", "Access" => \_::$User->AdminAccess, "Image" => "home"),
+        "Administrator-Content" => array(
             "Name" => "CONTENTS",
-            "Path" => "/admin/content/contents",
+            "Path" => "/administrator/content/contents",
             "Access" => \_::$User->AdminAccess,
             "Description" => "To manage all contents in the website",
             "Image" => "th-large",
             "Items" => array(
-                array("Name" => "CONTENTS", "Path" => "/admin/content/contents", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's posts and pages", "Image" => "file"),
-                array("Name" => "TAGS", "Path" => "/admin/content/tags", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's tags", "Image" => "tags"),
-                array("Name" => "CATEGORIES", "Path" => "/admin/content/categories", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's categories", "Image" => "code-fork"),
-                array("Name" => "'UPLOADED' 'STORAGE'", "Path" => "/admin/storage/dynamic", "Access" => \_::$User->AdminAccess, "Description" => "'Uploaded' 'files' 'management'", "Image" => "download"),
-                array("Name" => "'ORGANIZED' 'STORAGE'", "Path" => "/admin/storage/static", "Access" => \_::$User->AdminAccess, "Description" => "'Organized' 'files' 'management'", "Image" => "folder-tree"),
-                array("Name" => "'ROOT' 'STORAGE'", "Path" => "/admin/storage/root", "Access" => \_::$User->SuperAccess, "Description" => "'Root' 'files' 'management'", "Image" => "folder"),
+                array("Name" => "CONTENTS", "Path" => "/administrator/content/contents", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's posts and pages", "Image" => "file"),
+                array("Name" => "TAGS", "Path" => "/administrator/content/tags", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's tags", "Image" => "tags"),
+                array("Name" => "CATEGORIES", "Path" => "/administrator/content/categories", "Access" => \_::$User->AdminAccess, "Description" => "To manage website's categories", "Image" => "code-fork"),
             )
         ),
-        "Admin-User" => array(
+        "Administrator-Storage" => array(
+            "Name" => "STORAGES",
+            "Path" => "/administrator/storage/dynamic",
+            "Access" => \_::$User->AdminAccess,
+            "Description" => "To manage all 'files'",
+            "Image" => "files",
+            "Items" => array(
+                array("Name" => "'UPLOADED' 'STORAGE'", "Path" => "/administrator/storage/dynamic", "Access" => \_::$User->AdminAccess, "Description" => "'Uploaded' 'files' 'management'", "Image" => "download"),
+                array("Name" => "'ORGANIZED' 'STORAGE'", "Path" => "/administrator/storage/static", "Access" => \_::$User->AdminAccess, "Description" => "'Organized' 'files' 'management'", "Image" => "folder-tree"),
+                array("Name" => "'TEMPORARY' 'STORAGE'", "Path" => "/administrator/storage/temp", "Access" => \_::$User->AdminAccess, "Description" => "'Temporary' 'files' 'management'", "Image" => "clock"),
+                array("Name" => "'SEQUENCE' 'STORAGE'", "Path" => "/administrator/storage/sequence", "Access" => \_::$User->AdminAccess, "Description" => "'Sequence' 'files' 'management'", "Image" => "globe"),
+                array("Name" => "'ROOT' 'STORAGE'", "Path" => "/administrator/storage/root", "Access" => \_::$User->SuperAccess, "Description" => "'Root' 'files' 'management'", "Image" => "folder"),
+            )
+        ),
+        "Administrator-User" => array(
             "Name" => "USERS",
-            "Path" => "/admin/user/users",
+            "Path" => "/administrator/user/users",
             "Access" => \_::$User->AdminAccess,
             "Description" => "To manage all interactions with the website",
             "Image" => "user",
             "Items" => array(
-                array("Name" => "USERS", "Path" => "/admin/user/users", "Access" => \_::$User->AdminAccess, "Description" => "To manage all the website's users", "Image" => "user"),
-                array("Name" => "GROUPS", "Path" => "/admin/user/groups", "Access" => \_::$User->AdminAccess, "Description" => "To manage all the user groups of the website", "Image" => "user-group"),
-                array("Name" => "COMMENTS", "Path" => "/admin/user/comments", "Access" => \_::$User->AdminAccess, "Description" => "To manage all received comments", "Image" => "comment"),
-                array("Name" => "MESSAGES", "Path" => "/admin/user/messages", "Access" => \_::$User->AdminAccess, "Description" => "To manage all received emails and messages", "Image" => "envelope"),
-                array("Name" => "SESSIONS", "Path" => "/admin/user/sessions", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'sessions'", "Image" => "clock"),
-                array("Name" => "MANAGEMENT", "Path" => "/admin/user/management", "Access" => \_::$User->SuperAccess, "Description" => "To config 'users'", "Image" => "user-cog")
+                array("Name" => "USERS", "Path" => "/administrator/user/users", "Access" => \_::$User->AdminAccess, "Description" => "To manage all the website's users", "Image" => "user"),
+                array("Name" => "GROUPS", "Path" => "/administrator/user/groups", "Access" => \_::$User->AdminAccess, "Description" => "To manage all the user groups of the website", "Image" => "user-group"),
+                array("Name" => "COMMENTS", "Path" => "/administrator/user/comments", "Access" => \_::$User->AdminAccess, "Description" => "To manage all received comments", "Image" => "comment"),
+                array("Name" => "MESSAGES", "Path" => "/administrator/user/messages", "Access" => \_::$User->AdminAccess, "Description" => "To manage all received emails and messages", "Image" => "envelope"),
+                array("Name" => "SESSIONS", "Path" => "/administrator/user/sessions", "Access" => \_::$User->AdminAccess, "Description" => "To manage all 'sessions'", "Image" => "clock"),
+                array("Name" => "MANAGEMENT", "Path" => "/administrator/user/management", "Access" => \_::$User->SuperAccess, "Description" => "To config 'users'", "Image" => "user-cog")
             )
         ),
-        "Admin-System" => array(
+        "Administrator-System" => array(
             "Name" => "SYSTEMS",
-            "Path" => "/admin/system/information",
+            "Path" => "/administrator/system/information",
             "Access" => \_::$User->AdminAccess,
             "Description" => "To manage the back-end website settings",
             "Image" => "cog",
             "Items" => array(
-                array("Name" => "INFORMATION", "Path" => "/admin/system/information", "Access" => \_::$User->AdminAccess, "Image" => "palette"),
-                array("Name" => "TRANSLATION", "Path" => "/admin/system/translation", "Access" => \_::$User->AdminAccess, "Image" => "language"),
-                array("Name" => "APPEARANCE", "Path" => "/admin/system/template", "Access" => \_::$User->AdminAccess, "Image" => "eye"),
-                //array("Name" => "TEMPLATE", "Path" => "/admin/system/templates", "Access" => \_::$User->AdminAccess, "Image" => "th"),
-                array("Name" => "PLUGINS", "Path" => "/admin/system/plugins", "Access" => \_::$User->AdminAccess, "Image" => "puzzle-piece"),
+                array("Name" => "TRANSLATION", "Path" => "/administrator/system/translation", "Access" => \_::$User->AdminAccess, "Image" => "language"),
+                array("Name" => "APPEARANCE", "Path" => "/administrator/system/template", "Access" => \_::$User->AdminAccess, "Image" => "eye"),
+                //array("Name" => "TEMPLATES", "Path" => "/administrator/system/templates", "Access" => \_::$User->AdminAccess, "Image" => "th"),
+                array("Name" => "PLUGINS", "Path" => "/administrator/system/plugins", "Access" => \_::$User->AdminAccess, "Image" => "puzzle-piece"),
                 array("Name" => "MARKET", "Path" => "http://github.com/aseqbase", "Access" => \_::$User->AdminAccess, "Image" => "shopping-bag"),
-                array("Name" => "CONFIGURATION", "Path" => "/admin/system/configuration", "Access" => \_::$User->SuperAccess, "Image" => "cog")
+                array(
+                    "Name" => "INFORMATION",
+                    "Path" => "/administrator/system/information",
+                    "Access" => \_::$User->AdminAccess,
+                    "Image" => "edit",
+                    "Items" => loop(Revise::GetCategories(\_::$Front), fn($v, $k) => [
+                        "Name" => $k,
+                        "Path" => "/administrator/system/information?category=" . urlencode($k),
+                        "Access" => \_::$User->AdminAccess,
+                        "Image" => "edit"
+                    ])
+                ),
+                array(
+                    "Name" => "CONFIGURATION",
+                    "Path" => "/administrator/system/configuration",
+                    "Access" => \_::$User->SuperAccess,
+                    "Image" => "cog",
+                    "Items" => loop(Revise::GetCategories(\_::$Back), fn($v, $k) => [
+                        "Name" => $k,
+                        "Path" => "/administrator/system/configuration?category=" . urlencode($k),
+                        "Access" => \_::$User->AdminAccess,
+                        "Image" => "cog"
+                    ])
+                )
             )
-        ),
-        "User-0" => array(
-            "Name" => \_::$Front->Name,
-            "Path" => \_::$Front->Path,
-            "Access" => \_::$User->AdminAccess,
-            "Description" => "The main menu of the website",
-            "Image" => "globe",
-            "Items" => \_::$Front->MainMenus
         )
     );
-    \_::$Front->Shortcuts = array(
-        "Admin-1" => array("Name" => "MENU", "Path" => "viewSideMenu()", "Image" => "bars"),
-        "Admin-2" => array("Name" => "CONTENTS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/content/contents", "Image" => "th-large"),
-        "Admin-0" => array("Name" => "HOME", "Access" => \_::$User->AdminAccess, "Path" => "/sign/dashboard", "Image" => "home"),
-        "Admin-3" => array("Name" => "USERS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/user/users", "Image" => "user"),
-        "Admin-4" => array("Name" => "SYSTEMS", "Access" => \_::$User->AdminAccess, "Path" => "/admin/system/information", "Image" => "cog"),
+    \_::$Front->AdminShortcuts = array(
+        array("Name" => "MENU", "Path" => "viewSideMenu()", "Image" => "bars"),
+        array("Name" => "CONTENTS", "Access" => \_::$User->AdminAccess, "Path" => "/administrator/content/contents", "Image" => "th-large"),
+        array("Name" => "HOME", "Access" => \_::$User->AdminAccess, "Path" => "/sign/dashboard", "Image" => "home"),
+        array("Name" => "USERS", "Access" => \_::$User->AdminAccess, "Path" => "/administrator/user/users", "Image" => "user"),
+        array("Name" => "SYSTEMS", "Access" => \_::$User->AdminAccess, "Path" => "/administrator/system/information", "Image" => "cog"),
     );
 }
 
@@ -93,7 +122,7 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
         $up = "~administrator";
         $pairs = \_::$User->GroupDataTable->SelectPairs("Id", "Access", "Access>900000000");
         if (!$pairs)
-            deliverError("There is not at least one admin access group!");
+            deliverError("There is not at least one administrator access group!");
         if (!\_::$User->DataTable->Exists("GroupId IN (" . join(",", loop($pairs, fn($v, $k) => $k)) . ")")) {
             if (
                 \_::$User->SignUp(
@@ -106,7 +135,7 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
             ) {
                 view(\_::$Front->DefaultViewName, [
                     "Content" =>
-                        MiMFa\Library\Struct::Heading1("'Your Admin Account Created Successfully' " . MiMFa\Library\Struct::Icon("print", "window.print();", ["class" => "view unptintable"])) .
+                        MiMFa\Library\Struct::Heading1("'Your Administrator Account Created Successfully' " . MiMFa\Library\Struct::Icon("print", "window.print();", ["class" => "view unptintable"])) .
                         MiMFa\Library\Struct::Table([
                             ["Name", "Value", "Description"],
                             ["UserName", $un, ""],
@@ -121,27 +150,7 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
             route(404);
     })
     ->if(!\_::$User->HasAccess(\_::$User->AdminAccess))
-    ->On("$|admin")->Default(fn() => view("part", ["Name" => \_::$User->InHandlerPath]))
+    ->On("$|administrator")->Default(fn() => view("part", ["Name" => \_::$User->InHandlerPath]))
     ->On()->Default(\_::$Front->DefaultRouteName)
     ->else()
-    ->On("admin")->Reset()->Default(\_::$Address->UrlRoute, alternative: \_::$Front->DefaultRouteName);
-
-    
- \_::$Front->AdministratorView = function($handler, $data = []){
-    if($data){
-        $templ = \_::$Front->CreateTemplate("Administrator");
-        $templ->WindowTitle = pop($data, "WindowTitle")??get($data, 'Title' )??get($data, 'Name' );
-        module("PrePage");
-        $module = new MiMFa\Module\PrePage();
-        $module->Title = pop($data, 'Title');
-        $module->Path = pop($data, 'Path');
-        $module->Description = pop($data, 'Description');
-        $module->Content = pop($data, 'Content');
-        $module->Image = pop($data, 'Image');
-        $alternative = pop($data, "Alternative")??404;
-        if ($handler) $templ->Content = fn()=>view(\_::$Front->DefaultViewName, ["Content"=>fn()=>\MiMFa\Library\Struct::Page(($module->Title || $module->Description || $module->Content || $module->Image?$module->ToString():"").$handler())], print: false);
-        else $templ->Content = $module->Handle().view($alternative, data: $data, print: false);
-        $templ->Render();
-    }
-    else $handler();
-};
+    ->On("administrator")->Reset()->Default(\_::$Address->UrlRoute, alternative: \_::$Front->DefaultRouteName);

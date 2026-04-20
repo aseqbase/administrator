@@ -5,8 +5,8 @@ use MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 use MiMFa\Module\Form;
 use MiMFa\Module\Table;
-$data = $data ?? [];
-$routeHandler = function () use ($data) {
+$data = $data??[];
+$routeHandler = function ($data) {
     module("Form");
     $form = new Form();
     $form->BlockTimeout = 2000;
@@ -17,7 +17,7 @@ $routeHandler = function () use ($data) {
             $rec = receivePost();
             table("Message")->Update("`Id`=:Id", [":Id" => $rec["Id"], "Status" => $rec["Status"], "UpdateTime" => \_::$Front->CurrentDateTime]);
             table("Message")->Insert([
-                "RootId" => $rec["Id"],
+                "ParentId" => $rec["Id"],
                 "UserId" => \_::$User ? \_::$User->Id : null,
                 "Name" => \_::$User ? \_::$User->Name : null,
                 "From" => $rec["SenderEmail"],
@@ -68,7 +68,7 @@ $routeHandler = function () use ($data) {
     module("Table");
     $module = new Table(table("Message"));
     $module->SelectQuery = "
-    SELECT *, RootId AS 'ReplyTo'
+    SELECT *, ParentId AS 'ReplyTo'
     FROM {$module->DataTable->Name}
     ORDER BY `CreateTime` DESC
 ";
@@ -77,20 +77,16 @@ $routeHandler = function () use ($data) {
     $module->AllowDataTranslation = false;
     $module->AllowServerSide = true;
     $module->Updatable = true;
+    $module->ClearAccess = \_::$User->AdminAccess;
     $module->ModifyAccess = \_::$User->SuperAccess;
     $module->UpdateAccess = \_::$User->AdminAccess;
     $module->CreateModal();
-    $module->ControlHandler = function ($r, $func) {
-        switch ($func) {
-            case 'AddRow':
-                Contact::SendHtmlEmail($r["From"], $r["To"], $r["Subject"], $r["Content"]);
-                break;
-            default:
-                break;
-        }
-        return null;
+    $module->AddHandler = function ($r) {
+        if(Contact::SendHtmlEmail($r["From"], $r["To"], $r["Subject"], $r["Content"]))
+            return null;
+        else Struct::Error("Could not send the message to '{$r["To"]}'");
     };
-    $module->AppendControlsCreator = function ($id, $r) use ($module) {
+    $module->AppendControls = function ($id, $r) use ($module) {
         $st = intval($r["Status"] ?? 0);
         $d = "sendPatch(null, {
         Id:" . Script::Convert($r["Id"]) . ",
@@ -192,10 +188,10 @@ $routeHandler = function () use ($data) {
 (new Router())
     ->if(\_::$User->HasAccess(\_::$User->AdminAccess))
     ->Get(function () use ($routeHandler) {
-        (\_::$Front->AdministratorView)($routeHandler, [
+        (\_::$Front->AdminView)($routeHandler, [
             "Image" => "envelope",
             "Title" => "Messages Management"
         ]);
     })
-    ->Default(fn() => response($routeHandler()))
+    ->Default(fn() => response($routeHandler($data)))
     ->Handle();

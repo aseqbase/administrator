@@ -1,8 +1,8 @@
 <?php
 $data = $data??[];
-$routeHandler = function () use($data) {
+$routeHandler = function ($data) {
     $module = new (module("Storage"))(
-        dirname(\_::$Address->Directory).DIRECTORY_SEPARATOR,
+        array_keys(\_::$Sequence)[\_::$Back->AdminOrigin==0?1:0],
         rtrim(array_values(\_::$Sequence)[\_::$Back->AdminOrigin==0?1:0], "\\\/")."/"
     );
     $module->ModifyAccess = \_::$User->SuperAccess;
@@ -14,12 +14,12 @@ $routeHandler = function () use($data) {
 (new Router())
 ->if(\_::$User->HasAccess(\_::$User->SuperAccess))
     ->Get(function () use($routeHandler) {
-        (\_::$Front->AdministratorView)($routeHandler, [
-            "Image" => "folder",
-            "Title" => "'Root' 'Files' 'Management'"
+        (\_::$Front->AdminView)($routeHandler, [
+            "Image" => "globe",
+            "Title" => "'Sequence' 'Files' 'Management'"
         ]);
         
     })
-    ->Default(fn()=>response($routeHandler()))
+    ->Default(fn()=>response($routeHandler($data)))
     ->Handle();
 ?>

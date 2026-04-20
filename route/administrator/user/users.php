@@ -1,8 +1,8 @@
 <?php
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
-$data = $data ?? [];
-$routeHandler = function () use ($data) {
+$data = $data??[];
+$routeHandler = function ($data) {
     module("Table");
     $module = new Table(\_::$User->DataTable);
     $table1 = \_::$User->GroupDataTable->Name;
@@ -62,10 +62,10 @@ $routeHandler = function () use ($data) {
 (new Router())
     ->if(\_::$User->HasAccess(\_::$User->AdminAccess))
     ->Get(function () use ($routeHandler) {
-        (\_::$Front->AdministratorView)($routeHandler, [
+        (\_::$Front->AdminView)($routeHandler, [
             "Image" => "user",
             "Title" => "Users Management"
         ]);
     })
-    ->Default(fn() => response($routeHandler()))
+    ->Default(fn() => response($routeHandler($data)))
     ->Handle();

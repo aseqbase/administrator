@@ -4,7 +4,6 @@ namespace MiMFa\Module;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Script;
 use MiMFa\Library\Struct;
-use MiMFa\Template\Message;
 
 /**
  * To manage the storage
@@ -16,7 +15,9 @@ use MiMFa\Template\Message;
 class Storage extends Module
 {
     public string|null $Arrange = "items";
+    public string|null $Order = "name";
     public string $ArrangeRequest = "arrange";
+    public string $OrderRequest = "order";
     public string|null $Method = "Storage";
     public array|null $AcceptableFormats = null;
     public int|null $MinFileSize = null;
@@ -30,6 +31,8 @@ class Storage extends Module
     public readonly string $RootAddress;
     public readonly string $CurrentDirectory;
     public readonly string $CurrentAddress;
+    public array $PrependToolsBar = [];
+    public array $AppendToolsBar = [];
     public bool $AllowStreamManagement = true;
     public bool $MultiSelect = true;
     public string $LockRequest = "lock";
@@ -43,6 +46,7 @@ class Storage extends Module
         $this->RootAddress = \MiMFa\Library\Storage::GetAbsoluteUrl($rootAddress);
 
         $this->Arrange = receiveGet($this->ArrangeRequest) ?? getMemo($this->ArrangeRequest) ?? $this->Arrange;
+        $this->Order = receiveGet($this->OrderRequest) ?? getMemo($this->OrderRequest) ?? $this->Order;
         $this->Lock = boolval(receiveGet($this->LockRequest) ?? getMemo($this->LockRequest)) ?? $this->Lock;
 
         $this->MainClass = receiveGet("Class") ?? $this->MainClass;
@@ -160,63 +164,69 @@ class Storage extends Module
         }
         yield parent::GetInner();
         yield Struct::Division(
-                Struct::Division([
-                    ...($this->CurrentDirectory !== $this->RootDirectory ? [
-                        Struct::Action(
-                            Struct::Icon("folder-open", null, ["class" => "be fore green"]) . " " .
-                            (trim(preg_find("/[^\/\\\]+[\/\\\]$/u", $this->CurrentDirectory) ?? "", DIRECTORY_SEPARATOR)) .
-                            " " . Struct::Icon("arrow-left"),
-                            $this->GoBackScript(),
-                            ["class" => "be flex middle center parent"]
-                        ) . " "
-                    ] : []),
-                    ...($modifyAccess ? [
-                        Struct::Icon("download", $this->UploadScript(), ["tooltip" => "Upload a new file"]),
-                        Struct::Icon("folder", $this->CreatefolderScript(), ["tooltip" => "Create a new folder"]),
-                        Struct::Icon("file", $this->CreateFileScript(), ["tooltip" => "Create a new file"]),
-                    ] : []),
-                    Struct::Division("", ["class" => "selected-details multi-selected", "style" => "margin:0px; padding: calc(var(--size-0) / 2) var(--size-0); color: var(--color-gray);"]),
-                    ...($modifyAccess ? [
-                        Struct::Icon("copy", $this->CopyScript(), ["tooltip" => "Copy selected items", "class" => "selected"]),
-                        Struct::Icon("cut", $this->CutScript(), ["tooltip" => "Cut selected items", "class" => "selected"]),
-                        Struct::Icon("paste", $this->PasteScript(), ["tooltip" => "Paste items here", "class" => "clipboard", "hidden" => "hidden"]),
-                        Struct::Icon("edit", $this->RenameScript(), ["tooltip" => "Rename selected itema", "class" => "selected"]),
-                        Struct::Icon("trash", $this->DeleteScript(), ["tooltip" => "Delete selected itema", "class" => "selected", "style" => "color: var(--color-red);"]),
-                        Struct::Icon("archive", $this->CompressScript(), ["tooltip" => "Compress selected items", "class" => "selected"]),
-                        Struct::Icon("folder-open", $this->ExtractScript(), ["tooltip" => "Extract selected items", "class" => "selected"]),
-                        Struct::Icon("upload", $this->DownloadScript(), ["tooltip" => "Download selected items", "class" => "selected"]),
-                        Struct::Icon("link", $this->CopyAbsoluteUrlScript(), ["tooltip" => "Copy absolute URL of selected items", "class" => "selected"]),
-                        //Struct::Icon("info", $this->PropertiesScript(), ["tooltip" => "View properties of selected items", "class" => "selected"])
-                    ] : []),
-                ], ["class" => "be align start"]) .
-                Struct::Division([
-                    ...($this->MultiSelect ? [
-                        //Struct::Icon("close", $this->DeselectAllScript(), ["tooltip" => "Deselect all", "class" => "multi-selected"]),
-                        Struct::Icon("check-circle", $this->SelectAllScript(), ["tooltip" => "Select all"]),
-                    ] : []),
-                    Struct::Icon("refresh", $this->GoScript(), ["tooltip" => "Reload the page"]),
-                    Struct::Icon("list", Script::SetMemo($this->ArrangeRequest, "table") . ";" . $this->GoScript(), $this->Arrange === "table" ? ["class" => "hidden"] : []),
-                    Struct::Icon("th", Script::SetMemo($this->ArrangeRequest, "items") . ";" . $this->GoScript(), $this->Arrange === "items" ? ["class" => "hidden"] : []),
-                    ...(
-                        \_::$User->HasAccess($this->ModifyAccess) ? ($this->Lock ? [
-                            Struct::Icon("lock", Script::SetMemo($this->LockRequest, "0", path:\_::$Address->UrlPath) . ";" . $this->GoScript())
-                        ] : [
-                            Struct::Icon("lock-open", Script::SetMemo($this->LockRequest, "1", path:\_::$Address->UrlPath) . ";" . $this->GoScript())
-                        ]) : [])
-                ], ["class" => "be align end"])
-                ,
-                ["class" => "toolbar be flex justify"]
-            ) . Struct::ProgressBar(0, null, ["id" => "{$this->MainClass}_progress", "class" => "be invisible"]) . $items .
-            $this->GetContextMenu(".{$this->MainClass}") .
-            Struct::Script(
-                "
+            Struct::Box([
+                ...($this->CurrentDirectory !== $this->RootDirectory ? [
+                    Struct::Icon("house", \_::$Address->UrlBase, ["tooltip" => "Go to the '$this->RootDirectory'"]),
+                    Struct::Action(
+                        Struct::Icon("folder-open", null, ["class" => "be fore green"]) . " " .
+                        (trim(preg_find("/[^\/\\\]+[\/\\\]$/u", $this->CurrentDirectory) ?? "", DIRECTORY_SEPARATOR)) .
+                        " " . Struct::Icon("arrow-left"),
+                        $this->GoBackScript(),
+                        ["class" => "be flex middle center parent"]
+                    ) . " "
+                ] : []),
+                ...$this->PrependToolsBar,
+                ...($modifyAccess ? [
+                    Struct::Icon("download", $this->UploadScript(), ["tooltip" => "Upload a new file"]),
+                    Struct::Icon("folder", $this->CreatefolderScript(), ["tooltip" => "Create a new folder"]),
+                    Struct::Icon("file", $this->CreateFileScript(), ["tooltip" => "Create a new file"]),
+                ] : []),
+                Struct::Division("", ["class" => "selected-details multi-selected", "style" => "margin:0px; padding: calc(var(--size-0) / 2) var(--size-0); color: var(--color-gray);"]),
+                ...($modifyAccess ? [
+                    Struct::Icon("edit", $this->EditScript(), ["tooltip" => "To edit selected file", "class" => "single-selected file"]),
+                    Struct::Icon("copy", $this->CopyScript(), ["tooltip" => "Copy selected items", "class" => "selected"]),
+                    Struct::Icon("cut", $this->CutScript(), ["tooltip" => "Cut selected items", "class" => "selected"]),
+                    Struct::Icon("paste", $this->PasteScript(), ["tooltip" => "Paste items here", "class" => "clipboard", "hidden" => "hidden"]),
+                    Struct::Icon("tag", $this->RenameScript(), ["tooltip" => "Rename selected itema", "class" => "selected"]),
+                    Struct::Icon("trash-alt", $this->DeleteScript(), ["tooltip" => "Delete selected itema", "class" => "selected", "style" => "color: var(--color-red);"]),
+                    Struct::Icon("archive", $this->CompressScript(), ["tooltip" => "Compress selected items", "class" => "selected"]),
+                    Struct::Icon("folder-open", $this->ExtractScript(), ["tooltip" => "Extract selected items", "class" => "selected compressed"]),
+                    Struct::Icon("upload", $this->DownloadScript(), ["tooltip" => "Download selected items", "class" => "single-selected file"]),
+                    Struct::Icon("link", $this->CopyAbsoluteUrlScript(), ["tooltip" => "Copy absolute URL of selected items", "class" => "selected"]),
+                    //Struct::Icon("info", $this->PropertiesScript(), ["tooltip" => "View properties of selected items", "class" => "selected"])
+                ] : []),
+                ...$this->AppendToolsBar,
+            ], ["class" => "be align flex start"]) .
+            Struct::Box([
+                ...($this->MultiSelect ? [
+                    //Struct::Icon("close", $this->DeselectAllScript(), ["tooltip" => "Deselect all", "class" => "multi-selected"]),
+                    Struct::Icon("check-circle", $this->SelectAllScript(), ["tooltip" => "Select all"]),
+                ] : []),
+                Struct::Icon("refresh", $this->GoScript(), ["tooltip" => "Reload the page"]),
+                Struct::Icon("list", Script::SetMemo($this->ArrangeRequest, "table") . ";" . $this->GoScript(), $this->Arrange === "table" ? ["class" => "hidden"] : []),
+                Struct::Icon("th", Script::SetMemo($this->ArrangeRequest, "items") . ";" . $this->GoScript(), $this->Arrange === "items" ? ["class" => "hidden"] : []),
+                ...(
+                    \_::$User->HasAccess($this->ModifyAccess) ? ($this->Lock ? [
+                        Struct::Icon("lock", Script::SetMemo($this->LockRequest, "0", path: \_::$Address->UrlPath) . ";reload();")
+                    ] : [
+                        Struct::Icon("lock-open", Script::SetMemo($this->LockRequest, "1", path: \_::$Address->UrlPath) . ";reload();")
+                    ]) : [])
+            ], ["class" => "be align flex end"])
+            ,
+            ["class" => "toolbar be flex justify"]
+        );
+        yield Struct::ProgressBar(0, null, ["id" => "{$this->MainClass}_progress", "class" => "be invisible"]);
+        yield $items;
+        yield $this->GetContextMenu(".{$this->MainClass}");
+        yield Struct::Script(
+            "
                 function {$this->Name}_SelectedChanged(){
                     var selectedCount = _('.{$this->MainClass} .item [name=\"Path\"]:checked').length;
                     
                     if(typeof InternalClipboard !== 'undefined' && InternalClipboard.length > 0)
                         _('.{$this->MainClass} .clipboard').removeAttr('hidden');
                     else _('.{$this->MainClass} .clipboard').addAttr('hidden');
-                    
+
                     if(selectedCount > 0) _('.{$this->MainClass} .selected').removeClass('hidden');
                     else _('.{$this->MainClass} .selected').addClass('hidden');
 
@@ -231,6 +241,14 @@ class Storage extends Module
 
                     if(selectedCount > 1) _('.{$this->MainClass} .selected-details').text(selectedCount + ' " . __("items") . "');
                     else _('.{$this->MainClass} .selected-details').text('');
+                    
+                    _('.{$this->MainClass} .item [name=\"Path\"]:checked').each(v=>{
+                        if(/[\/\\\\]$/.test(v.value)){
+                            _('.{$this->MainClass} .file').addClass('hidden');
+                        } else {
+                            _('.{$this->MainClass} .folder').addClass('hidden');
+                        }
+                    });
                 }
                 
                 _('.{$this->MainClass} .item').on('click', function (e, item) {" . ($this->MultiSelect ? "
@@ -280,15 +298,15 @@ class Storage extends Module
                 
                 {$this->Name}_SelectedChanged();
             "
-            );
+        );
     }
 
     public function GetScript()
     {
         $modifyAccess = !$this->Lock && \_::$User->HasAccess($this->ModifyAccess);
         $successScript = "(d,e)=>{if(d) \$('.{$this->MainClass}').replaceWith(d); else if(e) alert(e); _('#{$this->MainClass}_progress').val(0).addClass('invisible');}";
-		yield parent::GetScript();
-		yield Struct::Script(
+        yield parent::GetScript();
+        yield Struct::Script(
             "
             _(document).on('click', function(e){
                 if(_(e.target).matches(' .item').length > 0){
@@ -328,8 +346,13 @@ class Storage extends Module
                             e.preventDefault();
                             break;
                         case 'enter':
-                            " . $this->OpenScript() . ";
-                            e.preventDefault();
+                            if(e.ctrlKey) {
+                                " . $this->EditScript() . ";
+                                e.preventDefault();
+                            } else  {
+                                " . $this->OpenScript() . ";
+                                e.preventDefault();
+                            }
                             break;
                         case 'backspace':
                             " . $this->GoBackScript() . ";
@@ -421,7 +444,7 @@ class Storage extends Module
                     "\${(path ?? {$this->Name}_CurrentAddress())+'&class={$this->MainClass}'}",
                     "\${data}",
                     ".{$this->MainClass}",
-                    onSuccessScript: $successScript
+                    successScript: $successScript
                 ) . "
             }
 
@@ -467,12 +490,15 @@ class Storage extends Module
             }
 
             function {$this->Name}_Open(sourceSelector = null){
-                for(const path of {$this->Name}_SelectedPaths(sourceSelector)) {$this->Name}_Go(path);
+                for(const path of {$this->Name}_SelectedPaths(sourceSelector))
+                    if(path.endsWith('/') || path.endsWith('\\\\')) {$this->Name}_Go(path);
+                    else {$this->Name}_Go(null, " . Script::Convert(["path" => "\${path}", "action" => "open"]) . ");
             }
 
             function {$this->Name}_Download(sourceSelector = null){
-                for(const path of {$this->Name}_SelectedAbsoluteUrls(sourceSelector))
-                    load(path, true);
+                for(const path of {$this->Name}_SelectedPaths(sourceSelector))
+                    {$this->Name}_Go(null, " . Script::Convert(["path" => "\${path}", "action" => "download"]) . ");
+                //     load(path, true);
             }
 
             function {$this->Name}_CopyRelativeUrl(sourceSelector = null){
@@ -506,7 +532,7 @@ class Storage extends Module
                 .replace(/\\+/g,'%2B')
                 .replace(/ /g,'%20');
             }
-                
+            " . ($modifyAccess ? "    
             function {$this->Name}_UploadFile(){
             " . Script::UploadStream(
                         target: "\${{$this->Name}_CurrentAddress()+'&class={$this->MainClass}'}",
@@ -515,7 +541,7 @@ class Storage extends Module
                         maxSize: $this->MaxFileSize,
                         speed: $this->Speed,
                         multiple: true,
-                        onSuccessScript: $successScript
+                        successScript: $successScript
                     ) . "
             }
 
@@ -529,6 +555,12 @@ class Storage extends Module
                 if(name || (name = " . Script::Prompt('Input the new file`s name:', 'New File.txt') . ")) {
                     {$this->Name}_Go(null, " . Script::Convert(["name" => "\${encodeURIComponent(name)}", "action" => "new-file"]) . ");
                 }
+            }
+
+            function {$this->Name}_Edit(sourceSelector = null){
+                for(const path of {$this->Name}_SelectedPaths(sourceSelector))
+                    if(path.endsWith('/') || path.endsWith('\\\\')) {$this->Name}_Go(path);
+                    else {$this->Name}_Go(null, " . Script::Convert(["path" => "\${path}", "action" => "edit"]) . ");
             }
 
             function {$this->Name}_Copy(sourceSelector = null){
@@ -562,7 +594,7 @@ class Storage extends Module
                     return;
                 }
                 name = " . Script::Prompt('Input the new name:', '${(paths[0].match(/[^\/\\\]+[\/\\\]?$/)??["New Name"])[0].replace(/[\/\\\]+$/giu, "")}') . ";
-                if(name) {$this->Name}_Go(null, " . Script::Convert(["paths" => "\${paths}", "name" => "\${encodeURIComponent(name)}", "action" => "rename"]) . ");
+                if(!isEmpty(name)) {$this->Name}_Go(null, " . Script::Convert(["paths" => "\${paths}", "name" => "\${encodeURIComponent(name)}", "action" => "rename"]) . ");
             }
 
             function {$this->Name}_Delete(sourceSelector = null){
@@ -594,48 +626,73 @@ class Storage extends Module
                 }
                 {$this->Name}_Go(null, " . Script::Convert(["paths" => "\${paths}", "action" => "extract"]) . ");
             }
-        "
+        " : "")
         );
     }
 
+    public function Items()
+    {
+        $items = iterator_to_array(\MiMFa\Library\Storage::GetDirectoryItems($this->CurrentDirectory));
+        switch (strtolower($this->Order ?? "")) {
+            case "access":
+                //$items = order($items, fn($it1, $it2) => $it1["AccessTime"] > $it2["AccessTime"]);
+                break;
+            case "create":
+                //$items = order($items, fn($it1, $it2) => $it1["CreateTime"] > $it2["CreateTime"]);
+                break;
+            case "update":
+                //$items = order($items, fn($it1, $it2) => $it1["UpdateTime"] > $it2["UpdateTime"]);
+                break;
+            case "name":
+            default:
+                sort($items);
+                break;
+        }
+        $items = array_merge(
+            array_filter($items, fn($it) => rtrim($it["Path"], "/\\") !== $it["Path"]),
+            array_filter($items, fn($it) => rtrim($it["Path"], "/\\") === $it["Path"])
+        );
+        return $items;
+    }
     public function GetTableArrange()
     {
         return Struct::Division(
             Struct::Table([
                 ["Name", "Size", "URL", "Type", "UpdateTime"],
-                ...loop(\MiMFa\Library\Storage::GetDirectoryItems($this->CurrentDirectory), function ($it, $k, $i) {
-                    $aurl = $this->GetAbsoluteUrl($it["Path"]);
-                    $url = getUrlRequest($aurl);
-                    return Struct::Row([
-                        "\${" .
-                        Struct::Division(
-                            Struct::CheckInput("Path", $it["Path"], ["class" => "hidden"]) .
-                            Struct::Span(
-                                $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow"]) : Struct::Icon("file", null, ["class" => "be fore blue"]),
-                                null,
-                                ["class" => "item-icon"]
-                            ) .
-                            Struct::Span("\${{$it["Name"]}}", null, [
-                                //"ondblclick" => $this->RenameScript(),
-                                "class" => "title"
-                            ]),
-                            ["class" => "item", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($aurl, true)]
-                        ) .
-                        "}",
-                        $it["Size"] ? Convert::ToCompactNumber($it["Size"] ?? 0) . "B" : null,
-                        $it["IsDirectory"] ? Struct::Icon("folder-open", $this->GoScript($it["Path"])) : ("\${" . Struct::Icon("copy", Script::Copy($aurl)) . Struct::Link("\${" . Convert::ToExcerpt($url, 0, 50) . "}", $aurl, ["class" => "view md-hide", "target" => "_blank"]) . "}"),
-                        $it["MimeType"],
-                        Convert::ToShownDateTimeString($it["UpdateTime"])
-                    ]);
-                })
+                ...loop(
+                    $this->Items(),
+                    function ($it, $k, $i) {
+                        $aurl = $this->GetAbsoluteUrl($it["Path"]);
+                        $url = getUrlRequest($aurl);
+                        return Struct::Row([
+                            Struct::Division(
+                                Struct::CheckInput("Path", $it["Path"], ["class" => "hidden"]) .
+                                Struct::Span(
+                                    $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow"]) : Struct::Icon("file", null, ["class" => "be fore blue"]),
+                                    null,
+                                    ["class" => "item-icon"]
+                                ) .
+                                Struct::Span("\${{$it["Name"]}}", null, [
+                                    //"ondblclick" => $this->RenameScript(),
+                                    "class" => "title"
+                                ]),
+                                ["class" => "item", "ondblclick" => $this->OpenScript()]
+                            ),
+                            $it["Size"] ? Convert::ToCompactNumber($it["Size"] ?? 0) . "B" : null,
+                            $it["IsDirectory"] ? Struct::Icon("folder-open", $this->GoScript($it["Path"])) : ("\${" . Struct::Icon("copy", Script::Copy($aurl)) . Struct::Link("\${" . Convert::ToExcerpt($url, 0, 50) . "}", $aurl, ["class" => "view md-hide", "target" => "_blank"]) . "}"),
+                            $it["MimeType"],
+                            Convert::ToShownDateTimeString($it["UpdateTime"])
+                        ]);
+                    }
+                )
             ]),
             ["class" => "table-arrange"]
         );
     }
     public function GetItemsArrange()
     {
-        return Struct::Division(loop(
-            \MiMFa\Library\Storage::GetDirectoryItems($this->CurrentDirectory),
+        return Struct::Section(loop(
+            $this->Items(),
             function ($it, $k, $i) {
                 $aurl = $this->GetAbsoluteUrl($it["Path"]);
                 return Struct::Division(
@@ -649,7 +706,7 @@ class Storage extends Module
                         [
                             "class" => "title",
                             //"ondblclick" => $this->RenameScript(),
-                            "tooltip" => Struct::Part([
+                            "tooltip" => Struct::Division([
                                 "Size: " . ($it["Size"] ? Convert::ToCompactNumber($it["Size"]) . "B" : null),
                                 "Type: " . $it["MimeType"],
                                 "Modified: " . Convert::ToShownDateTimeString($it["UpdateTime"]),
@@ -657,7 +714,7 @@ class Storage extends Module
                         ]
                     ) .
                     Struct::CheckInput("Path", $it["Path"], ["class" => "hidden"]),
-                    ["class" => "item", "ondblclick" => $it["IsDirectory"] ? $this->GoScript($it["Path"]) : Script::Load($aurl, true)]
+                    ["class" => "item", "ondblclick" => $this->OpenScript()]
                 );
             }
         ), ["class" => "items-arrange"]);
@@ -668,13 +725,14 @@ class Storage extends Module
         $modifyAccess = !$this->Lock && \_::$User->HasAccess($this->ModifyAccess);
         $itemSelector = $selector ? "$selector .item" : ".{$this->MainClass} .item";
         return Struct::ContextMenu([
-            Struct::Action(Struct::Division(Struct::Icon("eye") . Struct::Span("Open")) . Struct::Division("Enter", ["class" => "shortcut-key"]), $this->OpenScript($itemSelector), ["class" => "selected"]),
+            Struct::Action(Struct::Division(Struct::Icon("eye") . Struct::Span("Open")) . Struct::Division("Enter", ["class" => "shortcut-key"]), $this->OpenScript($itemSelector), ["class" => "single-selected"]),
             ...($modifyAccess ? [
+                Struct::Action(Struct::Division(Struct::Icon("edit") . Struct::Span("Edit")) . Struct::Division("Ctrl+Enter", ["class" => "shortcut-key"]), $this->EditScript($itemSelector), ["class" => "single-selected file"]),
                 Struct::Action(Struct::Division(Struct::Icon("copy") . Struct::Span("Copy")) . Struct::Division("Ctrl+C", ["class" => "shortcut-key"]), $this->CopyScript($itemSelector), ["class" => "selected"]),
                 Struct::Action(Struct::Division(Struct::Icon("cut") . Struct::Span("Cut")) . Struct::Division("Ctrl+X", ["class" => "shortcut-key"]), $this->CutScript($itemSelector), ["class" => "selected"]),
                 Struct::Action(Struct::Division(Struct::Icon("paste") . Struct::Span("Paste")) . Struct::Division("Ctrl+V", ["class" => "shortcut-key"]), $this->PasteScript($selector), ["class" => "clipboard"]),
-                Struct::Action(Struct::Division(Struct::Icon("edit") . Struct::Span("Rename")) . Struct::Division("F2", ["class" => "shortcut-key"]), $this->RenameScript($itemSelector), ["class" => "selected"]),
-                Struct::Action(Struct::Division(Struct::Icon("trash") . Struct::Span("Delete")) . Struct::Division("Del", ["class" => "shortcut-key"]), $this->DeleteScript($itemSelector), ["class" => "selected"]),
+                Struct::Action(Struct::Division(Struct::Icon("tag") . Struct::Span("Rename")) . Struct::Division("F2", ["class" => "shortcut-key"]), $this->RenameScript($itemSelector), ["class" => "selected"]),
+                Struct::Action(Struct::Division(Struct::Icon("trash-alt") . Struct::Span("Delete")) . Struct::Division("Del", ["class" => "shortcut-key"]), $this->DeleteScript($itemSelector), ["class" => "selected"]),
                 Struct::Element(null, "hr", ["class" => "selected"]),
                 Struct::Action(
                     Struct::Division(Struct::Icon("plus") . Struct::Span("New")) . Struct::Division(Struct::Icon("chevron-right"), ["class" => "shortcut-key"]) . Struct::ContextMenu([
@@ -688,9 +746,9 @@ class Storage extends Module
             ] : []),
             Struct::Action(
                 Struct::Division(Struct::Icon("link") . Struct::Span("Share")) . Struct::Division(Struct::Icon("chevron-right"), ["class" => "shortcut-key"]) . Struct::ContextMenu([
-                    Struct::Action(Struct::Division(Struct::Icon("upload") . Struct::Span("Download")) . Struct::Division("Ctrl+D", ["class" => "shortcut-key"]), $this->DownloadScript($itemSelector)),
-                    Struct::Action(Struct::Division(Struct::Icon("link-slash") . Struct::Span("Copy Relative URL")) . Struct::Division("F7", ["class" => "shortcut-key"]), $this->CopyRelativeUrlScript($itemSelector)),
-                    Struct::Action(Struct::Division(Struct::Icon("link") . Struct::Span("Copy Absolute URL")) . Struct::Division("F8", ["class" => "shortcut-key"]), $this->CopyAbsoluteUrlScript($itemSelector)),
+                    Struct::Action(Struct::Division(Struct::Icon("upload") . Struct::Span("Download")) . Struct::Division("Ctrl+D", ["class" => "shortcut-key"]), $this->DownloadScript($itemSelector), ["class" => "single-selected file"]),
+                    Struct::Action(Struct::Division(Struct::Icon("link-slash") . Struct::Span("Copy Relative URL")) . Struct::Division("F7", ["class" => "shortcut-key"]), $this->CopyRelativeUrlScript($itemSelector), ["class" => "selected"]),
+                    Struct::Action(Struct::Division(Struct::Icon("link") . Struct::Span("Copy Absolute URL")) . Struct::Division("F8", ["class" => "shortcut-key"]), $this->CopyAbsoluteUrlScript($itemSelector), ["class" => "selected"]),
                 ]),
                 null,
                 ["class" => "selected"]
@@ -698,13 +756,23 @@ class Storage extends Module
             ...($modifyAccess ? [
                 Struct::Element(null, "hr", ["class" => "selected"]),
                 Struct::Action(Struct::Division(Struct::Icon("archive") . Struct::Span("Compress")) . Struct::Division("Ctrl+Shift+C", ["class" => "shortcut-key"]), $this->CompressScript($itemSelector), ["class" => "selected"]),
-                Struct::Action(Struct::Division(Struct::Icon("folder-open") . Struct::Span("Extract")) . Struct::Division("Ctrl+Shift+E", ["class" => "shortcut-key"]), $this->ExtractScript($itemSelector), ["class" => "selected"]),
+                Struct::Action(Struct::Division(Struct::Icon("folder-open") . Struct::Span("Extract")) . Struct::Division("Ctrl+Shift+E", ["class" => "shortcut-key"]), $this->ExtractScript($itemSelector), ["class" => "selected compressed"]),
                 Struct::Element(null, "hr", ["class" => "selected"]),
             ] : []),
             Struct::Action(
                 Struct::Division(Struct::Icon("th-list") . Struct::Span("Arrange")) . Struct::Division(Struct::Icon("chevron-right"), ["class" => "shortcut-key"]) . Struct::ContextMenu([
                     Struct::Action(Struct::Division(Struct::Icon($this->Arrange === "table" ? "check" : "list") . Struct::Span("Table")) . Struct::Division("", ["class" => "shortcut-key"]), Script::SetMemo($this->ArrangeRequest, "table") . ";" . $this->GoScript()),
                     Struct::Action(Struct::Division(Struct::Icon($this->Arrange === "items" ? "check" : "th") . Struct::Span("Items")) . Struct::Division("", ["class" => "shortcut-key"]), Script::SetMemo($this->ArrangeRequest, "items") . ";" . $this->GoScript()),
+                ]),
+                null,
+                ["class" => "not-selected"]
+            ),
+            Struct::Action(
+                Struct::Division(Struct::Icon("sort") . Struct::Span("Order")) . Struct::Division(Struct::Icon("chevron-right"), ["class" => "shortcut-key"]) . Struct::ContextMenu([
+                    Struct::Action(Struct::Division(Struct::Icon($this->Order === "name" ? "check" : "list") . Struct::Span("Order by Name")) . Struct::Division("", ["class" => "shortcut-key"]), Script::SetMemo($this->OrderRequest, "name") . ";" . $this->GoScript()),
+                    Struct::Action(Struct::Division(Struct::Icon($this->Order === "access" ? "check" : "clock") . Struct::Span("Order by Access Time")) . Struct::Division("", ["class" => "shortcut-key"]), Script::SetMemo($this->OrderRequest, "access") . ";" . $this->GoScript()),
+                    Struct::Action(Struct::Division(Struct::Icon($this->Order === "update" ? "check" : "clock") . Struct::Span("Order by Update Time")) . Struct::Division("", ["class" => "shortcut-key"]), Script::SetMemo($this->OrderRequest, "update") . ";" . $this->GoScript()),
+                    Struct::Action(Struct::Division(Struct::Icon($this->Order === "create" ? "check" : "clock") . Struct::Span("Order by Create Time")) . Struct::Division("", ["class" => "shortcut-key"]), Script::SetMemo($this->OrderRequest, "create") . ";" . $this->GoScript()),
                 ]),
                 null,
                 ["class" => "not-selected"]
@@ -764,6 +832,10 @@ class Storage extends Module
     {
         return "{$this->Name}_Open(" . Script::Convert($selector) . ")";
     }
+    public function EditScript($selector = null)
+    {
+        return "{$this->Name}_Edit(" . Script::Convert($selector) . ")";
+    }
     public function CopyScript($selector = null)
     {
         return "{$this->Name}_Copy(" . Script::Convert($selector) . ")";
@@ -813,95 +885,162 @@ class Storage extends Module
     {
         $modifyAccess = !$this->Lock && \_::$User->HasAccess($this->ModifyAccess);
         $received = receive($this->Method);
-        if ($modifyAccess)
-            try {
-                $act = get($received, "action");
-                if ($act) {
-                    switch (strtolower($act)) {
-                        case "new-folder":
-                            if (\MiMFa\Library\Storage::CreateDirectory($this->CurrentDirectory . \MiMFa\Library\Storage::SanitizeName(urldecode(get($received, "name")))))
-                                success("The folder created successfully!");
+        try {
+            $act = get($received, "action");
+            if ($act) {
+                switch ($act = strtolower($act)) {
+                    case "new-folder":
+                        if (!$modifyAccess)
+                            return error("You do not have enough access!");
+                        if (\MiMFa\Library\Storage::CreateDirectory($this->CurrentDirectory . \MiMFa\Library\Storage::SanitizeName(urldecode(get($received, "name")))))
+                            success("The folder created successfully!");
+                        else
+                            return error("Could not to create the folder!");
+                        break;
+                    case "new-file":
+                        if (!$modifyAccess)
+                            return error("You do not have enough access!");
+                        if (\MiMFa\Library\Storage::CreateFile($this->CurrentDirectory . \MiMFa\Library\Storage::SanitizeName(urldecode(get($received, "name")))))
+                            success("The file created successfully!");
+                        else
+                            return error("Could not to create the file!");
+                        break;
+                    case "rename":
+                        if (!$modifyAccess)
+                            return error("You do not have enough access!");
+                        $name = urldecode(get($received, "name"));
+                        $paths = get($received, "paths");
+                        foreach ($paths as $path) {
+                            if (!\MiMFa\Library\Storage::Rename($path, $name))
+                                error("Could not to rename the '$name' item!", null);
+                        }
+                        break;
+                    case "delete":
+                        if (!$modifyAccess)
+                            return error("You do not have enough access!");
+                        $paths = get($received, "paths");
+                        foreach ($paths as $path) {
+                            if (!\MiMFa\Library\Storage::Delete($path))
+                                error("Could not to delete the '$path' item!", null);
+                        }
+                        break;
+                    case "copy":
+                        if (!$modifyAccess)
+                            return error("You do not have enough access!");
+                        $paths = get($received, "paths");
+                        foreach ($paths as $path) {
+                            $name = basename(rtrim($path, "\\\/"));
+                            $nPath = null;
+                            if (($this->CurrentDirectory . $name) === $path)
+                                $nPath = \MiMFa\Library\Storage::GenerateUniquePath($this->CurrentDirectory, "Copy", "-" . $name);
+                            elseif (startsWith($this->CurrentDirectory, $path))
+                                return error("You can not copy an item in itself!");
                             else
-                                return error("Could not to create the folder!");
-                            break;
-                        case "new-file":
-                            if (\MiMFa\Library\Storage::CreateFile($this->CurrentDirectory . \MiMFa\Library\Storage::SanitizeName(urldecode(get($received, "name")))))
-                                success("The file created successfully!");
-                            else
-                                return error("Could not to create the file!");
-                            break;
-                        case "rename":
-                            $name = urldecode(get($received, "name"));
-                            $paths = get($received, "paths");
-                            foreach ($paths as $path) {
-                                if (!\MiMFa\Library\Storage::Rename($path, $name))
-                                    error("Could not to rename the '$name' item!", null);
-                            }
-                            break;
-                        case "delete":
-                            $paths = get($received, "paths");
-                            foreach ($paths as $path) {
-                                if (!\MiMFa\Library\Storage::Delete($path))
-                                    error("Could not to delete the '$path' item!", null);
-                            }
-                            break;
-                        case "copy":
-                            $paths = get($received, "paths");
-                            foreach ($paths as $path) {
-                                $name = basename(rtrim($path, "\\\/"));
-                                $nPath = null;
-                                if (($this->CurrentDirectory . $name) === $path)
-                                    $nPath = \MiMFa\Library\Storage::GenerateUniquePath($this->CurrentDirectory, "Copy", "-" . $name);
-                                elseif (startsWith($this->CurrentDirectory, $path))
-                                    return error("You can not copy an item in itself!");
-                                else
-                                    $nPath = $this->CurrentDirectory . $name;
-                                if (!\MiMFa\Library\Storage::Copy($path, $nPath))
-                                    error("Could not to copy the '$name' item!", null);
-                            }
-                            break;
-                        case "move":
-                            $paths = get($received, "paths");
-                            foreach ($paths as $path) {
-                                if (startsWith($this->CurrentDirectory, $path))
-                                    return warning("You item does not move in itself!");
-                                $name = basename(rtrim($path, "\\\/"));
-                                if (!\MiMFa\Library\Storage::Move($path, $this->CurrentDirectory . $name))
-                                    error("Could not to move the '$name' item!", null);
-                            }
-                            break;
-                        case "compress":
-                            $name = urldecode(get($received, "name"));
-                            $paths = get($received, "paths");
+                                $nPath = $this->CurrentDirectory . $name;
+                            if (!\MiMFa\Library\Storage::Copy($path, $nPath))
+                                error("Could not to copy the '$name' item!", null);
+                        }
+                        break;
+                    case "move":
+                        if (!$modifyAccess)
+                            return error("You do not have enough access!");
+                        $paths = get($received, "paths");
+                        foreach ($paths as $path) {
+                            if (startsWith($this->CurrentDirectory, $path))
+                                return warning("You item does not move in itself!");
+                            $name = basename(rtrim($path, "\\\/"));
+                            if (!\MiMFa\Library\Storage::Move($path, $this->CurrentDirectory . $name))
+                                error("Could not to move the '$name' item!", null);
+                        }
+                        break;
+                    case "edit":
+                        if (!$modifyAccess)
+                            return error("You do not have enough access!");
+                        $path = get($received, "path");
+                        $id = uniqid("mf_");
+                        if ($path && \MiMFa\Library\Storage::IsFile($path))
+                            modal(Struct::Form(
+                                [
+                                    Struct::HiddenInput("action", "Save"),
+                                    Struct::Division(
+                                        Struct::Field("text", "path", $path, attributes: ["wrapper" => ["class" => "col-8"]]) .
+                                        Struct::Division(
+                                            Struct::Button("Apply", "_('#$id input[name=\"action\"]').val('apply'); submitForm('#$id')") .
+                                            Struct::Button("Save", "_('#$id input[name=\"action\"]').val('save'); submitForm('#$id')", ["class" => "main"])
+                                        ),
+                                        ["class" => "be sticky flex middle justify", "style" => "background-color:var(--back-color-special);color:var(--fore-color-special); top: 0px; margin: 0px"]
+                                    ) .
+                                    Struct::ScriptInput("content", open($path), ["style" => "display: inline-table; height: stretch; width: stretch;"])
+                                ],
+                                \_::$Address->UrlBase,
+                                [
+                                    "id" => $id,
+                                    "method" => $this->Method,
+                                    "style" => "min-width:80vw; min-height:80vh;"
+                                ]
+                            ));
+                        break;
+                    case "apply":
+                    case "save":
+                        if (!$modifyAccess)
+                            return error("You do not have enough access!");
+                        $path = get($received, "path");
+                        $content = get($received, "content");
+                        if (
+                            $path &&
+                            \MiMFa\Library\Storage::IsFile($path) &&
+                            \MiMFa\Library\Storage::SetFile($path, $content)
+                        )
+                            return deliverSuccess("File saved successfully!" . ($act === "save" ? Struct::Script("_('.modal-close').click();") : ""));
+                        else
+                            return deliverError("Your file is not saved successful!");
+                    case "open":
+                        $path = get($received, "path");
+                        if ($path && \MiMFa\Library\Storage::IsFile($path))
+                            modal(Struct::Media(null, $path, ["style" => "min-width:80vw; min-height:80vh;"]));
+                        break;
+                    case "download":
+                        $path = get($received, "path");
+                        if ($path && \MiMFa\Library\Storage::IsFile($path))
+                            return upload($path, basename($path));
+                        else
+                            return error("Could not to download the selected items!");
+                    case "compress":
+                        if (!$modifyAccess)
+                            return error("You do not have enough access!");
+                        $name = urldecode(get($received, "name"));
+                        $paths = get($received, "paths");
+                        if (
+                            $paths &&
+                            ($arr = \MiMFa\Library\Storage::Compress(
+                                $this->CurrentDirectory . ($name = $name ?? ("archive-" . date("Y-m-d-H-i-s") . ".zip")),
+                                ...$paths
+                            ))
+                        )
+                            success("There are " . count($arr) . " items compressed successfully in the '$name' file!");
+                        else
+                            return error("Could not to compress the selected items!");
+                        break;
+                    case "extract":
+                        if (!$modifyAccess)
+                            return error("You do not have enough access!");
+                        $paths = get($received, "paths");
+                        foreach ($paths as $path)
                             if (
-                                $paths &&
-                                ($arr = \MiMFa\Library\Storage::Compress(
-                                    $this->CurrentDirectory . ($name = $name ?? ("archive-" . date("Y-m-d-H-i-s") . ".zip")),
-                                    ...$paths
-                                ))
-                            )
-                                success("There are " . count($arr) . " items compressed successfully in the '$name' file!");
-                            else
-                                return error("Could not to compress the selected items!");
-                            break;
-                        case "extract":
-                            $paths = get($received, "paths");
-                            foreach ($paths as $path)
-                                if (
-                                    $arr = \MiMFa\Library\Storage::Decompress(
-                                        $path,
-                                        $this->CurrentDirectory
-                                    )
+                                $arr = \MiMFa\Library\Storage::Decompress(
+                                    $path,
+                                    $this->CurrentDirectory
                                 )
-                                    success("All " . count($arr) . " files extracted successfully!");
-                                else
-                                    return error("Could not to extract the selected files!");
-                            break;
-                    }
+                            )
+                                success("All " . count($arr) . " files extracted successfully!");
+                            else
+                                return error("Could not to extract the selected files!");
+                        break;
                 }
-            } catch (\Exception $ex) {
-                error($ex, null);
             }
+        } catch (\Exception $ex) {
+            error($ex, null);
+        }
         //$this->Router->Get()->Switch();
         //return $this->ToString();
         responseStatus(200);
@@ -944,8 +1083,8 @@ class Storage extends Module
                     return deliverProcedure("_('#{$this->MainClass}_progress').addClass('invisible');", 211);
                 else
                     return deliverProcedure("_('#{$this->MainClass}_progress').val($progress).removeClass('invisible');");
-            }
-            else return parent::Stream();
+            } else
+                return parent::Stream();
         } catch (\Exception $ex) {
             error($ex, null);
         }

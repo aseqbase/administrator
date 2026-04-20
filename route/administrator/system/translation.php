@@ -4,7 +4,7 @@ use \MiMFa\Library\Convert;
 use MiMFa\Library\Script;
 
 $data = $data ?? [];
-$routeHandler = function () use ($data) {
+$routeHandler = function ($data) {
     module("Table");
     $table = table("Translate_Lexicon", prefix: false);
     $langs = \_::$Front->Translate->GetLanguages();
@@ -20,6 +20,19 @@ $routeHandler = function () use ($data) {
         $module->UpdateAccess = \_::$User->AdminAccess;
     $module->ImportAccess =
         $module->ExportAccess = false;
+    $upd = received("update");
+    $module->AppendToolsBar = (
+        $upd ?
+        Struct::Button("View Lexicon", \_::$Address->UrlPath) :
+        Struct::Button("Edit Lexicon", \_::$Address->UrlPath . "?update=true")
+    ) .
+        Struct::Button("Export Lexicon", \_::$Address->UrlPath . "?export=true", ["target" => "blank"]) .
+        Struct::Button("Import Lexicon", Script::UploadStream(extensions: [".csv"])) .
+        Struct::Button(
+            "Clear Lexicon",
+            "if(confirm('Are you sure to clear all lexicon records?')) sendDeleteRequest(null, {'truncate':true}, '.content');",
+            ["class" => "error"]
+        );
 
     foreach ($langs as $k => $value)
         $module->CellsValues[$k] = function ($v) use ($k) {
@@ -73,14 +86,13 @@ $routeHandler = function () use ($data) {
                 // $n = \_::$Front->Translate->SetLexicon($file);
                 // procedure("_('.content .progressbar').val(0.5).removeClass('invisible');");
                 // unset($file);
-
+    
                 if ($n) {
                     procedure("_('.content .progressbar').val(1).addClass('invisible');");
                     return redirect(Struct::Success("$n of $c key values setted successfuly in lexicon!"), delay: 2000);
                 } else
                     return error("There occurred a problem!");
-            }
-            elseif ($file === false)
+            } elseif ($file === false)
                 return error("There occurred a problem in uploading the file!");
             elseif ($remain <= 1)
                 return procedure("_('.content .progressbar').val(1).addClass('invisible');");
@@ -105,7 +117,7 @@ $routeHandler = function () use ($data) {
         $moduleTranslator->Style = new MiMFa\Library\Style();
         $moduleTranslator->Style->Padding = "0px";
         $moduleTranslator["class"] = "be start flex";
-        (\_::$Front->AdministratorView)($routeHandler, [
+        (\_::$Front->AdminView)($routeHandler, [
             "Title" => "Translation",
             "Image" => "language",
             "Updatable" => $upd,
@@ -123,7 +135,7 @@ $routeHandler = function () use ($data) {
                                         "A ``sample` `text``",
                                         attributes: [
                                             "class" => "be wide ltr",
-                                            "oninput" => \_::$Front->MakeFillScript(
+                                            "oninput" => Script::Fill(
                                                 "#$id",
                                                 function ($text) {
                                                     return __($text);
@@ -139,28 +151,11 @@ $routeHandler = function () use ($data) {
                                 ),
                             ]
                         ]) .
-                        Struct::$Break .
-                        Struct::$BreakLine .
-                        Struct::$Break .
-                        Struct::Division(
-                            (
-                                $upd ?
-                                Struct::Button("View Lexicon", \_::$Address->UrlPath) :
-                                Struct::Button("Edit Lexicon", \_::$Address->UrlPath . "?update=true")
-                            ) .
-                            Struct::Button("Export Lexicon", \_::$Address->UrlPath . "?export=true", ["target" => "blank"]) .
-                            Struct::Button("Import Lexicon", Script::UploadStream(extensions: [".csv"])) .
-                            Struct::Button(
-                                "Clear Lexicon",
-                                "if(confirm('Are you sure to clear all lexicon records?')) sendDeleteRequest(null, {'truncate':true}, '.content');",
-                                ["class" => "error"]
-                            ),
-                            ["class" => "be flex middle center", "style" => "gap:var(--size-0);"]
-                        ) . Struct::ProgressBar(attributes: ["class" => "view invisible be wide"])
+                        Struct::$Break . Struct::ProgressBar(attributes: ["class" => "view invisible be wide"])
                         ,
                         ["class" => "content"]
                     )
         ]);
     })
-    ->Default(fn() => response($routeHandler()))
+    ->Default(fn() => response($routeHandler($data)))
     ->Handle();

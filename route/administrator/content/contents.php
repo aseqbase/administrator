@@ -1,8 +1,8 @@
 <?php
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
-$data = $data ?? [];
-$routeHandler = function () use ($data) {
+$data = $data??[];
+$routeHandler = function ($data) {
     auth(\_::$User->AdminAccess);
     module("Table");
     $module = new Table("Content");
@@ -17,6 +17,7 @@ $routeHandler = function () use ($data) {
     $module->IncludeColumns = ['Type', 'Image', 'Title', 'Route', 'Priority', 'Status', 'Lang', 'Access', 'Author', 'Editor', 'CreateTime', 'UpdateTime'];
     $module->AllowDataTranslation = false;
     $module->AllowServerSide = true;
+    $module->Quick = false;
     $module->Updatable = true;
     $module->UpdateAccess = \_::$User->AdminAccess;
     $users = table("User")->SelectPairs("Id", "Name");
@@ -43,7 +44,12 @@ $routeHandler = function () use ($data) {
     $module->CellsTypes = [
         "Id" => \_::$User->HasAccess(\_::$User->SuperAccess) ? "disabled" : false,
         "Name" => "text",
-        "Type" => "enum",
+        "Type" => get($data, "Type")?function ($t, $v) use($data) {
+            $std = new stdClass();
+            $std->Type = "hidden";
+            $std->Value = get($data, "Type");
+            return $std;
+        }:"enum",
         "Title" => "text",
         "Image" => "image",
         "Description" => "texts",
@@ -110,7 +116,7 @@ $routeHandler = function () use ($data) {
         "MetaData" => function ($t, $v, $k, $r) {
             $std = new stdClass();
             $std->Type = "json";
-            if (\_::$Front->AllowTranslate && !$r["Title"] && !$r["Content"])
+            if (!$v && \_::$Front->AllowTranslate)
                 $std->Value = "{\"lang\":\"" . \_::$Front->Translate->Language . "\"}";
             return $std;
         },
@@ -118,12 +124,13 @@ $routeHandler = function () use ($data) {
     pod($module, $data);
     return $module->ToString();
 };
+
 (new Router())->if(\_::$User->HasAccess(\_::$User->AdminAccess))
     ->Get(function () use ($routeHandler) {
-        (\_::$Front->AdministratorView)($routeHandler, [
+        (\_::$Front->AdminView)($routeHandler, [
             "Image" => "file",
             "Title" => "Contents Management"
         ]);
     })
-    ->Default(fn() => response($routeHandler()))
+    ->Default(fn() => response($routeHandler($data)))
     ->Handle();

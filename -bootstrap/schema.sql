@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `%%PREFIX%%Package` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `ParentId` int(11) DEFAULT NULL,
   `Name` tinytext NOT NULL,
+  `Version` tinytext DEFAULT NULL,
   `Title` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Description` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,

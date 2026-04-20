@@ -1,8 +1,8 @@
 <?php
 use MiMFa\Library\Convert;
 use MiMFa\Module\Table;
-$data = $data ?? [];
-$routeHandler = function () use ($data) {
+$data = $data??[];
+$routeHandler = function ($data) {
     auth(\_::$User->AdminAccess);
     module("Table");
     $module = new Table(table("Tag"));
@@ -42,10 +42,10 @@ $routeHandler = function () use ($data) {
 (new Router())
     ->if(\_::$User->HasAccess(\_::$User->AdminAccess))
     ->Get(function () use ($routeHandler) {
-        (\_::$Front->AdministratorView)($routeHandler, [
+        (\_::$Front->AdminView)($routeHandler, [
             "Image" => "tags",
             "Title" => "Tags Management"
         ]);
     })
-    ->Default(fn() => response($routeHandler()))
+    ->Default(fn() => response($routeHandler($data)))
     ->Handle();
