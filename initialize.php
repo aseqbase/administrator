@@ -44,7 +44,7 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
             "Path" => "/administrator/storage/dynamic",
             "Access" => \_::$User->AdminAccess,
             "Description" => "To manage all 'files'",
-            "Image" => "files",
+            "Image" => "server",
             "Items" => array(
                 array("Name" => "'UPLOADED' 'STORAGE'", "Path" => "/administrator/storage/dynamic", "Access" => \_::$User->AdminAccess, "Description" => "'Uploaded' 'files' 'management'", "Image" => "download"),
                 array("Name" => "'ORGANIZED' 'STORAGE'", "Path" => "/administrator/storage/static", "Access" => \_::$User->AdminAccess, "Description" => "'Organized' 'files' 'management'", "Image" => "folder-tree"),
@@ -151,6 +151,6 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
     })
     ->if(!\_::$User->HasAccess(\_::$User->AdminAccess))
     ->On("$|administrator")->Default(fn() => view("part", ["Name" => \_::$User->InHandlerPath]))
-    ->On()->Default(\_::$Front->DefaultRouteName)
+    ->On()->Default(\_::$Router->DefaultRouteName)
     ->else()
-    ->On("administrator")->Reset()->Default(\_::$Address->UrlRoute, alternative: \_::$Front->DefaultRouteName);
+    ->On("administrator")->Reset()->Default(\_::$Address->UrlRoute, alternative: \_::$Router->DefaultRouteName);

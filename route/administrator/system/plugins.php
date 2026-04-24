@@ -8,9 +8,11 @@ use MiMFa\Module\Table;
 library("Math");
 $data = $data ?? [];
 $routeHandler = function ($data) {
+    $dests = loop(array_keys(\_::$Sequence), fn($v) => substr($v, strlen(\_::$Address->Directory)) ?: "[ROOT DIRECTORY]");
+    $dsti = receiveGet("dest");
     if ($path = downloadStream(false))
         try {
-            $dest = array_keys(\_::$Sequence)[\_::$Back->AdminOrigin + 1];
+            $dest = array_keys(\_::$Sequence)[$dsti ?? (\_::$Back->AdminOrigin + 1)];
             $bsd = $dest . "-bootstrap" . DIRECTORY_SEPARATOR;
             if (is_string($path)) {
                 if ($files = Storage::Decompress($path, $dest)) {
@@ -33,7 +35,7 @@ $routeHandler = function ($data) {
                         "Version" => get($manifest, "Version"),
                         "Title" => $name = get($manifest, "Title") ?: $name,
                         "Description" => get($manifest, "Description"),
-                        "Content" => get($manifest, "Content"),
+                        "Content" => get($manifest, "Content") ?: Storage::GetFile($dest . "README-$name.md"),
                         "Image" => get($manifest, "Image"),
                         "Reference" => get($manifest, "Reference"),
                         "MetaData" => $md,
@@ -78,10 +80,27 @@ $routeHandler = function ($data) {
             Script::Send("Delete", null, ["Id" => $id])
         )
     ];
+    $module->CellsTypes = [
+        "Image" => "image",
+        "Content" => "content",
+        "Paths" => "json",
+    ];
     pod($module, $data);
-    return Struct::Center([
-        Struct::Button(__("Install or Update a package from computer") . Struct::Icon("plus"), Script::UploadStream(extensions: [".zip"]))
-    ]) . $module->ToString();
+    return Struct::Division(
+        Struct::Button(
+            Struct::Span(Struct::Icon("plus") . __("Install or Update a package from computer"), null, ["class"=>"be flex middle gap-1"]),
+            Script::UploadStream(\_::$Address->Url, extensions: [".zip"])
+        ) .
+        Struct::Field(
+            "select",
+            "dest",
+            $dsti,
+            title: "Target: ",
+            options: $dests,
+            attributes: ["onchange" => Script::Load(\_::$Address->UrlPath . "?dest=\${this.value}")]
+        ),
+        ["class" => "be flex middle justify wide"]
+    ) . $module->ToString();
 };
 
 (new Router())

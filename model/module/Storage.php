@@ -962,15 +962,15 @@ class Storage extends Module
                             modal(Struct::Form(
                                 [
                                     Struct::HiddenInput("action", "Save"),
+                                    Struct::ScriptInput("content", open($path), ["style" => "display: inline-table; height: stretch; width: stretch;"]).
                                     Struct::Division(
-                                        Struct::Field("text", "path", $path, attributes: ["wrapper" => ["class" => "col-8"]]) .
+                                        Struct::Field("text", "path:", $path, attributes: ["style"=>"width:100%;","wrapper" => ["class" => "be flex middle col-8 gap-1"]]) .
                                         Struct::Division(
                                             Struct::Button("Apply", "_('#$id input[name=\"action\"]').val('apply'); submitForm('#$id')") .
                                             Struct::Button("Save", "_('#$id input[name=\"action\"]').val('save'); submitForm('#$id')", ["class" => "main"])
                                         ),
-                                        ["class" => "be sticky flex middle justify", "style" => "background-color:var(--back-color-special);color:var(--fore-color-special); top: 0px; margin: 0px"]
-                                    ) .
-                                    Struct::ScriptInput("content", open($path), ["style" => "display: inline-table; height: stretch; width: stretch;"])
+                                        ["class" => "be sticky flex middle justify", "style" => "background-color:var(--back-color-special);color:var(--fore-color-special); bottom: 0px; margin: 0px;"]
+                                    )
                                 ],
                                 \_::$Address->UrlBase,
                                 [
@@ -997,7 +997,7 @@ class Storage extends Module
                     case "open":
                         $path = get($received, "path");
                         if ($path && \MiMFa\Library\Storage::IsFile($path))
-                            modal(Struct::Media(null, $path, ["style" => "min-width:80vw; min-height:80vh;"]));
+                            modal(Struct::Media(null, $path, ["style" => "min-width:80vw; min-height:80vh;", "controls"=>true]));
                         break;
                     case "download":
                         $path = get($received, "path");
