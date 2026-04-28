@@ -96,12 +96,12 @@ if (\_::$User->HasAccess(\_::$User->AdminAccess)) {
                     "Name" => "CONFIGURATION",
                     "Path" => "/administrator/system/configuration",
                     "Access" => \_::$User->SuperAccess,
-                    "Image" => "cog",
+                    "Image" => "wrench",
                     "Items" => loop(Revise::GetCategories(\_::$Back), fn($v, $k) => [
                         "Name" => $k,
                         "Path" => "/administrator/system/configuration?category=" . urlencode($k),
                         "Access" => \_::$User->AdminAccess,
-                        "Image" => "cog"
+                        "Image" => "wrench"
                     ])
                 )
             )

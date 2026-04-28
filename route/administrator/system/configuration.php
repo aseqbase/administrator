@@ -8,7 +8,7 @@ $routeHandler = function ($data) {
 ->if(\_::$User->HasAccess(\_::$User->SuperAccess))
     ->Get(function () use($routeHandler) {
         (\_::$Front->AdminView)($routeHandler, [
-            "Image" => "cog",
+            "Image" => "wrench",
             "Title" => "Configuration"
         ]);
     })
