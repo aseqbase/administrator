@@ -8,46 +8,66 @@ use MiMFa\Module\Table;
 library("Math");
 $data = $data ?? [];
 
-function InstallPackage($package, $version = null)
+function InstallPackage($package, $version = null, $force = true, $parent = null)
 {
     if (isAbsoluteUrl($package))
-        return InstallPackageFromUrl($package, $version);
+        return InstallPackageFromUrl($package, $version, $force);
     elseif (isFile($package))
-        return InstallPackageFromFile($package, $version);
+        return InstallPackageFromFile($package, force: $force);
     else
-        return InstallPackageFromPath($package, $version);
+        return InstallPackageFromPath($package, $version, $force);
 }
-function InstallPackageFromUrl($url, $version = null)
+function InstallPackageFromUrl($url, $version = null, $force = true, $parent = null)
 {
-    return InstallPackageFromFile(download(str_replace("{0}", $version ?? "", $url), null));
+    return InstallPackageFromFile(download(str_replace("{0}", $version ?? "", $url), extensions: [".zip"]), $force);
 }
-function InstallPackageFromPath($path, $version = null)
+function InstallPackageFromPath($reference, $version = null, $force = true, $parent = null)
 {
+    if (!$force) if (table("Package")->SelectRow("*", "`Reference`=:Reference", [":Reference" => $reference]))
+        return true;
     return InstallPackageFromFile(download($version ?
-        (startsWith($version, "v") ? str_replace(["{0}", "{1}"], [$path, $version], "https://github.com/{0}/archive/refs/tags/{1}.zip") :
-            str_replace(["{0}", "{1}"], [$path, $version], "https://packagist.org/downloads/{0}?v={1}")) :
-        str_replace("{0}", $path, "https://github.com/{0}/archive/refs/tags/v8.0.0.zip"), extensions: [".zip"]));
+        (startsWith($version, "v") ? str_replace(["{0}", "{1}"], [$reference, $version], "https://github.com/{0}/archive/refs/tags/{1}.zip") :
+            str_replace(["{0}", "{1}"], [$reference, $version], "https://packagist.org/downloads/{0}?v={1}")) :
+        str_replace("{0}", $reference, "https://github.com/{0}/archive/refs/tags/v8.0.0.zip"), extensions: [".zip"]), force: $force);
 }
-function InstallPackageFromFile($filePath, &$name = null)
+function InstallPackageFromFile($filePath, &$name = null, $force = true, $parent = null)
 {
     $dest = InstallerDestination();
-    $temp = Storage::CreateUniqueDirectory(\_::$Address->TempDirectory);
+    $temp = Storage::CreateUniqueDirectory(\_::$Address->TempDirectory, "unpack", random: true);
     try {
         if (is_string($filePath)) {
-            if ($files = Storage::Decompress($filePath, $temp)) {
-                $tempDir = Storage::ParentDirectory(...$files) ?? $temp;
-                $c = strlen($tempDir);
-                foreach ($files as $value)
-                    if (!startsWith(basename($value), "-", "~", "composer.json", ".gitignore"))
-                        Storage::Move($value, $dest . substr($value, 0, $c));
+            if ($exts = Storage::Decompress($filePath, $temp)) {
+                $tempDir = Storage::ParentDirectory(...$exts) ?: $temp;
+
                 $manifest = Convert::FromJson(open($tempDir . "-bootstrap" . DIRECTORY_SEPARATOR . "manifest.json")) ?? null;
-                if (!$manifest && path($tempDir . "composer.json"))
+                if (!$manifest)
                     $manifest = Convert::FromJson(open($tempDir . "composer.json")) ?? null;
+
+                $c = strlen($tempDir);
+                $files = [];
+                foreach ($exts as $value) {
+                    if($value === $tempDir."index.php")
+                        switch (strtolower(get($manifest, "Type")??"")) {
+                            case "project":
+                                break;
+                            case "package":
+                            default:
+                                continue 2;
+                        }
+                    if (!preg_match("/[\/\\\]([\-\~]|(composer\.json$)|(\.gitignore$))/i", $value))
+                        Storage::Move($value, $files[] = Storage::GetAbsolutePath($dest . substr($value, $c)));
+                }
+
+                $reference = get($manifest, "Reference");
+                if ($reference && !$force)
+                    if (table("Package")->SelectRow("*", "`Reference`=:Reference", [":Reference" => $reference]))
+                    return null;
+
                 $md = get($manifest, "MetaData") ?? [];
                 $preInstals = get($manifest, "PreInstalls") ?? [];
                 $postInstals = get($manifest, "PostInstalls") ?? [];
                 foreach ($preInstals as $key => $value)
-                    is_numeric($key) ? InstallPackage($value) : InstallPackage($key, $value);
+                    is_numeric($key) ? InstallPackage($value, force: false) : InstallPackage($key, $value, $force);
                 if ($schema = open($tempDir . "-bootstrap/schema.sql")) {
                     $md["Tables"] = array_values(array_unique($md["Tables"] ?? preg_find_all("/(?<=%%PREFIX%%)\w+\b/", $schema)));
                     $schema = str_replace('%%DATABASE%%', \_::$Back->DataBaseName, $schema);
@@ -65,8 +85,8 @@ function InstallPackageFromFile($filePath, &$name = null)
                     "Title" => $name = get($manifest, "Title") ?: $name,
                     "Description" => get($manifest, "Description"),
                     "Content" => get($manifest, "Content") ?: Storage::GetFile($dest . "README-$name.md"),
-                    "Image" => get($manifest, "Image")?:"plug",
-                    "Reference" => get($manifest, "Reference"),
+                    "Image" => get($manifest, "Image") ?: "plug",
+                    "Reference" => $reference,
                     "MetaData" => $md,
                     "Paths" => Convert::ToJson(($pts = get($manifest, "Paths")) ? loop($pts, fn($v) => $dest . ltrim($v, "\\\/")) : $files)
                 ];
@@ -78,14 +98,16 @@ function InstallPackageFromFile($filePath, &$name = null)
 
                 Storage::DeleteDirectory($temp);
                 foreach ($postInstals as $key => $value)
-                    is_numeric($key) ? InstallPackage($value) : InstallPackage($key, $value);
+                    is_numeric($key) ? InstallPackage($value, force: false) : InstallPackage($key, $value, $force);
                 return true;
+            } else {
+                Storage::DeleteDirectory($temp);
+                return deliverError("A problem is occurred while extracting the package!");
             }
         } elseif ($filePath === false) {
             Storage::DeleteDirectory($temp);
-            return deliverError("There occurred a problem in extracting the package!");
-        } else
-            return deliverWarning("Could not access to the package '$filePath'!");
+            return deliverError("A problem is occurred while downloading the package!");
+        }
         Storage::DeleteDirectory($temp);
         if ($filePath)
             return deliverError("Could not install the '$filePath'!");
@@ -130,6 +152,8 @@ $routeHandler = function ($data) {
         "Paths" => "json",
     ];
     pod($module, $data);
+    $dests = array_keys(\_::$Sequence);
+    $rsc = strlen(Storage::ParentDirectory(...$dests) ?: "");
     return Struct::Division(
         Struct::Button(
             Struct::Span(Struct::Icon("plus") . __("Install or Update from computer"), null, ["class" => "be flex middle gap-1"]),
@@ -153,7 +177,7 @@ $routeHandler = function ($data) {
             "dest",
             receiveGet("dest"),
             title: "Target: ",
-            options: loop(array_keys(\_::$Sequence), fn($v) => substr($v, strlen(\_::$Address->RootDirectory)) ?: "[ROOT DIRECTORY]"),
+            options: loop($dests, fn($v) => substr($v, $rsc) ?: "[ROOT DIR]"),
             attributes: ["onchange" => Script::Load(\_::$Address->UrlPath . "?dest=\${this.value}")]
         ),
         ["class" => "be flex middle justify wide package-installer"]
@@ -199,8 +223,8 @@ $routeHandler = function ($data) {
         return deliverError("Could not remove the package!");
     })
     ->Put(function () {
-        $name = receivePut("Source");
         try {
+            $name = receivePut("Source");
             if (InstallPackage($name))
                 return deliverRedirect(Struct::Success("The '$name' package installed successfully!"), delay: 2000);
             else
