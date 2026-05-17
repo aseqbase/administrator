@@ -169,9 +169,9 @@ class Storage extends Module
                 ...($this->CurrentDirectory !== $this->RootDirectory ? [
                     Struct::Icon("house", \_::$Address->UrlBase, ["tooltip" => "Go to the '$this->RootDirectory'"]),
                     Struct::Action(
+                        Struct::Icon("arrow-left") . " " .
                         Struct::Icon("folder-open", null, ["class" => "be fore green"]) . " " .
-                        (trim(preg_find("/[^\/\\\]+[\/\\\]$/u", $this->CurrentDirectory) ?? "", DIRECTORY_SEPARATOR)) .
-                        " " . Struct::Icon("arrow-left"),
+                        (trim(preg_find("/[^\/\\\]+[\/\\\]$/u", $this->CurrentDirectory) ?? "", DIRECTORY_SEPARATOR)),
                         $this->GoBackScript(),
                         ["class" => "be flex middle center parent"]
                     ) . " "
@@ -669,7 +669,7 @@ class Storage extends Module
                             Struct::Division(
                                 Struct::CheckInput("Path", $it["Path"], ["class" => "hidden"]) .
                                 Struct::Span(
-                                    $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow"]) : Struct::Icon("file", null, ["style"=>$it["Color"]?"color:{$it["Color"]};":""]),
+                                    $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow"]) : Struct::Icon("file", null, ["style"=>"color:".\MiMFa\Library\Storage::FileColor($it["Name"]).";"]),
                                     null,
                                     ["class" => "item-icon"]
                                 ) .
@@ -698,7 +698,7 @@ class Storage extends Module
                 $aurl = $this->GetAbsoluteUrl($it["Path"]);
                 return Struct::Division(
                     Struct::Span(
-                        $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow fa-2x"]) : Struct::Icon("file", null, ["class" => "fa-2x","style"=>$it["Color"]?"color:{$it["Color"]};":""]),
+                        $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow fa-2x"]) : Struct::Icon("file", null, ["class" => "fa-2x","style"=>"color:".\MiMFa\Library\Storage::FileColor($it["Name"]).";"]),
                         null,
                         ["class" => "item-icon"]
                     ) .
