@@ -13,6 +13,7 @@ $routeHandler = function ($data) {
     $module->ExcludeColumns = ["Id"];
     $module->AllowLabelTranslation = false;
     $module->Controlable = true;
+    $module->Updatable = true;
     $module->AddAccess =
         $module->RemoveAccess =
         $module->ModifyAccess =
@@ -20,12 +21,7 @@ $routeHandler = function ($data) {
         $module->UpdateAccess = \_::$User->AdminAccess;
     $module->ImportAccess =
         $module->ExportAccess = false;
-    $upd = received("update");
-    $module->AppendToolsBar = (
-        $upd ?
-        Struct::Button("View Lexicon", \_::$Address->UrlPath) :
-        Struct::Button("Edit Lexicon", \_::$Address->UrlPath . "?update=true")
-    ) .
+    $module->AppendToolsBar = 
         Struct::Button("Export Lexicon", \_::$Address->UrlPath . "?export=true", ["target" => "blank"]) .
         Struct::Button("Import Lexicon", Script::UploadStream(extensions: [".csv"])) .
         Struct::Button(
@@ -107,7 +103,6 @@ $routeHandler = function ($data) {
             deliverError("There occurred a problem!");
     })
     ->Get(function () use ($routeHandler) {//Shows
-        $upd = received("update");
         $id = "_" . getId();
         $moduleTranslator = new (module("Translator"))();
         $moduleTranslator->Items = \_::$Front->Translate->GetLanguages();
@@ -120,7 +115,6 @@ $routeHandler = function ($data) {
         (\_::$Front->AdminView)($routeHandler, [
             "Title" => "Translation",
             "Image" => "language",
-            "Updatable" => $upd,
             "Content" => Struct::Style("
                 .{$moduleTranslator->MainClass} .button {
                     border: none !important;
