@@ -149,6 +149,7 @@ class Storage extends Module
         ");
     }
 
+
     public function GetInner()
     {
         $modifyAccess = !$this->Lock && \_::$User->HasAccess($this->ModifyAccess);
@@ -668,7 +669,7 @@ class Storage extends Module
                             Struct::Division(
                                 Struct::CheckInput("Path", $it["Path"], ["class" => "hidden"]) .
                                 Struct::Span(
-                                    $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow"]) : Struct::Icon("file", null, ["class" => "be fore blue"]),
+                                    $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow"]) : Struct::Icon("file", null, ["style"=>$it["Color"]?"color:{$it["Color"]};":""]),
                                     null,
                                     ["class" => "item-icon"]
                                 ) .
@@ -697,7 +698,7 @@ class Storage extends Module
                 $aurl = $this->GetAbsoluteUrl($it["Path"]);
                 return Struct::Division(
                     Struct::Span(
-                        $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow fa-2x"]) : Struct::Icon("file", null, ["class" => "be fore blue fa-2x"]),
+                        $it["IsDirectory"] ? Struct::Icon("folder", null, ["class" => "be fore yellow fa-2x"]) : Struct::Icon("file", null, ["class" => "fa-2x","style"=>$it["Color"]?"color:{$it["Color"]};":""]),
                         null,
                         ["class" => "item-icon"]
                     ) .
