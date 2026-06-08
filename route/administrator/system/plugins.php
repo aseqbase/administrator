@@ -11,15 +11,15 @@ $data = $data ?? [];
 function InstallPackage($package, $version = null, $force = true, $parent = null)
 {
     if (isAbsoluteUrl($package))
-        return InstallPackageFromUrl($package, $version, $force);
+        return InstallPackageFromUrl($package, $version, $force, $parent);
     elseif (isFile($package))
-        return InstallPackageFromFile($package, force: $force);
+        return InstallPackageFromFile($package, force: $force, parent: $parent);
     else
-        return InstallPackageFromPath($package, $version, $force);
+        return InstallPackageFromPath($package, $version, $force, $parent);
 }
 function InstallPackageFromUrl($url, $version = null, $force = true, $parent = null)
 {
-    return InstallPackageFromFile(download(str_replace("{0}", $version ?? "", $url), extensions: [".zip"]), $force);
+    return InstallPackageFromFile(download(str_replace("{0}", $version ?? "", $url), extensions: [".zip"]), $force, $parent);
 }
 function InstallPackageFromPath($reference, $version = null, $force = true, $parent = null)
 {
@@ -28,9 +28,9 @@ function InstallPackageFromPath($reference, $version = null, $force = true, $par
     return InstallPackageFromFile(download($version ?
         (startsWith($version, "v") ? str_replace(["{0}", "{1}"], [$reference, $version], "https://github.com/{0}/archive/refs/tags/{1}.zip") :
             str_replace(["{0}", "{1}"], [$reference, $version], "https://packagist.org/downloads/{0}?v={1}")) :
-        str_replace("{0}", $reference, "https://github.com/{0}/archive/refs/tags/v8.0.0.zip"), extensions: [".zip"]), force: $force);
+        str_replace("{0}", $reference, "https://github.com/{0}/archive/refs/tags/v8.0.0.zip"), extensions: [".zip"]), force: $force, parent: $parent);
 }
-function InstallPackageFromFile($filePath, &$name = null, $force = true, $parent = null)
+function InstallPackageFromFile($filePath, &$name = null, $force = true, $parent = null, $special = null)
 {
     $dest = InstallerDestination();
     $temp = Storage::CreateUniqueDirectory(\_::$Address->TempDirectory, "unpack", random: true);
@@ -66,6 +66,7 @@ function InstallPackageFromFile($filePath, &$name = null, $force = true, $parent
                 $md = get($manifest, "MetaData") ?? [];
                 $preInstals = get($manifest, "PreInstalls") ?? [];
                 $postInstals = get($manifest, "PostInstalls") ?? [];
+                $name = (get($manifest, "Name") ?: basename($filePath)).$special;
                 foreach ($preInstals as $key => $value)
                     is_numeric($key) ? InstallPackage($value, force: false) : InstallPackage($key, $value, $force);
                 if ($schema = open($tempDir . "-bootstrap/schema.sql")) {
@@ -75,14 +76,18 @@ function InstallPackageFromFile($filePath, &$name = null, $force = true, $parent
                     $pdo = \_::$Back->DataBase->Connection();
                     if ($pdo->exec($schema) === false) {
                         Storage::DeleteDirectory($temp);
-                        return deliverWarning("A problem is occured while working on database!");
+                        return deliverWarning("A problem is occured while working on database '$name'!");
                     }
                 }
-                $name = get($manifest, "Name") ?: basename($filePath);
+                $pkg = table("Package")->SelectRow("Id, Paths", \_::$Back->DataBase->StartWrap . "Name" . \_::$Back->DataBase->StartWrap . "=:Name", [":Name" => $name]);
+                if($pkg["Paths"]??false)
+                    foreach (Convert::FromJson($pkg["Paths"]) as $p)
+                        $files[] = $p;
+                $files = array_unique($files);
                 $package = [
                     "Name" => $name,
                     "Version" => get($manifest, "Version"),
-                    "Title" => $name = get($manifest, "Title") ?: $name,
+                    "Title" => get($manifest, "Title") ?: $name,
                     "Description" => get($manifest, "Description"),
                     "Content" => get($manifest, "Content") ?: Storage::GetFile($dest . "README-$name.md"),
                     "Image" => get($manifest, "Image") ?: "plug",
@@ -90,9 +95,8 @@ function InstallPackageFromFile($filePath, &$name = null, $force = true, $parent
                     "MetaData" => $md,
                     "Paths" => Convert::ToJson(($pts = get($manifest, "Paths")) ? loop($pts, fn($v) => $dest . ltrim($v, "\\\/")) : $files)
                 ];
-                $id = table("Package")->SelectValue("Id", \_::$Back->DataBase->StartWrap . "Name" . \_::$Back->DataBase->StartWrap . "=:Name", [":Name" => $name]);
-                if ($id)
-                    table("Package")->Set($id, $package);
+                if ($pkg["Id"]??false)
+                    table("Package")->Set($pkg["Id"], $package);
                 else
                     table("Package")->Insert($package);
 
@@ -102,17 +106,17 @@ function InstallPackageFromFile($filePath, &$name = null, $force = true, $parent
                 return true;
             } else {
                 Storage::DeleteDirectory($temp);
-                return deliverError("A problem is occurred while extracting the package!");
+                return deliverError("A problem is occurred while extracting the package '$name'!");
             }
         } elseif ($filePath === false) {
             Storage::DeleteDirectory($temp);
-            return deliverError("A problem is occurred while downloading the package!");
+            return deliverError("A problem is occurred while downloading the package '$name'!");
         }
         Storage::DeleteDirectory($temp);
         if ($filePath)
             return deliverError("Could not install the '$filePath'!");
         else
-            return deliverError("Something went wrong!");
+            return deliverError("Something went wrong on installing '$name'!");
     } catch (\Exception $ex) {
         Storage::DeleteDirectory($temp);
         return deliverError($ex);
@@ -124,8 +128,9 @@ function InstallerDestination()
 }
 
 $routeHandler = function ($data) {
+    $dest = receiveGet("dest");
     if ($filePath = downloadStream(false))
-        if (InstallPackageFromFile($filePath, $name))
+        if (InstallPackageFromFile($filePath, $name, special:(in_array(\_::$Address->Name, ["aseq","base"])?"":"--".\_::$Address->Name).($dest?"--$dest":"")))
             return deliverRedirect(Struct::Success("The '$name' package installed successfully!"), delay: 2000);
     module("Table");
     $module = new Table(table("Package"));
@@ -175,7 +180,7 @@ $routeHandler = function ($data) {
         Struct::Field(
             "select",
             "dest",
-            receiveGet("dest"),
+            $dest,
             title: "Target: ",
             options: loop($dests, fn($v) => substr($v, $rsc) ?: "[ROOT DIR]"),
             attributes: ["onchange" => Script::Load(\_::$Address->UrlPath . "?dest=\${this.value}")]
